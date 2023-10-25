@@ -3,9 +3,8 @@ project('gridbenchmark2sipp', 'cpp',
   default_options : ['warning_level=3', 'default_library=static', 'cpp_std=c++20'])
 boost_dep = dependency('boost', static:true, modules : ['program_options', 'random', 'iostreams'])
 zdep = dependency('zlib', static:true)
-
-executable('gridbenchmark2sipp',
-           ['main.cpp'],
+executable('atsipp',
+           ['main.cpp', 'graph.cpp'],
            install : true,
            dependencies : [boost_dep, zdep],
            )

@@ -1,6 +1,10 @@
 #include <iostream>
 #include <filesystem>
+#include <ostream>
 #include <boost/program_options.hpp>
+#include "structs.hpp"
+#include "map.hpp"
+#include "graph.hpp"
 
 namespace po = boost::program_options;
 
@@ -10,31 +14,24 @@ int main(int argc, char* argv[]) {
         po::options_description desc("Allowed options");
         desc.add_options()
         ("help,h", "produce help message")
-        ("map,m", po::value<std::filesystem::path>(), "Static map")
-        ("graph,g", po::value<std::filesystem::path>(), "Search graph file")
-        ("startx,x", po::value<int>(), "Starting location x coordinate")
-        ("starty,y", po::value<int>(), "Starting location y coordinate")
-        ("goalx,X", po::value<int>(), "Goal location x coordinate")
-        ("goaly,Y", po::value<int>(), "Goal location y coordinate")
+        //("map,m", po::value<std::filesystem::path>(), "Static map")
+        ("startx,x", po::value<int>(), "x position of agent starting location")
+        ("starty,y", po::value<int>(), "y position of agent starting location")
+        ("goalx,X", po::value<int>(), "x position of goal location")
+        ("goaly,Y", po::value<int>(), "y position of goal location")
+        ("edgegraph,g", po::value<std::filesystem::path>(),"gzip'd file containing the edge arrival time functions.")
         ;
-        po::positional_options_description pos_desc;
-        //pos_desc.add("num", -1);
-
-        po::command_line_parser parser{argc, argv};
-        parser.options(desc).positional(pos_desc).allow_unregistered();
-        po::parsed_options parsed_options = parser.run();
-
         po::variables_map vm;
-        po::store(parsed_options, vm);
-        po::notify(vm);
-
-
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::notify(vm);   
         // Parse options
         if (vm.count("help")){
             std::cout << desc << std::endl;
         }
-        else if(vm.count("graph") && std::filesystem::is_regular_file(vm["graph"].as<std::filesystem::path>())){
-         //else if(vm.count("map") && std::filesystem::is_regular_file(vm["map"].as<std::filesystem::path>()) && vm.count("graph") && std::filesystem::is_regular_file(vm["graph"].as<std::filesystem::path>())){  
+        else if(vm.count("edgegraph") && std::filesystem::is_regular_file(vm["edgegraph"].as<std::filesystem::path>())){
+            // read map
+            std::cerr << "Reading graph\n";
+            read_graph("si.out.gz");
         }
         else{
             std::cout << desc << std::endl;
