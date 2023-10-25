@@ -35,6 +35,7 @@ struct Location{
         gIndex_t _x;
         gIndex_t _y;
     public:
+        Location() = default;
         Location(int xi, int yi):_x(xi),_y(yi){}
         constexpr int x() const{
             return _x;
@@ -47,12 +48,12 @@ struct Location{
         constexpr bool operator ==(const Location & l) const{
             return x() == l.x() && y() == l.y();
         }
-
-        inline void debug() const{
-            std::cout << x() << " " << y() << "\n";
-        }
         constexpr uint pack() const{
             return ((uint)_x << 16) + _y;
+        }
+        inline friend std::ostream& operator<< (std::ostream& stream, const Location& loc){
+            stream << loc.x() << " " << loc.y();
+            return stream;
         }
 };
 

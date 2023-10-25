@@ -30,7 +30,7 @@ void read_ATF(std::istream& i, std::vector<inATF>& res){
     res.emplace_back(source, dest, edge); 
 }
 
-std::unordered_map<Location, EdgeATFList> read_graph(std::string filename){
+Graph read_graph(std::string filename){
     std::ifstream file(filename, std::ios_base::in | std::ios_base::binary);
     boost::iostreams::filtering_streambuf<boost::iostreams::input> inbuf;
     inbuf.push(boost::iostreams::gzip_decompressor());
@@ -42,5 +42,19 @@ std::unordered_map<Location, EdgeATFList> read_graph(std::string filename){
         read_ATF(instream, res);
     }
     file.close();
-    return {};
+    // make GraphNodes
+    Graph g;
+    g.edges.reserve(res.size());
+    for (const auto& entry: res){
+        if (!g.nodes.contains(entry.source)){
+            g.nodes[entry.source] = entry.source;
+        }
+        if (!g.nodes.contains(entry.dest)){
+            g.nodes[entry.dest] = entry.dest;
+        }
+        g.edges.emplace_back(entry.eATF);
+        g.edges.back().destination = &g.nodes[entry.dest];
+        g.nodes[entry.source].successors.emplace(&g.edges.back());
+    }
+    return g;
 }

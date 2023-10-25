@@ -1,6 +1,7 @@
 #include "constants.hpp"
 #include <boost/container/flat_set.hpp>
 #include <limits>
+#include <format>
 
 struct EdgeATF{
     intervalTime_t zeta;
@@ -27,6 +28,11 @@ struct EdgeATF{
 
     inline bool operator<(const EdgeATF& rhs) const{
         return earliest_arrival_time() < rhs.earliest_arrival_time();
+    }
+    
+    inline friend std::ostream& operator<< (std::ostream& stream, const EdgeATF& eatf){
+        stream << "<" << eatf.zeta << "," << "eatf.alpha" << "," << eatf.beta << "," << eatf.delta << ">";
+        return stream;
     }
 };
 
