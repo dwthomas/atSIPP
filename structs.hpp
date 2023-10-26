@@ -75,37 +75,3 @@ inline std::pair<Location, Location> canonical_edge(const Location& loc1, const 
     Location b(std::max(loc1.x(), loc2.x()), std::max(loc1.y(), loc2.y()));
     return std::pair<Location, Location>(a, b);
 }
-
-struct State{
-        Location loc;
-        float time;
-        State(int xi, int yi, double t):loc(xi,yi),time(t){
-            assert(xi >= 0);
-            assert(xi <= std::numeric_limits<gIndex_t>::max());
-            assert(yi >= 0);
-            assert(yi <= std::numeric_limits<gIndex_t>::max());
-        }
-
-        constexpr int x() const{
-            return loc.x();
-        }
-
-        constexpr int y() const{
-            return loc.y();
-        }
-
-        constexpr bool operator ==(const State & s) const{
-            return loc == s.loc && time == s.time;
-        }
-
-        inline void debug() const{
-            std::cout << x() << " " << y() << " " << time << "\n";
-        }
-};
-
-struct Action{
-    State source;
-    State destination;
-    
-    Action(const State& s, const State& d):source(s),destination(d){}
-};

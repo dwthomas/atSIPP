@@ -64,6 +64,7 @@ Graph read_graph(std::string filename){
     }
     for (const auto & entry: res){ 
         g.edges.emplace_back(entry.eATF);
+        g.edges.back().source = &g.nodes[entry.source];
         g.edges.back().destination = &g.nodes[entry.dest];
         g.nodes[entry.source].successors.emplace(&g.edges.back());
     }

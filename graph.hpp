@@ -20,12 +20,14 @@ struct GraphNode{
 
 struct GraphEdge{
     EdgeATF edge;
+    GraphNode * source;
     GraphNode * destination;
     GraphEdge(const EdgeATF& e):edge(e){
+        source = nullptr;
         destination = nullptr;
     }
     inline friend std::ostream& operator<< (std::ostream& stream, const GraphEdge& ge){
-        stream << ge.edge << "->" << *ge.destination;
+        stream << ge.edge << " " << *ge.source << "->" << *ge.destination;
         return stream;
     }
 };
