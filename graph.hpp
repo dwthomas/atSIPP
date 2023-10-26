@@ -12,9 +12,12 @@ struct GraphNode{
     boost::container::flat_set<GraphEdge *> successors;
     GraphNode() = default;
     GraphNode(const Location& l):loc(l){}
-    inline friend std::ostream& operator<< (std::ostream& stream, const GraphNode& gn){
+    inline friend std::ostream& operator<<(std::ostream& stream, const GraphNode& gn){
         stream << gn.loc << " ns:" << gn.successors.size();
         return stream;
+    }
+    constexpr friend double operator-(const GraphNode& lhs, const GraphNode& rhs){
+        return eightWayDistance(lhs.loc, rhs.loc);
     }
 };
 
@@ -29,6 +32,14 @@ struct GraphEdge{
     inline friend std::ostream& operator<< (std::ostream& stream, const GraphEdge& ge){
         stream << ge.edge << " " << *ge.source << "->" << *ge.destination;
         return stream;
+    }
+
+    inline friend bool operator<(const GraphEdge& lhs, double rhs){
+        return lhs.edge.earliest_arrival_time() < rhs;
+    }
+
+    inline friend bool operator<(const GraphEdge& lhs, const GraphEdge& rhs){
+        return lhs < rhs.edge.earliest_arrival_time();
     }
 };
 

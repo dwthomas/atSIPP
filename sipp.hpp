@@ -1,21 +1,26 @@
 #pragma once
 #include <boost/heap/binomial_heap.hpp>
+#include <unordered_map>
 #include "graph.hpp"
 
+namespace sipp{
+    struct Node;
+    using Open_t = boost::heap::binomial_heap<Node, std::less<Node>>;
+    using Closed_t = std::unordered_map<Location, double>;
 
-struct Node;
-using Open_t = boost::heap::binomial_heap<Node, std::less>;
+    struct Node{
+        double g;
+        double f;
+        GraphNode* node;
+        GraphEdge* parent;
+        Node() = default;
+        Node(double _g, double _h, const GraphNode * _node, const GraphEdge * _parent):g(_g),f(_g + _h),node(_node),parent(_parent){}
 
-struct Node{
-    double g;
-    double f;
-    GraphNode* node;
-    GraphEdge* parent;
-    State() = default;
-    State(double _g, double _h, GraphNode * _node, GraphEdge * _parent):g(_g),f(_g + _h),node(_node),parent(_parent){}
+        inline friend bool operator<(const Node& a, const Node& b){
+            return a.f < b.f;
+        }
+    };
 
-    inline friend bool operator<(const State& a, const State& b){
-        return a.f < b.f;
-    }
+    Node search(const Graph& g, const GraphNode& source, const GraphNode& dest);
 }
 
