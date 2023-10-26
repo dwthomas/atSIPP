@@ -3,7 +3,6 @@
 #include <ostream>
 #include <boost/program_options.hpp>
 #include "structs.hpp"
-#include "map.hpp"
 #include "graph.hpp"
 
 namespace po = boost::program_options;
