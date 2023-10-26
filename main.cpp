@@ -30,8 +30,9 @@ int main(int argc, char* argv[]) {
         else if(vm.count("edgegraph") && std::filesystem::is_regular_file(vm["edgegraph"].as<std::filesystem::path>())){
             // read map
             std::cerr << "Reading graph\n";
-            Graph g = read_graph("si.out.gz");
-            std::cout << g << "\n";
+            Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
+            std::cerr << g << "\n";
+            std::cerr << "Dumping Graph:\n";
             g.dump();
         }
         else{

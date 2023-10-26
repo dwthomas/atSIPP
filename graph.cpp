@@ -11,21 +11,30 @@ struct inATF{
     EdgeATF eATF;
 };
 
+
+
 void read_ATF(std::istream& i, std::vector<inATF>& res){
     gIndex_t x, y;
-    char buff[sizeof(double)]; 
-    i.read(buff, sizeof(x));
-    x = *(gIndex_t *)buff;
-    i.read(buff, sizeof(x));
-    y = *(gIndex_t *)buff;
-    std::cout <<x << " " << y;
+    std::string s;
+    if(!(i >> x)){return;}
+    i >> y;
+    //std::cout << x << " ";
+    //std::cout << y;
     Location source(x, y);
     i >> x >> y; 
-    std::cout << " " << x << " " << y;
+    //std::cout << " " << x << " " << y;
     Location dest(x, y);
     intervalTime_t zeta, alpha, beta, delta;
-    i >> zeta >> alpha >> beta >> delta;
-    std::cout << " " << zeta << " " << alpha << " " << beta << " " << delta << std::endl;
+    i >> s;
+    zeta = stod(s);
+    i >> s;
+    alpha = stod(s);
+    i >> s;
+    beta = stod(s);
+    i >> s;
+    delta = stod(s);
+    //i >> zeta >> alpha >> beta >> delta;
+    //std::cout << " " << zeta << " " << alpha << " " << beta << " " << delta << std::endl;
     EdgeATF edge(zeta, alpha, beta, delta);
     res.emplace_back(source, dest, edge); 
 }
@@ -37,6 +46,8 @@ Graph read_graph(std::string filename){
     inbuf.push(file);
     //Convert streambuf to istream
     std::istream instream(&inbuf);
+    //std::cout << instream.rdbuf();
+ 
     std::vector<inATF> res;
     while(!instream.eof()){
         read_ATF(instream, res);
@@ -52,6 +63,8 @@ Graph read_graph(std::string filename){
         if (!g.nodes.contains(entry.dest)){
             g.nodes[entry.dest] = entry.dest;
         }
+    }
+    for (const auto & entry: res){ 
         g.edges.emplace_back(entry.eATF);
         g.edges.back().destination = &g.nodes[entry.dest];
         g.nodes[entry.source].successors.emplace(&g.edges.back());
