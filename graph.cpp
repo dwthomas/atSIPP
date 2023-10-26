@@ -11,8 +11,6 @@ struct inATF{
     EdgeATF eATF;
 };
 
-
-
 void read_ATF(std::istream& i, std::vector<inATF>& res){
     gIndex_t x, y;
     std::string s;

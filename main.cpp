@@ -29,11 +29,22 @@ int main(int argc, char* argv[]) {
         }
         else if(vm.count("edgegraph") && std::filesystem::is_regular_file(vm["edgegraph"].as<std::filesystem::path>())){
             // read map
+            Location source_loc(vm["startx"].as<int>(), vm["starty"].as<int>());
+            Location goal_loc(vm["goalx"].as<int>(), vm["goaly"].as<int>());
             std::cerr << "Reading graph\n";
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
             std::cerr << g << "\n";
-            std::cerr << "Dumping Graph:\n";
-            g.dump();
+            if(!g.nodes.count(source_loc)){
+                std::cerr << "Error source not found in graph\n";
+                exit(-1);
+            } 
+            if(!g.nodes.count(goal_loc)){
+                std::cerr << "Error goal not found in graph\n";
+                exit(-1);
+            }
+            const GraphNode& source = g.nodes[source_loc];
+            const GraphNode& goal = g.nodes[goal_loc];
+            std::cout << source << " " << goal << "\n";
         }
         else{
             std::cout << desc << std::endl;
