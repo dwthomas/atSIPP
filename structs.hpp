@@ -29,7 +29,6 @@ inline bool overlap(const SafeInterval& left, const SafeInterval& right){
     return latest - earliest <= end(left) - begin(left) + end(right) - begin(right);
 }
 
-
 struct Location{
     private:
         gIndex_t _x;
@@ -57,6 +56,14 @@ struct Location{
         }
 };
 
+constexpr double eightWayDistance(const Location& l1, const Location& l2){
+    int dx = std::abs(l1.x() - l2.x()); 
+    int dy = std::abs(l1.y() - l2.y());
+    long diag = std::min(dx, dy);
+    long flat = dy + dx - 2*diag;
+    return (double)(flat +  sqrt2()*diag);
+}
+
 
 namespace std {
     template<>
@@ -68,10 +75,35 @@ namespace std {
     };
 }
 
-
-
 inline std::pair<Location, Location> canonical_edge(const Location& loc1, const Location& loc2){
     Location a(std::min(loc1.x(), loc2.x()), std::min(loc1.y(), loc2.y()));
     Location b(std::max(loc1.x(), loc2.x()), std::max(loc1.y(), loc2.y()));
     return std::pair<Location, Location>(a, b);
+}
+
+struct State{
+    Location loc;
+    SafeInterval interval;
+    State() = default;
+    State(int a, int b, double s, double e):loc(a,b),interval(e,s){}; 
+    constexpr bool operator ==(const State & s) const{
+        return loc == s.loc && interval == s.interval;
+    }
+    inline friend std::ostream& operator<< (std::ostream& stream, const State& s){
+        stream << s.loc << " <" << s.interval.second << "," << s.interval.first << ">";
+        return stream;
+    }
+};
+
+namespace std {
+    template<>
+    struct hash<State> {
+        inline std::size_t operator()(const State& s) const {
+            std::size_t seed = 0;
+            boost::hash_combine(seed, s.loc.pack());
+            boost::hash_combine(seed, s.interval.second);
+            boost::hash_combine(seed, s.interval.second);
+            return seed;
+        }
+    };
 }

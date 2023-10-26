@@ -8,16 +8,16 @@ struct GraphEdge;
 struct GraphNode;
 
 struct GraphNode{
-    Location loc;
+    State state;
     boost::container::flat_set<GraphEdge *> successors;
     GraphNode() = default;
-    GraphNode(const Location& l):loc(l){}
+    GraphNode(const State& s):state(s){}
     inline friend std::ostream& operator<<(std::ostream& stream, const GraphNode& gn){
-        stream << gn.loc << " ns:" << gn.successors.size();
+        stream << gn.state << " ns:" << gn.successors.size();
         return stream;
     }
     constexpr friend double operator-(const GraphNode& lhs, const GraphNode& rhs){
-        return eightWayDistance(lhs.loc, rhs.loc);
+        return eightWayDistance(lhs.state.loc, rhs.state.loc);
     }
 };
 
@@ -45,7 +45,7 @@ struct GraphEdge{
 
 struct Graph{
     std::vector<GraphEdge> edges;
-    boost::unordered::unordered_flat_map<Location, GraphNode, std::hash<Location>> nodes;
+    boost::unordered::unordered_flat_map<State, GraphNode, std::hash<State>> nodes;
     Graph() = default;
     inline void dump() const{
         for (const auto & n: nodes){

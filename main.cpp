@@ -34,17 +34,9 @@ int main(int argc, char* argv[]) {
             std::cerr << "Reading graph\n";
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
             std::cerr << g << "\n";
-            if(!g.nodes.count(source_loc)){
-                std::cerr << "Error source not found in graph\n";
-                exit(-1);
-            } 
-            if(!g.nodes.count(goal_loc)){
-                std::cerr << "Error goal not found in graph\n";
-                exit(-1);
-            }
-            const GraphNode& source = g.nodes[source_loc];
-            const GraphNode& goal = g.nodes[goal_loc];
-            std::cout << source << " " << goal << "\n";
+            //const GraphNode& source = g.nodes[source_loc];
+            //const GraphNode& goal = g.nodes[goal_loc];
+            //std::cout << source << " " << goal << "\n";
         }
         else{
             std::cout << desc << std::endl;

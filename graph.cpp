@@ -6,22 +6,23 @@
 #include <boost/iostreams/filter/gzip.hpp>
 
 struct inATF{
-    Location source;
-    Location dest;
+    State source;
+    State dest;
     EdgeATF eATF;
 };
 
 void read_ATF(std::istream& i, std::vector<inATF>& res){
     gIndex_t x, y;
+    double st, en;
     std::string s;
     if(!(i >> x)){return;}
-    i >> y;
+    i >> y >> st >> en;
     //std::cout << x << " ";
     //std::cout << y;
-    Location source(x, y);
-    i >> x >> y; 
+    State source(x, y, st, en);
+    i >> x >> y >> st >> en; 
     //std::cout << " " << x << " " << y;
-    Location dest(x, y);
+    State dest(x, y, st, en);
     intervalTime_t zeta, alpha, beta, delta;
     i >> s;
     zeta = stod(s);
