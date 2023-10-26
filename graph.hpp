@@ -34,6 +34,19 @@ struct Graph{
     std::vector<GraphEdge> edges;
     boost::unordered::unordered_flat_map<Location, GraphNode, std::hash<Location>> nodes;
     Graph() = default;
+    inline void dump() const{
+        for (const auto & n: nodes){
+            std::cout << n.second;
+            std::cout << "succ: ";
+            for (const auto& s: n.second.successors){
+                std::cout << s ;
+            }
+            std::cout << "\n";
+        }
+        for (const auto& e: edges){
+            std::cout << e << "\n";
+        }
+    }
     inline friend std::ostream& operator<< (std::ostream& stream, const Graph& g){
         stream << g.edges.size() << " edges, " << g.nodes.size() << " nodes";       
         return stream;

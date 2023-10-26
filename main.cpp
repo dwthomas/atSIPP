@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "Reading graph\n";
             Graph g = read_graph("si.out.gz");
             std::cout << g << "\n";
+            g.dump();
         }
         else{
             std::cout << desc << std::endl;
