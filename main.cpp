@@ -34,9 +34,8 @@ int main(int argc, char* argv[]) {
             std::cerr << "Reading graph\n";
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
             std::cerr << g << "\n";
-            //const GraphNode& source = g.nodes[source_loc];
-            //const GraphNode& goal = g.nodes[goal_loc];
-            //std::cout << source << " " << goal << "\n";
+            const GraphNode& source = find_earliest(g,source_loc);
+            std::cout << source << "\n";
         }
         else{
             std::cout << desc << std::endl;

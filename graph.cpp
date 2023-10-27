@@ -16,15 +16,24 @@ void read_ATF(std::istream& i, std::vector<inATF>& res){
     double st, en;
     std::string s;
     if(!(i >> x)){return;}
-    i >> y >> st >> en;
+    i >> y;
+    i >> s;
+    st = stod(s);
+    i >> s;
+    en = stod(s);
     //std::cout << x << " ";
     //std::cout << y;
     State source(x, y, st, en);
-    i >> x >> y >> st >> en; 
+    i >> x >> y; 
+    i >> s;
+    st = stod(s);
+    i >> s;
+    en = stod(s);
     //std::cout << " " << x << " " << y;
     State dest(x, y, st, en);
     intervalTime_t zeta, alpha, beta, delta;
     i >> s;
+    //std::cout << source << " " << dest << " " << s << "\n";
     zeta = stod(s);
     i >> s;
     alpha = stod(s);
@@ -70,4 +79,18 @@ Graph read_graph(std::string filename){
         g.nodes[entry.source].successors.emplace(&g.edges.back());
     }
     return g;
+}
+
+const GraphNode&  find_earliest(const Graph& g, Location loc){
+    const GraphNode * cur = nullptr;
+    for (const auto& node: g.nodes){
+        if ((cur == nullptr || begin(cur->state.interval) > begin(node.first.interval)) && loc == node.first.loc){
+            cur = &node.second;
+        }
+    }
+    if(cur == nullptr){
+        std::cerr << "Unable to find starting vertex\n";
+        exit(-1);
+    }
+    return *cur;
 }
