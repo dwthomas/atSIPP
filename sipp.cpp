@@ -13,12 +13,12 @@ void expand(const Node& cur, Open_t& open_list, const Location& goal_loc){
         if(arrival_time < successor->destination->earliest_arrival){
             successor->destination->earliest_arrival = arrival_time;
             double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-            open_list.emplace(arrival_time, arrival_time + h, successor->destination, successor->edge);
+            open_list.emplace(arrival_time, arrival_time + h, successor->destination, successor);
         }
     }
 }
 
-Node search(GraphNode * source, const Location& dest){
+Node sipp::search(GraphNode * source, const Location& dest){
     Open_t open_list;
     open_list.emplace(0.0, eightWayDistance(dest, source->state.loc), source, nullptr);
     while(!open_list.empty()){

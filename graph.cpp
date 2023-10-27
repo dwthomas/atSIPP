@@ -81,7 +81,7 @@ Graph read_graph(std::string filename){
     return g;
 }
 
-GraphNode&  find_earliest(const Graph& g, Location loc){
+GraphNode *  find_earliest(Graph& g, Location loc){
     GraphNode * cur = nullptr;
     for (auto& node: g.nodes){
         if ((cur == nullptr || begin(cur->state.interval) > begin(node.first.interval)) && loc == node.first.loc){
@@ -92,5 +92,5 @@ GraphNode&  find_earliest(const Graph& g, Location loc){
         std::cerr << "Unable to find starting vertex\n";
         exit(-1);
     }
-    return *cur;
+    return cur;
 }
