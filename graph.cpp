@@ -81,9 +81,9 @@ Graph read_graph(std::string filename){
     return g;
 }
 
-const GraphNode&  find_earliest(const Graph& g, Location loc){
-    const GraphNode * cur = nullptr;
-    for (const auto& node: g.nodes){
+GraphNode&  find_earliest(const Graph& g, Location loc){
+    GraphNode * cur = nullptr;
+    for (auto& node: g.nodes){
         if ((cur == nullptr || begin(cur->state.interval) > begin(node.first.interval)) && loc == node.first.loc){
             cur = &node.second;
         }

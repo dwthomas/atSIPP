@@ -1,5 +1,7 @@
+#pragma once
 #include "structs.hpp"
 #include "atf.hpp"
+#include <limits>
 #include <unordered_map>
 #include <boost/container/flat_set.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
@@ -8,10 +10,11 @@ struct GraphEdge;
 struct GraphNode;
 
 struct GraphNode{
+    double earliest_arrival;
     State state;
     boost::container::flat_set<GraphEdge *> successors;
     GraphNode() = default;
-    GraphNode(const State& s):state(s){}
+    GraphNode(const State& s):earliest_arrival(std::numeric_limits<double>::infinity()),state(s){}
     inline friend std::ostream& operator<<(std::ostream& stream, const GraphNode& gn){
         stream << gn.state << " ns:" << gn.successors.size();
         return stream;

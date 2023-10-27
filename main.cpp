@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <ostream>
 #include <boost/program_options.hpp>
+#include "sipp.hpp"
 #include "structs.hpp"
 #include "graph.hpp"
 
@@ -34,8 +35,9 @@ int main(int argc, char* argv[]) {
             std::cerr << "Reading graph\n";
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
             std::cerr << g << "\n";
-            const GraphNode& source = find_earliest(g,source_loc);
+            GraphNode& source = find_earliest(g,source_loc);
             std::cout << source << "\n";
+            sipp::search(&source, goal_loc);
         }
         else{
             std::cout << desc << std::endl;
