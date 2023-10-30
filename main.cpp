@@ -36,8 +36,9 @@ int main(int argc, char* argv[]) {
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
             std::cerr << g << "\n";
             GraphNode * source = find_earliest(g,source_loc);
-            std::cout << source << "\n";
-            sipp::search(source, goal_loc);
+            std::cout << *source << "\n";
+            sipp::Node res = sipp::search(source, goal_loc);
+            std::cout << *res.node << "\n";
         }
         else{
             std::cout << desc << std::endl;
