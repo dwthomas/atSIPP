@@ -23,6 +23,7 @@ Node sipp::search(GraphNode * source, const Location& dest){
     open_list.emplace(0.0, eightWayDistance(dest, source->state.loc), source, nullptr);
     while(!open_list.empty()){
         Node cur = open_list.top();
+        std::cout << *cur.node << "\n";
         if(isGoal(cur, dest)){
             return cur;
         }
