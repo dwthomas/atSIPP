@@ -6,31 +6,16 @@
 #include <boost/iostreams/filter/gzip.hpp>
 
 struct inATF{
-    State source;
-    State dest;
+    long source;
+    long dest;
     EdgeATF eATF;
 };
 
 void read_ATF(std::istream& i, std::vector<inATF>& res){
-    gIndex_t x, y;
-    double st, en;
+    long x, y;
     std::string s;
     if(!(i >> x)){return;}
     i >> y;
-    i >> s;
-    st = stod(s);
-    i >> s;
-    en = stod(s);
-    //std::cout << x << " ";
-    //std::cout << y;
-    State source(x, y, st, en);
-    i >> x >> y; 
-    i >> s;
-    st = stod(s);
-    i >> s;
-    en = stod(s);
-    //std::cout << " " << x << " " << y;
-    State dest(x, y, st, en);
     intervalTime_t zeta, alpha, beta, delta;
     i >> s;
     //std::cout << source << " " << dest << " " << s << "\n";
@@ -44,7 +29,7 @@ void read_ATF(std::istream& i, std::vector<inATF>& res){
     //i >> zeta >> alpha >> beta >> delta;
     //std::cout << " " << zeta << " " << alpha << " " << beta << " " << delta << std::endl;
     EdgeATF edge(zeta, alpha, beta, delta);
-    res.emplace_back(source, dest, edge); 
+    res.emplace_back(x, y, edge); 
 }
 
 Graph read_graph(std::string filename){
@@ -57,26 +42,43 @@ Graph read_graph(std::string filename){
     //std::cout << instream.rdbuf();
  
     std::vector<inATF> res;
+    Graph g;
+    long n_nodes;
+    std::string s;
+    instream >> s >> s >> n_nodes;
+    std::cout << "n:" << n_nodes << "\n";
+    g.nodes.reserve(n_nodes);
+    g.node_array.reserve(n_nodes);
+    for (long i = 0; i < n_nodes; i++){
+        gIndex_t x, y;
+        double st, en;
+        instream >> x;
+        instream >> y;
+        instream >> s;
+        st = stod(s);
+        instream >> s;
+        en = stod(s);
+        State state(x, y, st, en);
+        g.node_array.emplace_back(state);
+        g.nodes.emplace(state, &g.node_array.back());
+    }
+    std::cout << "nodes read\n";
+
     while(!instream.eof()){
         read_ATF(instream, res);
     }
     file.close();
     // make GraphNodes
-    Graph g;
-    g.edges.reserve(res.size());
-    for (const auto& entry: res){
-        if (!g.nodes.contains(entry.source)){
-            g.nodes[entry.source] = entry.source;
-        }
-        if (!g.nodes.contains(entry.dest)){
-            g.nodes[entry.dest] = entry.dest;
-        }
-    }
+    g.edges.reserve(2*res.size());
     for (const auto & entry: res){ 
         g.edges.emplace_back(entry.eATF);
-        g.edges.back().source = &g.nodes[entry.source];
-        g.edges.back().destination = &g.nodes[entry.dest];
-        g.nodes[entry.source].successors.emplace(&g.edges.back());
+        g.edges.back().source = &g.node_array[entry.source];
+        g.edges.back().destination = &g.node_array[entry.dest];
+        g.node_array[entry.source].successors.emplace_hint(g.node_array[entry.source].successors.end(), &g.edges.back());
+        g.edges.emplace_back(entry.eATF);
+        g.edges.back().source = &g.node_array[entry.dest];
+        g.edges.back().destination = &g.node_array[entry.source];
+        g.node_array[entry.dest].successors.emplace_hint(g.node_array[entry.dest].successors.end(), &g.edges.back());
     }
     return g;
 }
@@ -85,7 +87,7 @@ GraphNode *  find_earliest(Graph& g, Location loc){
     GraphNode * cur = nullptr;
     for (auto& node: g.nodes){
         if ((cur == nullptr || begin(cur->state.interval) > begin(node.first.interval)) && loc == node.first.loc){
-            cur = &node.second;
+            cur = node.second;
         }
     }
     if(cur == nullptr){

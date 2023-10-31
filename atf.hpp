@@ -31,7 +31,7 @@ struct EdgeATF{
     }
     
     inline friend std::ostream& operator<< (std::ostream& stream, const EdgeATF& eatf){
-        stream << "<" << eatf.zeta << "," << "eatf.alpha" << "," << eatf.beta << "," << eatf.delta << ">";
+        stream << "<" << eatf.zeta << "," << eatf.alpha << "," << eatf.beta << "," << eatf.delta << ">";
         return stream;
     }
 };

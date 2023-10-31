@@ -48,14 +48,15 @@ struct GraphEdge{
 
 struct Graph{
     std::vector<GraphEdge> edges;
-    boost::unordered::unordered_flat_map<State, GraphNode, std::hash<State>> nodes;
+    std::vector<GraphNode> node_array;
+    boost::unordered::unordered_flat_map<State, GraphNode *, std::hash<State>> nodes;
     Graph() = default;
     inline void dump() const{
         for (const auto & n: nodes){
-            std::cout << n.second;
-            std::cout << "succ: ";
-            for (const auto& s: n.second.successors){
-                std::cout << s ;
+            std::cout << *n.second;
+            std::cout << " succ:\n";
+            for (const auto& s: n.second->successors){
+                std::cout << "\t" << *s  << "\n";
             }
             std::cout << "\n";
         }
