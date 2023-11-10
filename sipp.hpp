@@ -1,5 +1,5 @@
 #pragma once
-#include <boost/heap/binomial_heap.hpp>
+#include <boost/heap/d_ary_heap.hpp>
 #include <unordered_map>
 #include "graph.hpp"
 
@@ -9,13 +9,16 @@ namespace sipp{
     struct Node{
         double g;
         double f;
-        GraphNode* node;
-        GraphEdge* parent;
+        GraphNode * node;
         Node() = default;
-        Node(double _g, double _h, GraphNode * _node, GraphEdge * _parent):g(_g),f(_g + _h),node(_node),parent(_parent){}
+        Node(double _g, double _h, GraphNode * _node):g(_g),f(_g + _h),node(_node){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             return a.f > b.f;
+        }
+
+        inline friend bool operator>(const Node * a, const Node * b){
+            return a->f > b->f;
         }
 
         inline friend std::ostream& operator<< (std::ostream& stream, const Node& n){
@@ -23,7 +26,11 @@ namespace sipp{
             return stream;
         }
     };
-    using Open_t = boost::heap::binomial_heap<Node, boost::heap::compare<std::greater<Node> >>;
+
+    struct Open{
+        boost::heap::d_ary_heap<Node *, boost::heap::arity<4>, boost::heap::mutable_<true>, boost::heap::compare<std::greater<Node *>>> queue;
+        std::unordered_map<GraphNode *, GraphNode *> parent;
+    };
 
 
     Node search(GraphNode * source, const Location& dest);
