@@ -107,3 +107,19 @@ namespace std {
         }
     };
 }
+
+struct MetaData{
+    long generated;
+    long expanded;
+    long decreased;
+
+    inline void init(){
+        generated = 0;
+        expanded = 0;
+        decreased = 0;
+    }
+    inline friend std::ostream& operator<< (std::ostream& stream, const MetaData& m){
+        stream << "Nodes generated: " << m.generated << " Nodes decreased: " << m.decreased << " Nodes expanded: " << m.expanded << "\n"; 
+        return stream;
+    }
+};

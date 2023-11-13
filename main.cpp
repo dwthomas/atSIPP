@@ -3,6 +3,7 @@
 #include <ostream>
 #include <boost/program_options.hpp>
 #include "sipp.hpp"
+#include "augmentedsipp.hpp"
 #include "structs.hpp"
 #include "graph.hpp"
 
@@ -20,6 +21,7 @@ int main(int argc, char* argv[]) {
         ("goalx,X", po::value<int>(), "x position of goal location")
         ("goaly,Y", po::value<int>(), "y position of goal location")
         ("edgegraph,g", po::value<std::filesystem::path>(),"gzip'd file containing the edge arrival time functions.")
+        ("search,s", po::value<std::string>(), "Search algorithm to use")
         ;
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -36,10 +38,24 @@ int main(int argc, char* argv[]) {
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
             std::cerr << g << "\n";
             GraphNode * source = find_earliest(g,source_loc);
-            auto res = sipp::search(source, goal_loc);
-            for(auto n: res){
-                std::cout << *n << "\n";
+            if(vm["search"].as<std::string>() == "sipp"){
+                MetaData m;
+                auto res = sipp::search(source, goal_loc, m);
+                for(auto n: res){
+                    std::cout << *n << "\n";
+                }
+                std::cout << m << "\n";
             }
+            else if(vm["search"].as<std::string>() == "asipp"){
+                MetaData m;
+                auto res = asipp::search(source, goal_loc, m);
+                for(auto n: res.first){
+                    std::cout << *n << "\n";
+                }
+                std::cout << res.second << "\n";
+                std::cout << m << "\n";
+            }
+
         }
         else{
             std::cout << desc << std::endl;

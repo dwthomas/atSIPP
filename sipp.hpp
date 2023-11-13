@@ -3,6 +3,7 @@
 #include <functional>
 #include <unordered_map>
 #include "graph.hpp"
+#include "structs.hpp"
 
 namespace sipp{
     struct Node;
@@ -64,6 +65,6 @@ namespace sipp{
     };
 
 
-   std::vector<GraphNode *> search(GraphNode * source, const Location& dest);
+   std::vector<GraphNode *> search(GraphNode * source, const Location& dest, MetaData & m);
 }
 

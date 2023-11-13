@@ -2,6 +2,7 @@
 #include "graph.hpp"
 #include "structs.hpp"
 #include <algorithm>
+#include <cmath>
 
 using namespace sipp;
 
@@ -9,20 +10,23 @@ bool isGoal(const Node& n, const Location& goal_loc){
     return n.node->state.loc == goal_loc;
 }
 
-void expand(const Node& cur, Open& open_list, const Location& goal_loc){
+void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
+    m.expanded++;
     for(GraphEdge * successor: cur.node->successors){
         double arrival_time = successor->edge.arrival_time(cur.g);
-        if(open_list.expanded.contains(successor->destination)){
+        if(open_list.expanded.contains(successor->destination) || !std::isfinite(arrival_time)){
             continue;
         }
         else if (open_list.handles.contains(successor->destination)){
             auto handle = open_list.handles[successor->destination];
             if(arrival_time < (*handle).g){
+                m.decreased++;
                 double h = eightWayDistance(successor->destination->state.loc, goal_loc);
                 open_list.decrease_key(handle ,arrival_time, h, successor->destination, successor->source);
             }
         }
         else{
+            m.generated++;
             double h = eightWayDistance(successor->destination->state.loc, goal_loc);
             open_list.emplace(arrival_time, h, successor->destination, successor->source);
         }
@@ -49,18 +53,20 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
     return res;
 }
 
-std::vector<GraphNode *> sipp::search(GraphNode * source, const Location& dest){
+std::vector<GraphNode *> sipp::search(GraphNode * source, const Location& dest, MetaData& m){
     Open open_list;
+    m.init();
     open_list.emplace(0.0, eightWayDistance(dest, source->state.loc), source, nullptr);
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
         //std::cout << *cur.node << "\n";
         if(isGoal(cur, dest)){
+            dump_open(open_list);
             return backup(cur, open_list);
         }
         open_list.pop();
-        expand(cur, open_list, dest);
+        expand(cur, open_list, dest, m);
     }
     std::cerr << "Failed to find path\n";
     exit(-1);
