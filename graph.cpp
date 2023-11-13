@@ -46,7 +46,6 @@ Graph read_graph(std::string filename){
     long n_nodes;
     std::string s;
     instream >> s >> s >> n_nodes;
-    std::cout << "n:" << n_nodes << "\n";
     g.nodes.reserve(n_nodes);
     g.node_array.reserve(n_nodes);
     for (long i = 0; i < n_nodes; i++){
@@ -62,7 +61,7 @@ Graph read_graph(std::string filename){
         g.node_array.emplace_back(state);
         g.nodes.emplace(state, &g.node_array.back());
     }
-    std::cout << "nodes read\n";
+    std::cerr << "nodes read\n";
 
     while(!instream.eof()){
         read_ATF(instream, res);

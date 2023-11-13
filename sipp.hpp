@@ -56,9 +56,14 @@ namespace sipp{
             expanded[n.node] = n.g;
             queue.pop();
         }
+
+        inline void decrease_key(handle_t handle ,double g, double h, GraphNode * n, GraphNode * p){
+            parent[n] = p;
+            queue.decrease(handle, Node(g, h, n));
+        }
     };
 
 
-    Node search(GraphNode * source, const Location& dest);
+   std::vector<GraphNode *> search(GraphNode * source, const Location& dest);
 }
 

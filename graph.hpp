@@ -10,11 +10,10 @@ struct GraphEdge;
 struct GraphNode;
 
 struct GraphNode{
-    double earliest_arrival;
     State state;
     boost::container::flat_set<GraphEdge *> successors;
     GraphNode() = default;
-    GraphNode(const State& s):earliest_arrival(std::numeric_limits<double>::infinity()),state(s){}
+    GraphNode(const State& s):state(s){}
     inline friend std::ostream& operator<<(std::ostream& stream, const GraphNode& gn){
         stream << gn.state << " ns:" << gn.successors.size();
         return stream;
