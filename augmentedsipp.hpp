@@ -3,17 +3,16 @@
 #include <functional>
 #include <unordered_map>
 #include "graph.hpp"
-#include "structs.hpp"
 
-namespace sipp{
+namespace asipp{
     struct Node;
 
     struct Node{
-        double g;
+        EdgeATF g;
         double f;
         GraphNode * node;
         Node() = default;
-        Node(double _g, double _h, GraphNode * _node):g(_g),f(_g + _h),node(_node){}
+        Node(EdgeATF e, double _h, GraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             return a.f > b.f;
@@ -39,9 +38,9 @@ namespace sipp{
         std::unordered_map<GraphNode *, handle_t> handles;
         std::unordered_map<GraphNode *, double> expanded;
 
-        inline void emplace(double g, double h, GraphNode * n, GraphNode * p){
+        inline void emplace(EdgeATF e, double h, GraphNode * n, GraphNode * p){
             parent[n] = p;
-            handles[n] = queue.push(Node(g, h, n));
+            handles[n] = queue.push(Node(e, h, n));
         }
 
         inline bool empty() const{
@@ -54,17 +53,17 @@ namespace sipp{
 
         inline void pop(){
             Node n = top();
-            expanded[n.node] = n.g;
+            expanded[n.node] = n.g.earliest_arrival_time();
             queue.pop();
         }
 
-        inline void decrease_key(handle_t handle ,double g, double h, GraphNode * n, GraphNode * p){
+        inline void decrease_key(handle_t handle , EdgeATF e, double h, GraphNode * n, GraphNode * p){
             parent[n] = p;
-            queue.decrease(handle, Node(g, h, n));
+            queue.decrease(handle, Node(e, h, n));
         }
     };
 
 
-   std::vector<GraphNode *> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);
+   std::pair<std::vector<GraphNode *>, EdgeATF> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);
 }
 

@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
         ("goaly,Y", po::value<int>(), "y position of goal location")
         ("edgegraph,g", po::value<std::filesystem::path>(),"gzip'd file containing the edge arrival time functions.")
         ("search,s", po::value<std::string>(), "Search algorithm to use")
+        ("startTime,t", po::value<double>()->default_value(0.0), "Start Time of search.")
         ;
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -40,7 +41,8 @@ int main(int argc, char* argv[]) {
             GraphNode * source = find_earliest(g,source_loc);
             if(vm["search"].as<std::string>() == "sipp"){
                 MetaData m;
-                auto res = sipp::search(source, goal_loc, m);
+                double start_time = vm["startTime"].as<double>();
+                auto res = sipp::search(source, goal_loc, m, start_time);
                 for(auto n: res){
                     std::cout << *n << "\n";
                 }
@@ -48,7 +50,8 @@ int main(int argc, char* argv[]) {
             }
             else if(vm["search"].as<std::string>() == "asipp"){
                 MetaData m;
-                auto res = asipp::search(source, goal_loc, m);
+                double start_time = vm["startTime"].as<double>();
+                auto res = asipp::search(source, goal_loc, m, start_time);
                 for(auto n: res.first){
                     std::cout << *n << "\n";
                 }

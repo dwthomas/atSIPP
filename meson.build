@@ -8,3 +8,8 @@ executable('atsipp',
            install : true,
            dependencies : [boost_dep, zdep],
            )
+executable('lhtest',
+            ['lhtest.cpp', 'segment.cpp'],
+            install: true,
+            dependencies : [boost_dep,],
+)

@@ -1,10 +1,11 @@
-#include "sipp.hpp"
+#include "augmentedsipp.hpp"
 #include "graph.hpp"
 #include "structs.hpp"
 #include <algorithm>
-#include <cmath>
+#include <limits>
+#include <utility>
 
-using namespace sipp;
+using namespace asipp;
 
 bool isGoal(const Node& n, const Location& goal_loc){
     return n.node->state.loc == goal_loc;
@@ -12,23 +13,30 @@ bool isGoal(const Node& n, const Location& goal_loc){
 
 void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
     m.expanded++;
+    double zeta = cur.g.zeta;
     for(GraphEdge * successor: cur.node->successors){
-        double arrival_time = successor->edge.arrival_time(cur.g);
-        if(open_list.expanded.contains(successor->destination) || !std::isfinite(arrival_time)){
+        if(cur.g.earliest_arrival_time() >= successor->edge.beta || cur.g.supremum_arrival_time() <= successor->edge.zeta){
+            continue;
+        } 
+        double alpha = std::max(cur.g.alpha, successor->edge.alpha - cur.g.delta);
+        double beta = std::min(cur.g.beta, successor->edge.beta - cur.g.delta);
+        double delta = successor->edge.delta + cur.g.delta;
+        EdgeATF arrival_time_function(zeta, alpha, beta, delta);
+        if(open_list.expanded.contains(successor->destination)){
             continue;
         }
         else if (open_list.handles.contains(successor->destination)){
             auto handle = open_list.handles[successor->destination];
-            if(arrival_time < (*handle).g){
+            if(arrival_time_function.earliest_arrival_time() < (*handle).g.earliest_arrival_time()){
                 m.decreased++;
                 double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-                open_list.decrease_key(handle ,arrival_time, h, successor->destination, successor->source);
+                open_list.decrease_key(handle ,arrival_time_function, h, successor->destination, successor->source);
             }
         }
         else{
             m.generated++;
             double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-            open_list.emplace(arrival_time, h, successor->destination, successor->source);
+            open_list.emplace(arrival_time_function, h, successor->destination, successor->source);
         }
     }
 }
@@ -53,16 +61,16 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
     return res;
 }
 
-std::vector<GraphNode *> sipp::search(GraphNode * source, const Location& dest, MetaData& m, double start_time){
+std::pair<std::vector<GraphNode *>, EdgeATF> asipp::search(GraphNode * source, const Location& dest, MetaData & m, double start_time){
     Open open_list;
     m.init();
-    open_list.emplace(start_time, eightWayDistance(dest, source->state.loc), source, nullptr);
+    open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), start_time, std::numeric_limits<double>::infinity(), 0.0), eightWayDistance(dest, source->state.loc), source, nullptr);
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
         //std::cout << *cur.node << "\n";
         if(isGoal(cur, dest)){
-            return backup(cur, open_list);
+            return std::make_pair(backup(cur, open_list), cur.g);
         }
         open_list.pop();
         expand(cur, open_list, dest, m);
