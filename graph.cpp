@@ -9,6 +9,8 @@ struct inATF{
     long source;
     long dest;
     EdgeATF eATF;
+
+    inATF(long s, long d, EdgeATF e):source(s),dest(d),eATF(e){}
 };
 
 void read_ATF(std::istream& i, std::vector<inATF>& res){
@@ -18,6 +20,7 @@ void read_ATF(std::istream& i, std::vector<inATF>& res){
     i >> y;
     intervalTime_t zeta, alpha, beta, delta;
     i >> s;
+    //std::cerr << s << "\n"; 
     //std::cout << source << " " << dest << " " << s << "\n";
     zeta = stod(s);
     i >> s;
@@ -62,8 +65,10 @@ Graph read_graph(std::string filename){
     }
     std::cerr << "nodes read\n";
 
+    //std::cerr << instream.rdbuf();
+    //exit(-1);
     while(!instream.eof()){
-        break; // remove when fixed
+      //break; // remove when fixed
         read_ATF(instream, res);
     }
     file.close();
