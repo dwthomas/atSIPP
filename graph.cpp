@@ -45,25 +45,25 @@ Graph read_graph(std::string filename){
     Graph g;
     long n_nodes;
     std::string s;
+    std::string name;
     instream >> s >> s >> n_nodes;
     g.nodes.reserve(n_nodes);
     g.node_array.reserve(n_nodes);
     for (long i = 0; i < n_nodes; i++){
-        gIndex_t x, y;
         double st, en;
-        instream >> x;
-        instream >> y;
+        instream >> name;
         instream >> s;
         st = stod(s);
         instream >> s;
         en = stod(s);
-        State state(x, y, st, en);
+        State state(name, st, en);
         g.node_array.emplace_back(state);
         g.nodes.emplace(state, &g.node_array.back());
     }
     std::cerr << "nodes read\n";
 
     while(!instream.eof()){
+        break; // remove when fixed
         read_ATF(instream, res);
     }
     file.close();

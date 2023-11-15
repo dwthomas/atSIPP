@@ -18,9 +18,6 @@ struct GraphNode{
         stream << gn.state << " ns:" << gn.successors.size();
         return stream;
     }
-    constexpr friend double operator-(const GraphNode& lhs, const GraphNode& rhs){
-        return eightWayDistance(lhs.state.loc, rhs.state.loc);
-    }
 };
 
 struct GraphEdge{

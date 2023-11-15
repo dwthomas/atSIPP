@@ -12,6 +12,7 @@ bool isGoal(const Node& n, const Location& goal_loc){
 
 void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
     m.expanded++;
+    (void)goal_loc; // reserved for heuristic 
     for(GraphEdge * successor: cur.node->successors){
         double arrival_time = successor->edge.arrival_time(cur.g);
         if(open_list.expanded.contains(successor->destination) || !std::isfinite(arrival_time)){
@@ -21,13 +22,13 @@ void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData
             auto handle = open_list.handles[successor->destination];
             if(arrival_time < (*handle).g){
                 m.decreased++;
-                double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                double h = 0;
                 open_list.decrease_key(handle ,arrival_time, h, successor->destination, successor->source);
             }
         }
         else{
             m.generated++;
-            double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+            double h = 0;
             open_list.emplace(arrival_time, h, successor->destination, successor->source);
         }
     }
@@ -56,7 +57,7 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
 std::vector<GraphNode *> sipp::search(GraphNode * source, const Location& dest, MetaData& m, double start_time){
     Open open_list;
     m.init();
-    open_list.emplace(start_time, eightWayDistance(dest, source->state.loc), source, nullptr);
+    open_list.emplace(start_time, 0, source, nullptr);
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
