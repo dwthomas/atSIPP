@@ -30,62 +30,35 @@ inline bool overlap(const SafeInterval& left, const SafeInterval& right){
 }
 
 struct Location{
-    private:
-        gIndex_t _x;
-        gIndex_t _y;
-    public:
+        std::string name;
         Location() = default;
-        Location(int xi, int yi):_x(xi),_y(yi){}
-        constexpr int x() const{
-            return _x;
-        }
-
-        constexpr int y() const{
-            return _y;
-        }
-
+        Location(std::string n):name(n){}
         constexpr bool operator ==(const Location & l) const{
-            return x() == l.x() && y() == l.y();
-        }
-        constexpr uint pack() const{
-            return ((uint)_x << 16) + _y;
+            return name == l.name;
         }
         inline friend std::ostream& operator<< (std::ostream& stream, const Location& loc){
-            stream << loc.x() << " " << loc.y();
+            stream << loc.name;
             return stream;
         }
 };
 
-constexpr double eightWayDistance(const Location& l1, const Location& l2){
-    int dx = std::abs(l1.x() - l2.x()); 
-    int dy = std::abs(l1.y() - l2.y());
-    long diag = std::min(dx, dy);
-    long flat = dy + dx - 2*diag;
-    return (double)(flat +  sqrt2()*diag);
-}
 
 
 namespace std {
     template<>
     struct hash<Location> {
         inline size_t operator()(const Location& loc) const {
-          boost::hash<uint> hasher;
-    return hasher(loc.pack());
+            boost::hash<std::string> hasher;
+            return hasher(loc.name);
         }
     };
-}
-
-inline std::pair<Location, Location> canonical_edge(const Location& loc1, const Location& loc2){
-    Location a(std::min(loc1.x(), loc2.x()), std::min(loc1.y(), loc2.y()));
-    Location b(std::max(loc1.x(), loc2.x()), std::max(loc1.y(), loc2.y()));
-    return std::pair<Location, Location>(a, b);
 }
 
 struct State{
     Location loc;
     SafeInterval interval;
     State() = default;
-    State(int a, int b, double s, double e):loc(a,b),interval(e,s){}; 
+    State(std::string n, double s, double e):loc(n),interval(e,s){}; 
     constexpr bool operator ==(const State & s) const{
         return loc == s.loc && interval == s.interval;
     }
@@ -100,7 +73,7 @@ namespace std {
     struct hash<State> {
         inline std::size_t operator()(const State& s) const {
             std::size_t seed = 0;
-            boost::hash_combine(seed, s.loc.pack());
+            boost::hash_combine(seed, s.loc.name);
             boost::hash_combine(seed, s.interval.second);
             boost::hash_combine(seed, s.interval.second);
             return seed;
