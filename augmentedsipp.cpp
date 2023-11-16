@@ -31,7 +31,7 @@ void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData
             if(arrival_time_function.earliest_arrival_time() < (*handle).g.earliest_arrival_time()){
                 m.decreased++;
                 double h = 0;
-                open_list.decrease_key(handle ,arrival_time_function, h, successor->destination, successor->source);
+                open_list.decrease_key(handle, arrival_time_function, h, successor->destination, successor->source);
             }
         }
         else{
