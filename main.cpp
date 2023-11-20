@@ -22,6 +22,8 @@ int main(int argc, char* argv[]) {
         ("edgegraph,g", po::value<std::filesystem::path>(),"gzip'd file containing the edge arrival time functions.")
         ("search,s", po::value<std::string>(), "Search algorithm to use")
         ("startTime,t", po::value<double>()->default_value(0.0), "Start Time of search.")
+        ("agentSpeed,a", po::value<double>()->default_value(15.0), "Traveling speed of the agent.")
+        ("walkingSpeed,w", po::value<double>()->default_value(1.0), "Walking speed for reversing train.")
         ;
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -34,12 +36,12 @@ int main(int argc, char* argv[]) {
             // read map
             Location source_loc(vm["start"].as<std::string>());
             Location goal_loc(vm["goal"].as<std::string>());
-            std::cerr << "Reading graph\n";
-            Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
-            std::cerr << g << "\n";
-            //g.dump();
-            double start_time = vm["startTime"].as<double>();
-            GraphNode * source = find_earliest(g, source_loc, start_time);
+            double walkingSpeed(vm["walkingSpeed"].as<double>());
+            double agentSpeed(vm["agentSpeed"].as<double>());
+            // std::cerr << "Reading graph\n";
+            Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string(), agentSpeed, walkingSpeed);
+            // std::cerr << g << "\n";
+            GraphNode * source = find_earliest(g,source_loc);
             if(vm["search"].as<std::string>() == "sipp"){
                 MetaData m;
                 auto res = sipp::search(source, goal_loc, m, start_time);

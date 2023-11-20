@@ -12,7 +12,7 @@ struct inATF{
     inATF(long s, long d, EdgeATF e):source(s),dest(d),eATF(e){}
 };
 
-void read_ATF(std::istream& i, std::vector<inATF>& res){
+void read_ATF(std::istream& i, std::vector<inATF>& res, double agentSpeed, double walkingSpeed){
     long x, y;
     std::string s;
     if(!(i >> x)){return;}
@@ -27,14 +27,20 @@ void read_ATF(std::istream& i, std::vector<inATF>& res){
     i >> s;
     beta = stod(s);
     i >> s;
-    delta = stod(s);
+    // Set delta: length of edge (delta from file) / speed (depending on edge type: A/B (walking speed) versus A/A or B/B (agent speed))
+    double length = stod(s);
+    if (length == 0) {
+        delta = length / walkingSpeed;
+    } else {
+        delta = length / agentSpeed;
+    }
     //i >> zeta >> alpha >> beta >> delta;
     //std::cout << " " << zeta << " " << alpha << " " << beta << " " << delta << std::endl;
     EdgeATF edge(zeta, alpha, beta, delta);
     res.emplace_back(x, y, edge); 
 }
 
-Graph read_graph(std::string filename){
+Graph read_graph(std::string filename, double agentSpeed, double walkingSpeed){
     std::ifstream file(filename, std::ios_base::in | std::ios_base::binary);
     boost::iostreams::filtering_streambuf<boost::iostreams::input> inbuf;
     inbuf.push(boost::iostreams::gzip_decompressor());
@@ -55,20 +61,20 @@ Graph read_graph(std::string filename){
         double st, en;
         instream >> name;
         instream >> s;
-        st = stod(s);
+        st = stod(s); //start of node interval
         instream >> s;
-        en = stod(s);
+        en = stod(s); //end of node interval
         State state(name, st, en);
         g.node_array.emplace_back(state);
         g.nodes.emplace(state, &g.node_array.back());
     }
-    std::cerr << "nodes read\n";
+    // std::cerr << "nodes read\n";
 
     //std::cerr << instream.rdbuf();
     //exit(-1);
     while(!instream.eof()){
       //break; // remove when fixed
-        read_ATF(instream, res);
+        read_ATF(instream, res, agentSpeed, walkingSpeed);
     }
     file.close();
     // make GraphNodes
