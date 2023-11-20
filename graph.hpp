@@ -66,6 +66,6 @@ struct Graph{
     }
 };
 
-Graph read_graph(std::string filename);
+Graph read_graph(std::string filename, double agentSpeed, double walkingSpeed);
 GraphNode * find_earliest(Graph& g, Location loc);
 
