@@ -69,7 +69,7 @@ std::pair<std::vector<GraphNode *>, EdgeATF> asipp::search(GraphNode * source, c
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
-        //std::cout << *cur.node << "\n";
+        std::cout << "Current " << cur << "\n";
         if(isGoal(cur, dest)){
             return std::make_pair(backup(cur, open_list), cur.g);
         }
