@@ -68,7 +68,7 @@ Graph read_graph(std::string filename, double agentSpeed, double walkingSpeed){
         g.node_array.emplace_back(state);
         g.nodes.emplace(state, &g.node_array.back());
     }
-    // std::cerr << "nodes read\n";
+    std::cerr << "nodes read\n";
 
     //std::cerr << instream.rdbuf();
     //exit(-1);
@@ -80,14 +80,11 @@ Graph read_graph(std::string filename, double agentSpeed, double walkingSpeed){
     // make GraphNodes
     g.edges.reserve(2*res.size());
     for (const auto & entry: res){ 
+        // Only create edges in the direction they are given
         g.edges.emplace_back(entry.eATF);
         g.edges.back().source = &g.node_array[entry.source];
         g.edges.back().destination = &g.node_array[entry.dest];
         g.node_array[entry.source].successors.emplace_hint(g.node_array[entry.source].successors.end(), &g.edges.back());
-        //g.edges.emplace_back(entry.eATF);
-        //g.edges.back().source = &g.node_array[entry.dest];
-        //g.edges.back().destination = &g.node_array[entry.source];
-        //g.node_array[entry.dest].successors.emplace_hint(g.node_array[entry.dest].successors.end(), &g.edges.back());
     }
     return g;
 }
