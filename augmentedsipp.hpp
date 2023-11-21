@@ -59,7 +59,7 @@ namespace asipp{
 
         inline void decrease_key(handle_t handle , EdgeATF e, double h, GraphNode * n, GraphNode * p){
             parent[n] = p;
-            queue.decrease(handle, Node(e, h, n));
+            queue.increase(handle, Node(e, h, n));
         }
     };
 
