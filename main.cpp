@@ -37,9 +37,10 @@ int main(int argc, char* argv[]) {
             Location goal_loc(vm["goal"].as<std::string>());
             double walkingSpeed(vm["walkingSpeed"].as<double>());
             double agentSpeed(vm["agentSpeed"].as<double>());
-            // std::cerr << "Reading graph\n";
+            std::cerr << "Reading graph\n";
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string(), agentSpeed, walkingSpeed);
-            // std::cerr << g << "\n";
+            std::cerr << g << "\n";
+            // g.dump();
             GraphNode * source = find_earliest(g,source_loc);
             if(vm["search"].as<std::string>() == "sipp"){
                 MetaData m;
