@@ -12,8 +12,8 @@ inline void intersection(segments_small_container& res, const Segment& a, const 
     assert(a.x0 == b.x0);
     assert(a.x1 == b.x1);
     assert(a.y0 < b.y0 && a.y1 > b.y1);
-    a.assertfinite();
-    b.assertfinite();
+    //a.assertfinite();
+    //b.assertfinite();
     a.assert_rising();
     b.assert_flat();
     double y_inter = b.y0;
@@ -34,6 +34,7 @@ inline void lowerHullHelper(segments_small_container& res, double s, double e, c
     //std::cout << "ac: " << ac << " bc: " << bc << "\n";
     assert(ac.y0 <= bc.y0);
     if(ac.y0 < bc.y0 && bc.y1 < ac.y1){
+        //std::cerr << "ac: " << ac << ", bc: " << bc << "\n";
         intersection(res, ac, bc);
         return;
     }

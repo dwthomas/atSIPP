@@ -1,31 +1,15 @@
 #pragma once
-#include "constants.hpp"
 #include <boost/container/flat_set.hpp>
 #include <vector>
 #include <set>
 #include <limits>
 #include <format>
 
+#include "constants.hpp"
+#include "segment.hpp"
+#include <iostream>
+
 struct EdgeATF;
-
-struct ATFSegment{
-    double x0;
-    double x1;
-    double y0;
-    double y1;
-    long parent;
-    ATFSegment() = default;
-    ATFSegment(double b, double e, double s, double a, long p):x0(b),x1(e),y0(s),y1(a),parent(p){}
-
-    inline bool operator<(const ATFSegment& seg) const{
-        return x0 < seg.x0;
-    }
-
-    inline friend std::ostream& operator<< (std::ostream& stream, const ATFSegment& seg){
-        stream << "<" << seg.x0 << "," << seg.x1 << "," << seg.y0 << "," << seg.y1 << ">";
-        return stream;
-    }
-};
 
 struct EdgeATF{
     intervalTime_t zeta;
@@ -73,12 +57,16 @@ struct EdgeATF{
         return stream;
     }
 
-    inline std::pair<ATFSegment, ATFSegment> segments() const{
-        std::pair<ATFSegment, ATFSegment> res;
+    inline segments_small_container segments() const{
+        segments_small_container res;
         double periapsis = arrival_time(alpha);
-        double apoapsis = arrival_time(beta);
-        res.first = ATFSegment(zeta, alpha, periapsis, periapsis, -1);
-        res.second = ATFSegment(alpha, beta, periapsis, apoapsis, -1);
+        double apoapsis = inclusive_arrival_time(beta);
+        if(alpha > zeta){
+            res.emplace_back(zeta, alpha, periapsis, periapsis, -1);
+        }
+        if(beta > alpha){
+            res.emplace_back(alpha, beta, periapsis, apoapsis, -1);
+        }
         return res;
     }
 };
@@ -87,28 +75,101 @@ using EdgeATFList = boost::container::flat_set<EdgeATF>;
 
 struct CompoundATF{
     std::vector<EdgeATF> edge_atfs;
-    std::set<ATFSegment> segments;
+    std::set<Segment> segments;
 
     CompoundATF(){
         edge_atfs.emplace_back(
-            -std::numeric_limits<double>::infinity(),
-            std::numeric_limits<double>::infinity(),
+            0,
+            0,
             std::numeric_limits<double>::infinity(),
             std::numeric_limits<double>::infinity()
         );
         segments.emplace(
-            -std::numeric_limits<double>::infinity(),
-            std::numeric_limits<double>::infinity(),
             0.0,
+            std::numeric_limits<double>::infinity(),
+            std::numeric_limits<double>::infinity(),
             std::numeric_limits<double>::infinity(),
             0);
     }
 
+    inline bool monotonic_non_decreasing() const{
+        if (segments.size() < 2){
+            return true;
+        }
+        bool res = true;
+        auto a = segments.begin();
+        auto b = std::next(a);
+        while(b != segments.end()){
+            res = res && a->y1 <= b->y0; 
+            a = b;
+            b++;
+        }
+        return res;
+    } 
+
+    inline bool bumper_to_bumper() const{
+        if (segments.size() < 2){
+            return true;
+        }
+        bool res = true;
+        auto a = segments.begin();
+        auto b = std::next(a);
+        while(b != segments.end()){
+            res = res && a->x1 == b->x0; 
+            a = b;
+            b++;
+        }
+        return res;
+    }    
+
+    inline void add_segment(const Segment& segment){
+        Segment seg = segment;
+        //std::cerr << "Adding: " << seg << "\n";
+        auto it = segments.lower_bound(segment);
+        while(true){
+            if(!overlap(seg, *it)){
+                segments.emplace_hint(it, seg);
+                break;
+            }
+            auto hull = lowerHull(*it, seg);
+            //std::cerr << "lowerhull: " << *it << ", " << seg << " is: ";
+            //for(int i = 0; i < hull.size(); i++){
+            //    std::cerr << hull[i] << ", ";
+            //}
+            //std::cerr << "\n";
+            seg = hull[0];
+            //std::cerr << "deleting: " << *it << "\n";
+            it = segments.erase(it);
+            for(int i = hull.size()-1; i > 0; i--){
+                //std::cerr << "placing: " << hull[i] << "\n";
+                it = segments.emplace_hint(it, hull[i]);
+            }
+            it = std::prev(it);
+            if(it == segments.begin()){
+                //std::cerr << "placing: " << seg << "\n";
+                segments.emplace_hint(it, seg);
+                break;
+            }
+        }        
+    }
+
     inline void add(const EdgeATF& e){
+        //std::cerr << "atf: " << e << "\n";
         edge_atfs.emplace_back(e);
         auto segments = e.segments();
-        segments.first.parent = edge_atfs.size()-1;
-        segments.second.parent = edge_atfs.size()-1;
-        (void)segments;
+        for(auto segment: segments){
+            segment.payload = edge_atfs.size()-1;
+            add_segment(segment);
+        }
+        //std::cerr << "cATF: "<< *this << "\n";
+        assert(bumper_to_bumper());
+        assert(monotonic_non_decreasing());
+    }
+
+    inline friend std::ostream& operator<< (std::ostream& stream, const CompoundATF& catf){
+        for(const auto& segment : catf.segments){
+            stream << segment << ", ";
+        }
+        return stream;
     }
 };

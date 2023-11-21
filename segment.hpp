@@ -6,6 +6,7 @@
 #include <ostream>
 #include <array>
 #include <cassert>
+#include <iostream>
 #include <boost/container/small_vector.hpp>
 
 struct Segment{
@@ -16,8 +17,9 @@ struct Segment{
     long payload;
     Segment() = default;
     Segment(double b, double e, double s, double a, long p):x0(b),x1(e),y0(s),y1(a),payload(p){
+        //std::cerr << "this: " << *this << "\n";
         assert(x0 < x1);
-        assert(y0 <= y1 || (!std::isfinite(y0) && !std::isfinite(y1)));
+        assert(y0 <= y1 || (!std::isfinite(y0)));
     }
 
     inline void assertfinite() const{
@@ -56,6 +58,7 @@ struct Segment{
     }
 
     inline double y_exc(double x) const{
+        //std::cerr << *this << " x: " << x << "\n";
         if(x <= x0 || x >= x1){
             return std::numeric_limits<double>::infinity();
         }
@@ -86,12 +89,13 @@ struct Segment{
         else{
             y1 = y_exc(e);
         }
+        //std::cerr << "y1: " << y1 << "\n";
         return Segment(s, e, y0, y1, payload);
     }
 
 
     inline bool operator<(const Segment& seg) const{
-        return x0 < seg.x0;
+        return x1 < seg.x1;
     }
 
     inline bool operator==(const Segment& seg) const{
@@ -104,5 +108,5 @@ struct Segment{
     }
 };
 using segments_small_container = boost::container::small_vector<Segment, 4>;
-
+bool overlap(const Segment& left, const Segment& right);
 segments_small_container lowerHull(const Segment& a, const Segment& b);

@@ -12,4 +12,9 @@ executable('lhtest',
             ['lhtest.cpp', 'segment.cpp'],
             install: true,
             dependencies : [boost_dep,],
-)
+            )
+executable('atftest',
+            ['atftest.cpp', 'segment.cpp'],
+            install: true,
+            dependencies : [boost_dep,],
+            )
