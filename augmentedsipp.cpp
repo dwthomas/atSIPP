@@ -59,6 +59,7 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
         cur = open_list.parent[cur];
     }
     std::reverse(res.begin(), res.end());
+    std::cout << "Arrival time: " << n.f << "\n";
     return res;
 }
 
@@ -69,7 +70,7 @@ std::pair<std::vector<GraphNode *>, EdgeATF> asipp::search(GraphNode * source, c
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
-        std::cout << "Current " << cur << "\n";
+        //std::cout << "Current " << cur << "\n";
         if(isGoal(cur, dest)){
             return std::make_pair(backup(cur, open_list), cur.g);
         }

@@ -94,15 +94,16 @@ Graph read_graph(std::string filename, double agentSpeed, double walkingSpeed){
     return g;
 }
 
-GraphNode *  find_earliest(Graph& g, Location loc){
+GraphNode *  find_earliest(Graph& g, Location loc, double start_time){
     GraphNode * cur = nullptr;
     for (auto& node: g.nodes){
-        if ((cur == nullptr || begin(cur->state.interval) > begin(node.first.interval)) && loc == node.first.loc){
+        if (loc == node.first.loc && contains(node.first.interval, start_time) && (cur == nullptr || begin(cur->state.interval) > begin(node.first.interval))){
             cur = node.second;
         }
     }
     if(cur == nullptr){
-        std::cerr << "Unable to find starting vertex\n";
+        std::cerr << "Error: unable to find safe starting state: tried to find ";
+        std::cerr << loc << " at time t=" << start_time << "\n";
         exit(-1);
     }
     return cur;

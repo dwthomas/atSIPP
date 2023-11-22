@@ -60,7 +60,7 @@ namespace sipp{
 
         inline void decrease_key(handle_t handle ,double g, double h, GraphNode * n, GraphNode * p){
             parent[n] = p;
-            queue.decrease(handle, Node(g, h, n));
+            queue.increase(handle, Node(g, h, n));
         }
     };
 

@@ -51,6 +51,7 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
         cur = open_list.parent[cur];
     }
     std::reverse(res.begin(), res.end());
+    std::cout << "Arrival time: " << n.f << "\n";
     return res;
 }
 
@@ -61,7 +62,7 @@ std::vector<GraphNode *> sipp::search(GraphNode * source, const Location& dest, 
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
-        std::cout << "Current " << cur << "\n";
+        //std::cout << "Current " << cur << "\n";
         if(isGoal(cur, dest)){
             return backup(cur, open_list);
         }
