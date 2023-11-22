@@ -4,6 +4,7 @@
 #include <boost/program_options.hpp>
 #include "sipp.hpp"
 #include "augmentedsipp.hpp"
+#include "repeat.hpp"
 #include "structs.hpp"
 #include "graph.hpp"
 
@@ -56,6 +57,17 @@ int main(int argc, char* argv[]) {
                     std::cout << *n << "\n";
                 }
                 std::cout << res.second << "\n";
+                std::cout << m << "\n";
+            }
+            else if(vm["search"].as<std::string>() == "repeat"){
+                MetaData m;
+                rePEAT::search(source, goal_loc, m, start_time);
+                /*
+                for(auto n: res.first){
+                    std::cout << *n << "\n";
+                }
+                std::cout << res.second << "\n";
+                */
                 std::cout << m << "\n";
             }
 
