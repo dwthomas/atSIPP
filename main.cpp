@@ -38,10 +38,11 @@ int main(int argc, char* argv[]) {
             std::cerr << "Reading graph\n";
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
             std::cerr << g << "\n";
-            GraphNode * source = find_earliest(g,source_loc);
+            g.dump();
+            double start_time = vm["startTime"].as<double>();
+            GraphNode * source = find_earliest(g, source_loc, start_time);
             if(vm["search"].as<std::string>() == "sipp"){
                 MetaData m;
-                double start_time = vm["startTime"].as<double>();
                 auto res = sipp::search(source, goal_loc, m, start_time);
                 for(auto n: res){
                     std::cout << *n << "\n";
@@ -50,7 +51,6 @@ int main(int argc, char* argv[]) {
             }
             else if(vm["search"].as<std::string>() == "asipp"){
                 MetaData m;
-                double start_time = vm["startTime"].as<double>();
                 auto res = asipp::search(source, goal_loc, m, start_time);
                 for(auto n: res.first){
                     std::cout << *n << "\n";

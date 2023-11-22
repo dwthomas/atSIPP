@@ -9,6 +9,7 @@ struct inATF{
     long source;
     long dest;
     EdgeATF eATF;
+    inATF(long s, long d, EdgeATF e):source(s),dest(d),eATF(e){}
 };
 
 void read_ATF(std::istream& i, std::vector<inATF>& res){
@@ -74,23 +75,24 @@ Graph read_graph(std::string filename){
         g.edges.back().source = &g.node_array[entry.source];
         g.edges.back().destination = &g.node_array[entry.dest];
         g.node_array[entry.source].successors.emplace_hint(g.node_array[entry.source].successors.end(), &g.edges.back());
-        g.edges.emplace_back(entry.eATF);
-        g.edges.back().source = &g.node_array[entry.dest];
-        g.edges.back().destination = &g.node_array[entry.source];
-        g.node_array[entry.dest].successors.emplace_hint(g.node_array[entry.dest].successors.end(), &g.edges.back());
+        //g.edges.emplace_back(entry.eATF);
+        //g.edges.back().source = &g.node_array[entry.dest];
+        //g.edges.back().destination = &g.node_array[entry.source];
+        //g.node_array[entry.dest].successors.emplace_hint(g.node_array[entry.dest].successors.end(), &g.edges.back());
     }
     return g;
 }
 
-GraphNode *  find_earliest(Graph& g, Location loc){
+GraphNode *  find_earliest(Graph& g, Location loc, double start_time){
     GraphNode * cur = nullptr;
     for (auto& node: g.nodes){
-        if ((cur == nullptr || begin(cur->state.interval) > begin(node.first.interval)) && loc == node.first.loc){
+        if (loc == node.first.loc && contains(node.first.interval, start_time) && (cur == nullptr || begin(cur->state.interval) > begin(node.first.interval))){
             cur = node.second;
         }
     }
     if(cur == nullptr){
-        std::cerr << "Unable to find starting vertex\n";
+        std::cerr << "Error: unable to find safe starting state: tried to find ";
+        std::cerr << loc << " at time t=" << start_time << "\n";
         exit(-1);
     }
     return cur;

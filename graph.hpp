@@ -70,5 +70,5 @@ struct Graph{
 };
 
 Graph read_graph(std::string filename);
-GraphNode * find_earliest(Graph& g, Location loc);
+GraphNode * find_earliest(Graph& g, Location loc, double start_time);
 

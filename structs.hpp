@@ -11,16 +11,16 @@
 
 using SafeInterval = std::pair<intervalTime_t, intervalTime_t>;
 
-inline bool contains(const SafeInterval& si, intervalTime_t t){
-    return si.first <= t && t < si.second;
-}
-
 inline intervalTime_t begin(const SafeInterval& si){
     return si.second;
 }
 
 inline intervalTime_t end(const SafeInterval& si){
     return si.first;
+}
+
+inline bool contains(const SafeInterval& si, intervalTime_t t){
+    return begin(si) <= t && t < end(si);
 }
 
 inline bool overlap(const SafeInterval& left, const SafeInterval& right){

@@ -37,16 +37,18 @@ void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData
             m.generated++;
             double h = eightWayDistance(successor->destination->state.loc, goal_loc);
             open_list.emplace(arrival_time_function, h, successor->destination, successor->source);
+            std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
         }
     }
 }
 
 void dump_open(const Open& open_list){
-    Queue open_list_copy(open_list.queue);
+    Queue::ordered_iterator cur = open_list.queue.ordered_begin();
+    Queue::ordered_iterator end = open_list.queue.ordered_end();
     std::cerr << "Open:";
-    while(!open_list_copy.empty()){
-        std::cerr << "\t" << open_list_copy.top() << "\n";
-        open_list_copy.pop();
+    while(cur != end){
+        std::cerr << "\t" << *cur << "\n";
+        cur = std::next(cur);
     }
 }
 
@@ -58,6 +60,7 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
         cur = open_list.parent[cur];
     }
     std::reverse(res.begin(), res.end());
+    std::cout << "Arrival time: " << n.f << "\n";
     return res;
 }
 
@@ -66,7 +69,7 @@ std::pair<std::vector<GraphNode *>, EdgeATF> asipp::search(GraphNode * source, c
     m.init();
     open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), start_time, std::numeric_limits<double>::infinity(), 0.0), eightWayDistance(dest, source->state.loc), source, nullptr);
     while(!open_list.empty()){
-        //dump_open(open_list);
+        dump_open(open_list);
         Node cur = open_list.top();
         //std::cout << *cur.node << "\n";
         if(isGoal(cur, dest)){
