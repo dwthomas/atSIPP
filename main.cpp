@@ -40,9 +40,10 @@ int main(int argc, char* argv[]) {
             double agentSpeed(vm["agentSpeed"].as<double>());
             std::cerr << "Reading graph\n";
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string(), agentSpeed, walkingSpeed);
-            std::cerr << g << "\n";
+            // std::cerr << g << "\n";
             // g.dump();
-            GraphNode * source = find_earliest(g,source_loc);
+            double start_time = vm["startTime"].as<double>();
+            GraphNode * source = find_earliest(g, source_loc, start_time);
             if(vm["search"].as<std::string>() == "sipp"){
                 MetaData m;
                 auto res = sipp::search(source, goal_loc, m, start_time);
