@@ -112,7 +112,7 @@ namespace asipp{
                 m.generated++;
                 double h = eightWayDistance(successor->destination->state.loc, goal_loc);
                 open_list.emplace(arrival_time_function, h, successor->destination, successor->source);
-                std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
+                //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
             }
         }
     }
@@ -130,7 +130,7 @@ namespace asipp{
     template<typename Open_t>
     inline std::pair<std::vector<GraphNode *>, EdgeATF> search_core(Open_t& open_list, const Location& dest, MetaData & m){
         while(!open_list.empty()){
-            dump_open(open_list);
+            //dump_open(open_list);
             auto cur = open_list.top();
             //std::cout << *cur.node << "\n";
             if(isGoal(cur, dest)){

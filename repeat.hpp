@@ -68,6 +68,6 @@ namespace rePEAT{
         }
     };
 
-   void search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);
+   CompoundATF<std::vector<GraphNode *>> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);
 }
 

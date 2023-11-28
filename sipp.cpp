@@ -33,7 +33,7 @@ void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData
             m.generated++;
             double h = eightWayDistance(successor->destination->state.loc, goal_loc);
             open_list.emplace(arrival_time, h, successor->destination, successor->source);
-            std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
+            //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
         }
     }
 }

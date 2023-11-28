@@ -73,17 +73,20 @@ struct EdgeATF{
 
 using EdgeATFList = boost::container::flat_set<EdgeATF>;
 
+template <typename T>
 struct CompoundATF{
     std::vector<EdgeATF> edge_atfs;
+    std::vector<T> payload;
     std::set<Segment> segments;
 
-    CompoundATF(){
+    CompoundATF(const T& init){
         edge_atfs.emplace_back(
             0,
             0,
             std::numeric_limits<double>::infinity(),
             std::numeric_limits<double>::infinity()
         );
+        payload.emplace_back(init);
         segments.emplace(
             0.0,
             std::numeric_limits<double>::infinity(),
@@ -153,9 +156,10 @@ struct CompoundATF{
         }        
     }
 
-    inline void add(const EdgeATF& e){
+    inline void add(const EdgeATF& e, const T& p){
         //std::cerr << "atf: " << e << "\n";
         edge_atfs.emplace_back(e);
+        payload.emplace_back(p);
         auto segments = e.segments();
         for(auto segment: segments){
             segment.payload = edge_atfs.size()-1;
@@ -169,6 +173,13 @@ struct CompoundATF{
     inline friend std::ostream& operator<< (std::ostream& stream, const CompoundATF& catf){
         for(const auto& segment : catf.segments){
             stream << segment << ", ";
+        }
+        stream << "\n";
+        for(const auto& segment : catf.segments){
+            for (auto j : catf.payload[segment.payload]){
+                stream << *j << "\n";
+            }
+            stream << catf.edge_atfs[segment.payload] << "\n";
         }
         return stream;
     }
