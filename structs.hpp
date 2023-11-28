@@ -94,7 +94,7 @@ struct MetaData{
         decreased = 0;
     }
     inline friend std::ostream& operator<< (std::ostream& stream, const MetaData& m){
-        stream << "Nodes generated: " << m.generated << " Nodes decreased: " << m.decreased << " Nodes expanded: " << m.expanded << "\n"; 
+        stream << "Nodes generated: " << m.generated << " Nodes decreased: " << m.decreased << " Nodes expanded: " << m.expanded; 
         return stream;
     }
 };

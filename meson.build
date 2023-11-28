@@ -4,7 +4,7 @@ project('gridbenchmark2sipp', 'cpp',
 boost_dep = dependency('boost', static:true, modules : ['program_options', 'random', 'iostreams'])
 zdep = dependency('zlib', static:true)
 executable('atsipp',
-           ['main.cpp', 'graph.cpp', 'sipp.cpp', 'augmentedsipp.cpp'],
+           ['main.cpp', 'graph.cpp', 'sipp.cpp', 'augmentedsipp.cpp', 'repeat.cpp', 'segment.cpp'],
            install : true,
            dependencies : [boost_dep, zdep],
            )
@@ -13,3 +13,8 @@ executable('lhtest',
             install: true,
             dependencies : [boost_dep,],
 )
+executable('atftest',
+            ['atftest.cpp', 'segment.cpp'],
+            install: true,
+            dependencies : [boost_dep,],
+            )
