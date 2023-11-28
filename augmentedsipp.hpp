@@ -104,13 +104,13 @@ namespace asipp{
                 auto handle = open_list.handles[successor->destination];
                 if(arrival_time_function.earliest_arrival_time() < (*handle).g.earliest_arrival_time()){
                     m.decreased++;
-                    double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                    double h = 0;
                     open_list.decrease_key(handle ,arrival_time_function, h, successor->destination, successor->source);
                 }
             }
             else{
                 m.generated++;
-                double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                double h = 0;
                 open_list.emplace(arrival_time_function, h, successor->destination, successor->source);
                 //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
             }
