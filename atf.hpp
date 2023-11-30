@@ -147,16 +147,16 @@ struct CompoundATF{
                 //std::cerr << "placing: " << hull[i] << "\n";
                 it = segments.emplace_hint(it, hull[i]);
             }
-            std::cout << "getting previous " << *it << "\n";
+            //std::cout << "getting previous " << *it << "\n";
             if (it == segments.begin()) {
-                std::cerr << "Already at begin of iterator.\n";
-                std::cerr << "placing: " << seg << " (segment)\n";
+                //std::cerr << "Already at begin of iterator.\n";
+                //std::cerr << "placing: " << seg << " (segment)\n";
                 segments.emplace_hint(it, seg);
                 break;
             }
             it = std::prev(it);
             if(it == segments.begin()){
-                std::cerr << "placing: " << seg << " (segment)\n";
+                //std::cerr << "placing: " << seg << " (segment)\n";
                 segments.emplace_hint(it, seg);
                 break;
             }
