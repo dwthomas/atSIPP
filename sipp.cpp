@@ -44,6 +44,7 @@ void dump_open(const Open& open_list){
 }
 
 std::vector<GraphNode *> backup(const Node& n, Open& open_list){
+    auto lookup_start_time = std::chrono::high_resolution_clock::now();
     std::vector<GraphNode *> res;
     GraphNode* cur = n.node;
     while(cur != nullptr){
@@ -51,6 +52,9 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
         cur = open_list.parent[cur];
     }
     std::reverse(res.begin(), res.end());
+    auto lookup_time = std::chrono::high_resolution_clock::now();
+    auto lookup_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(lookup_time - lookup_start_time);
+    std::cout << "Lookup time: 0.00000000" << lookup_duration.count() << " seconds\n";
     std::cout << "Arrival time: " << n.f << "\n";
     return res;
 }
