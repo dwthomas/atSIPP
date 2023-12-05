@@ -64,15 +64,6 @@ int main(int argc, char* argv[]) {
             else if(vm["search"].as<std::string>() == "repeat"){
                 MetaData m;
                 auto res = rePEAT::search(source, goal_loc, m, start_time);
-<<<<<<< HEAD
-                /*
-                for(auto n: res.first){
-                    std::cout << *n << "\n";
-                }
-                std::cout << res.second << "\n";
-                */
-=======
->>>>>>> 4f9aa6d (cpp - repeat pulled in from main)
                 std::cout << m << "\n";
                 std::cout << res;
             }
