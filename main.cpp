@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
                     std::cout << *n << "\n";
                 }
                 std::cout << m << "\n";
-                std::cout << "Search time: 0.00000000" << search_duration.count() << " seconds\n";
+                std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
             }
             else if(vm["search"].as<std::string>() == "asipp"){
                 MetaData m;
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
                 }
                 std::cout << res.second << "\n";
                 std::cout << m << "\n";
-                std::cout << "Search time: 0.00000000" << search_duration.count() << " seconds\n";
+                std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
             }
             else if(vm["search"].as<std::string>() == "repeat"){
                 MetaData m;
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
                 auto search_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(search_time - search_start_time);                
                 std::cout << m << "\n";
                 std::cout << res;
-                std::cout << "Search time: 0.00000000" << search_duration.count() << " seconds\n";
+                std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
             }
 
         }
