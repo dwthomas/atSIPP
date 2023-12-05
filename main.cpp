@@ -11,6 +11,8 @@
 
 namespace po = boost::program_options;
 
+
+
 int main(int argc, char* argv[]) {
     try{
         // Declare options
@@ -25,6 +27,7 @@ int main(int argc, char* argv[]) {
         ("startTime,t", po::value<double>()->default_value(0.0), "Start Time of search.")
         ("agentSpeed,a", po::value<double>()->default_value(15.0), "Traveling speed of the agent.")
         ("walkingSpeed,w", po::value<double>()->default_value(1.0), "Walking speed for reversing train.")
+        ("lookups,l", po::value<long>()->default_value(100), "Number of lookups to test repeat")
         ;
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -78,6 +81,12 @@ int main(int argc, char* argv[]) {
                 std::cout << m << "\n";
                 std::cout << res;
                 std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
+                auto c = res.time_lookup(vm["lookups"].as<long>());
+                double acc = 0.0;
+                for (auto i : c){
+                    acc += i;
+                }
+                std::cerr << acc << " " << c.size() << "\n";
             }
 
         }

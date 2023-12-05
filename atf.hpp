@@ -1,10 +1,12 @@
 #pragma once
 #include <boost/container/flat_set.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
 #include <vector>
 #include <set>
 #include <limits>
 #include <format>
-
+#include <chrono>
 #include "constants.hpp"
 #include "segment.hpp"
 #include <iostream>
@@ -175,6 +177,37 @@ struct CompoundATF{
         //std::cerr << "cATF: "<< *this << "\n";
         assert(bumper_to_bumper());
         assert(monotonic_non_decreasing());
+    }
+
+    inline EdgeATF lookup(double t) const{
+        //std::cerr << "t: " << t << "\n";
+        Segment ti(t-1.0,t,0,0,0); // only x1 matters for ordering
+        auto it = segments.lower_bound(ti);
+        return edge_atfs[it->payload];
+    }
+
+    inline std::vector<double> time_lookup(std::size_t n) const{
+        std::vector<double> nums;
+        std::vector<Segment> seg_vec(segments.begin(), segments.end());
+        nums.reserve(n);
+        boost::random::mt19937 gen;
+        boost::random::uniform_int_distribution<> dist(0, seg_vec.size()-1);
+        for(std::size_t i = 0; i < n; i++){
+            auto j = dist(gen);
+            while(!std::isfinite(seg_vec[j].x1 - seg_vec[j].x0)){
+                j = dist(gen);
+            }
+            nums.emplace_back(0.5*(seg_vec[j].x1 - seg_vec[j].x0));
+        }
+        auto lookup_start_time = std::chrono::high_resolution_clock::now();
+        for(std::size_t i = 0; i < nums.size(); i++){
+            auto res = lookup(nums[i]);
+            nums[i] = res.earliest_arrival_time();
+        }
+        auto lookup_end_time = std::chrono::high_resolution_clock::now();
+        auto lookup_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(lookup_end_time - lookup_start_time);
+        std::cout << "Total (n=" << n << ") Lookup time: " << lookup_duration.count() << " nanoseconds\n";
+        return nums;
     }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const CompoundATF& catf){

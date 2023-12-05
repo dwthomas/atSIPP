@@ -136,11 +136,11 @@ namespace asipp{
             auto cur = open_list.top();
             //std::cout << *cur.node << "\n";
             if(isGoal(cur, dest)){
-                auto lookup_start_time = std::chrono::high_resolution_clock::now();
+                //auto lookup_start_time = std::chrono::high_resolution_clock::now();
                 auto res = std::make_pair(backup(cur, open_list), cur.g);
-                auto lookup_time = std::chrono::high_resolution_clock::now();
-                auto lookup_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(lookup_time - lookup_start_time);
-                std::cout << "Lookup time: " << lookup_duration.count() << " nanoseconds\n";
+                //auto lookup_time = std::chrono::high_resolution_clock::now();
+                //auto lookup_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(lookup_time - lookup_start_time);
+                //std::cout << "Lookup time: " << lookup_duration.count() << " nanoseconds\n";
                 return res;             
             }
             open_list.pop();
