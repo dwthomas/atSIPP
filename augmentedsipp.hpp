@@ -138,7 +138,7 @@ namespace asipp{
                 auto res = std::make_pair(backup(cur, open_list), cur.g);
                 auto lookup_time = std::chrono::high_resolution_clock::now();
                 auto lookup_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(lookup_time - lookup_start_time);
-                std::cout << "Lookup time: 0.00000000" << lookup_duration.count() << " seconds\n";
+                std::cout << "Lookup time: " << lookup_duration.count() << " nanoseconds\n";
                 return res;             
             }
             open_list.pop();

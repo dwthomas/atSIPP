@@ -60,7 +60,7 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
     std::reverse(res.begin(), res.end());
     auto lookup_time = std::chrono::high_resolution_clock::now();
     auto lookup_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(lookup_time - lookup_start_time);
-    std::cout << "Lookup time: 0.00000000" << lookup_duration.count() << " seconds\n";
+    std::cout << "Lookup time: " << lookup_duration.count() << " nanoseconds\n";
     std::cout << "Arrival time: " << n.f << "\n";
     return res;
 }
