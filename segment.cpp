@@ -5,7 +5,7 @@
 bool overlap(const Segment& left, const Segment& right){
     auto earliest = std::min(left.x0, right.x0);
     auto latest = std::max(left.x1, right.x1);
-    return latest - earliest <= left.x1 - left.x0 + right.x1 - right.x0;
+    return latest - earliest <= left.x1 - left.x0 + right.x1 - right.x0 || left.x1 == right.x0;
 }
 
 inline void intersection(segments_small_container& res, const Segment& a, const Segment& b){
