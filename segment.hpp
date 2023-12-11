@@ -17,7 +17,7 @@ struct Segment{
     long payload;
     Segment() = default;
     Segment(double b, double e, double s, double a, long p):x0(b),x1(e),y0(s),y1(a),payload(p){
-        //std::cerr << "this: " << *this << "\n";
+        std::cerr << "this: " << *this << "\n";
         assert(x0 < x1);
         assert(y0 <= y1 || (!std::isfinite(y0)));
     }
@@ -54,7 +54,7 @@ struct Segment{
         if(x == x1){
             return y1;
         }
-        return y0 + (x - x0)*(y1 - y0)/(x1 - x0);
+        return y0 + (x - x0);//*(y1 - y0)/(x1 - x0);
     }
 
     inline double y_exc(double x) const{
@@ -72,7 +72,7 @@ struct Segment{
         if(x == x1){
             return y1;
         }
-        return y0 + (x - x0)*(y1 - y0)/(x1 - x0);
+        return y0 + (x - x0); //*(y1 - y0)/(x1 - x0);
     }
 
     inline Segment constrain(double s, double e) const{
@@ -89,7 +89,8 @@ struct Segment{
         else{
             y1 = y_exc(e);
         }
-        //std::cerr << "y1: " << y1 << "\n";
+        std::cerr << *this << " " << s << " "<< e << "\n";
+        std::cerr << "y1: " << y1 << "\n";
         return Segment(s, e, y0, y1, payload);
     }
 

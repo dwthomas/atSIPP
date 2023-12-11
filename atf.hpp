@@ -147,25 +147,38 @@ struct CompoundATF{
 
     inline void add_segment(const Segment& segment){
         Segment seg = segment;
-        //std::cerr << "Adding: " << seg << "\n";
+        std::cerr << "Adding: " << seg << "\n";
         auto it = segments.lower_bound(segment);
         while(true){
+            std::cerr << "seg: " << seg << " it:" << *it << " "<<"\n";
             if(!overlap(seg, *it)){
                 segments.emplace_hint(it, seg);
                 break;
             }
             auto hull = lowerHull(*it, seg);
-            //std::cerr << "lowerhull: " << *it << ", " << seg << " is: ";
-            //for(int i = 0; i < hull.size(); i++){
-            //    std::cerr << hull[i] << ", ";
-            //}
-            //std::cerr << "\n";
+            std::cerr << "lowerhull: " << *it << ", " << seg << " is: ";
+            for(int i = 0; i < hull.size(); i++){
+               std::cerr << hull[i] << ", ";
+            }
+            std::cerr << "\n";
             seg = hull[0];
             //std::cerr << "deleting: " << *it << "\n";
-            it = segments.erase(it);
+            if (it == segments.begin()){
+                segments.erase(it);
+                it = segments.begin();
+            }
+            else{
+                it = segments.erase(it);
+            }
             for(int i = hull.size()-1; i > 0; i--){
                 //std::cerr << "placing: " << hull[i] << "\n";
                 it = segments.emplace_hint(it, hull[i]);
+            }
+            //std::cerr << "it pre prev" << *it << "\n";
+            if(it == segments.begin()){
+                //std::cerr << "placing: " << seg << "\n";
+                segments.emplace_hint(it, seg);
+                break;
             }
             it = std::prev(it);
             if(it == segments.begin()){
@@ -207,9 +220,9 @@ struct CompoundATF{
         }
         stream << "\n";
         for(const auto& segment : catf.segments){
-            for (auto j : catf.payload[segment.payload]){
-                stream << *j << "\n";
-            }
+            //for (auto j : catf.payload[segment.payload]){
+            //    stream << *j << "\n";
+            //}
             stream << catf.edge_atfs[segment.payload] << "\n";
         }
         return stream;
