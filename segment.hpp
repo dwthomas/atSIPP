@@ -5,6 +5,7 @@
 #include <limits>
 #include <ostream>
 #include <array>
+#include <format>
 #include <cassert>
 #include <iostream>
 #include <boost/container/small_vector.hpp>
@@ -103,7 +104,7 @@ struct Segment{
     }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const Segment& seg){
-        stream << "<" << seg.x0 << "," << seg.x1 << "," << seg.y0 << "," << seg.y1 << ">";
+        stream << "<" << std::format("{}", seg.x0) << "," << std::format("{}", seg.x1) << "," << std::format("{}", seg.y0) << "," << std::format("{}", seg.y1) << ">";
         return stream;
     }
 };
