@@ -65,7 +65,7 @@ std::vector<GraphNode *> sipp::search(GraphNode * source, const Location& dest, 
     m.init();
     open_list.emplace(start_time, eightWayDistance(dest, source->state.loc), source, nullptr);
     while(!open_list.empty()){
-        dump_open(open_list);
+        //dump_open(open_list);
         Node cur = open_list.top();
         //std::cout << *cur.node << "\n";
         if(isGoal(cur, dest)){
