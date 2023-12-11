@@ -136,11 +136,12 @@ namespace asipp{
     }
     template<typename Open_t>
     inline std::pair<std::vector<GraphNode *>, EdgeATF> search_core(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
+        long start_expansions = m.expanded;
         while(!open_list.empty()){
             //dump_open(open_list);
             auto cur = open_list.top();
             //std::cout << *cur.node << "\n";
-            if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded >= expansion_budget)){
+            if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions > expansion_budget)){
                 return std::make_pair(backup(cur, open_list), cur.g);
             }
             open_list.pop();

@@ -71,6 +71,10 @@ struct EdgeATF{
     }
 };
 
+inline EdgeATF shiftIdentity(double x){
+    return EdgeATF(-std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), x);
+}
+
 using EdgeATFList = boost::container::flat_set<EdgeATF>;
 
 template <typename T>
@@ -78,6 +82,22 @@ struct CompoundATF{
     std::vector<EdgeATF> edge_atfs;
     std::vector<T> payload;
     std::set<Segment> segments;
+
+    CompoundATF(){
+        edge_atfs.emplace_back(
+            0,
+            0,
+            std::numeric_limits<double>::infinity(),
+            std::numeric_limits<double>::infinity()
+        );
+        payload.emplace_back(T());
+        segments.emplace(
+            0.0,
+            std::numeric_limits<double>::infinity(),
+            std::numeric_limits<double>::infinity(),
+            std::numeric_limits<double>::infinity(),
+            0);
+    }
 
     CompoundATF(const T& init){
         edge_atfs.emplace_back(
@@ -168,6 +188,17 @@ struct CompoundATF{
         //std::cerr << "cATF: "<< *this << "\n";
         assert(bumper_to_bumper());
         assert(monotonic_non_decreasing());
+    }
+
+    inline long at(double t) const{
+        Segment ref(-std::numeric_limits<double>::infinity(), t, 0, 0, 0);
+        auto it = segments.lower_bound(ref);
+        return it->payload;
+    }
+
+    inline double arrival_time(double t) const{
+        auto ind = at(t);
+        return edge_atfs[ind].arrival_time(t);
     }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const CompoundATF& catf){

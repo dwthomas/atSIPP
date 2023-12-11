@@ -5,6 +5,7 @@
 #include "sipp.hpp"
 #include "augmentedsipp.hpp"
 #include "repeat.hpp"
+#include "rtasipp.hpp"
 #include "structs.hpp"
 #include "graph.hpp"
 
@@ -24,6 +25,7 @@ int main(int argc, char* argv[]) {
         ("edgegraph,g", po::value<std::filesystem::path>(),"gzip'd file containing the edge arrival time functions.")
         ("search,s", po::value<std::string>(), "Search algorithm to use")
         ("startTime,t", po::value<double>()->default_value(0.0), "Start Time of search.")
+        ("budget,b", po::value<long>()->default_value(1), "Search budget in num of expansions")
         ;
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -71,7 +73,15 @@ int main(int argc, char* argv[]) {
                 std::cout << m << "\n";
                 std::cout << res;
             }
-
+            else if(vm["search"].as<std::string>() == "rtasipp"){
+                MetaData m;
+                long budget = vm["budget"].as<long>();
+                auto res = rtasipp::search(source, goal_loc, m, budget, start_time);
+                for(auto n: res){
+                    std::cout << *n << "\n";
+                }
+                std::cout << m << "\n";
+            }
         }
         else{
             std::cout << desc << std::endl;
