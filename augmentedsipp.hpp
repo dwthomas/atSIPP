@@ -7,6 +7,11 @@
 namespace asipp{
     struct Node;
 
+    double constexpr h_eight_way_helper(const GraphNode& cur, double cur_t, const Location& dest){
+        (void) cur_t;
+        return eightWayDistance(cur.state.loc, dest);
+    }
+
     struct Node{
         EdgeATF g;
         double f;
@@ -86,7 +91,7 @@ namespace asipp{
     }
 
     template <typename Node_t, typename Open_t>
-    inline void expand(const Node_t& cur, Open_t& open_list, const Location& goal_loc, MetaData & m){
+    inline void expand(const Node_t& cur, Open_t& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
         m.expanded++;
         double zeta = cur.g.zeta;
         for(GraphEdge * successor: cur.node->successors){
@@ -104,13 +109,15 @@ namespace asipp{
                 auto handle = open_list.handles[successor->destination];
                 if(arrival_time_function.earliest_arrival_time() < (*handle).g.earliest_arrival_time()){
                     m.decreased++;
-                    double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                    double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
+                    //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
                     open_list.decrease_key(handle ,arrival_time_function, h, successor->destination, successor->source);
                 }
             }
             else{
                 m.generated++;
-                double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
+                //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
                 open_list.emplace(arrival_time_function, h, successor->destination, successor->source);
                 //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
             }
@@ -128,7 +135,7 @@ namespace asipp{
         }
     }
     template<typename Open_t>
-    inline std::pair<std::vector<GraphNode *>, EdgeATF> search_core(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1){
+    inline std::pair<std::vector<GraphNode *>, EdgeATF> search_core(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
         while(!open_list.empty()){
             //dump_open(open_list);
             auto cur = open_list.top();
@@ -137,12 +144,14 @@ namespace asipp{
                 return std::make_pair(backup(cur, open_list), cur.g);
             }
             open_list.pop();
-            expand(cur, open_list, dest, m);
+            expand(cur, open_list, dest, m, hf);
         }
         std::cerr << "Failed to find path\n";
         exit(-1);
     }
 
-   std::pair<std::vector<GraphNode *>, EdgeATF> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0, long expansion_budget = -1);
+
+
+    std::pair<std::vector<GraphNode *>, EdgeATF> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper);
 }
 
