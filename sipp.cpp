@@ -34,14 +34,16 @@ void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData
     }
 }
 
-void dump_open(const Open& open_list){
-    Queue open_list_copy(open_list.queue);
-    std::cerr << "Open:";
-    while(!open_list_copy.empty()){
-        std::cerr << "\t" << open_list_copy.top() << "\n";
-        open_list_copy.pop();
+   template<typename Open_t>
+    inline void dump_open(const Open_t& open_list){
+        auto cur = open_list.queue.ordered_begin();
+        auto end = open_list.queue.ordered_end();
+        std::cerr << "Open:";
+        while(cur != end){
+            std::cerr << "\t" << *cur << "\n";
+            cur = std::next(cur);
+        }
     }
-}
 
 std::vector<GraphNode *> backup(const Node& n, Open& open_list){
     //auto lookup_start_time = std::chrono::high_resolution_clock::now();
@@ -66,7 +68,7 @@ std::vector<GraphNode *> sipp::search(GraphNode * source, const Location& dest, 
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
-        //std::cout << "Current " << cur << "\n";
+        //std::cout << "Current " << cur << " " << open_list.queue.size() << "\n";
         if(isGoal(cur, dest)){
             return backup(cur, open_list);
         }

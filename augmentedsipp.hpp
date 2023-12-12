@@ -134,7 +134,8 @@ namespace asipp{
         while(!open_list.empty()){
             //dump_open(open_list);
             auto cur = open_list.top();
-            //std::cout << *cur.node << "\n";
+            //std::cout << "Current " << cur << " " << open_list.queue.size() << "\n";
+
             if(isGoal(cur, dest)){
                 //auto lookup_start_time = std::chrono::high_resolution_clock::now();
                 auto res = std::make_pair(backup(cur, open_list), cur.g);
