@@ -147,20 +147,20 @@ struct CompoundATF{
 
     inline void add_segment(const Segment& segment){
         Segment seg = segment;
-        std::cerr << "Adding: " << seg << "\n";
+        //std::cerr << "Adding: " << seg << "\n";
         auto it = segments.lower_bound(segment);
         while(true){
-            std::cerr << "seg: " << seg << " it:" << *it << " "<<"\n";
+            //std::cerr << "seg: " << seg << " it:" << *it << " "<<"\n";
             if(!overlap(seg, *it)){
                 segments.emplace_hint(it, seg);
                 break;
             }
             auto hull = lowerHull(*it, seg);
-            std::cerr << "lowerhull: " << *it << ", " << seg << " is: ";
-            for(int i = 0; i < hull.size(); i++){
-               std::cerr << hull[i] << ", ";
-            }
-            std::cerr << "\n";
+            //std::cerr << "lowerhull: " << *it << ", " << seg << " is: ";
+            //for(int i = 0; i < hull.size(); i++){
+            //   std::cerr << hull[i] << ", ";
+            //}
+            //std::cerr << "\n";
             seg = hull[0];
             //std::cerr << "deleting: " << *it << "\n";
             if (it == segments.begin()){
@@ -212,6 +212,11 @@ struct CompoundATF{
     inline double arrival_time(double t) const{
         auto ind = at(t);
         return edge_atfs[ind].arrival_time(t);
+    }
+
+    inline T payload_at(double t) const{
+        auto ind = at(t);
+        return payload[ind];
     }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const CompoundATF& catf){
