@@ -11,6 +11,7 @@ struct GraphNode;
 
 struct GraphNode{
     State state;
+    boost::container::flat_set<GraphEdge *> predecessors;
     boost::container::flat_set<GraphEdge *> successors;
     GraphNode() = default;
     GraphNode(const State& s):state(s){}

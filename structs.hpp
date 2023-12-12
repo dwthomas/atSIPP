@@ -85,6 +85,7 @@ struct State{
     Location loc;
     SafeInterval interval;
     State() = default;
+    State(const Location& l, const SafeInterval& si):loc(l),interval(si){};
     State(int a, int b, double s, double e):loc(a,b),interval(e,s){}; 
     constexpr bool operator ==(const State & s) const{
         return loc == s.loc && interval == s.interval;
@@ -101,7 +102,7 @@ namespace std {
         inline std::size_t operator()(const State& s) const {
             std::size_t seed = 0;
             boost::hash_combine(seed, s.loc.pack());
-            boost::hash_combine(seed, s.interval.second);
+            boost::hash_combine(seed, s.interval.first);
             boost::hash_combine(seed, s.interval.second);
             return seed;
         }

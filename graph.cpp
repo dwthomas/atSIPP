@@ -75,6 +75,7 @@ Graph read_graph(std::string filename){
         g.edges.back().source = &g.node_array[entry.source];
         g.edges.back().destination = &g.node_array[entry.dest];
         g.node_array[entry.source].successors.emplace_hint(g.node_array[entry.source].successors.end(), &g.edges.back());
+        g.node_array[entry.dest].predecessors.emplace_hint(g.node_array[entry.dest].predecessors.end(), &g.edges.back());
         //g.edges.emplace_back(entry.eATF);
         //g.edges.back().source = &g.node_array[entry.dest];
         //g.edges.back().destination = &g.node_array[entry.source];
