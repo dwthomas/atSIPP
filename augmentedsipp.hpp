@@ -141,7 +141,7 @@ namespace asipp{
             //dump_open(open_list);
             auto cur = open_list.top();
             //std::cout << *cur.node << "\n";
-            if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions > expansion_budget)){
+            if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
                 return std::make_pair(backup(cur, open_list), cur.g);
             }
             open_list.pop();
