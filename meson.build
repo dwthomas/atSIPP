@@ -4,7 +4,7 @@ project('gridbenchmark2sipp', 'cpp',
 boost_dep = dependency('boost', static:true, modules : ['program_options', 'random', 'iostreams'])
 zdep = dependency('zlib', static:true)
 executable('atsipp',
-           ['main.cpp', 'graph.cpp', 'segment.cpp','sipp.cpp', 'augmentedsipp.cpp', 'repeat.cpp', 'rtasipp.cpp', 'grtsipp.cpp'],
+           ['main.cpp', 'graph.cpp', 'segment.cpp','sipp.cpp', 'augmentedsipp.cpp', 'repeat.cpp', 'rtasipp.cpp', 'plrtosipp.cpp','grtsipp.cpp'],
            install : true,
            dependencies : [boost_dep, zdep],
            )

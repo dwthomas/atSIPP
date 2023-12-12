@@ -128,11 +128,16 @@ namespace asipp{
     inline void dump_open(const Open_t& open_list){
         auto cur = open_list.queue.ordered_begin();
         auto end = open_list.queue.ordered_end();
-        std::cerr << "Open:";
+        std::cerr << "Open:\n";
         while(cur != end){
             std::cerr << "\t" << *cur << "\n";
             cur = std::next(cur);
         }
+        std::cerr << "Closed:\n";
+        for( auto x : open_list.expanded){
+            std::cerr <<  "\t" << *x.first << "\n";
+        }
+
     }
     template<typename Open_t>
     inline std::pair<std::vector<GraphNode *>, EdgeATF> search_core(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
