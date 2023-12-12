@@ -47,7 +47,8 @@ struct EdgeATF{
     }
 
     inline intervalTime_t supremum_arrival_time() const{
-        return beta + delta;
+        return std::numeric_limits<double>::infinity();
+        //return beta + delta;
     }
 
     inline bool operator<(const EdgeATF& rhs) const{
