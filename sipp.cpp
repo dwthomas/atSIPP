@@ -24,7 +24,7 @@ void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData
             auto handle = open_list.handles[successor->destination];
             if(arrival_time < (*handle).g){
                 m.decreased++;
-                std::cerr << "Decrease " << *handle << "\n";
+                //std::cerr << "Decrease " << *handle << "\n";
                 double h = eightWayDistance(successor->destination->state.loc, goal_loc);
                 open_list.decrease_key(handle, arrival_time, h, successor->destination, successor->source);
             }

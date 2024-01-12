@@ -5,6 +5,7 @@
 #include <limits>
 #include <ostream>
 #include <array>
+#include <format>
 #include <cassert>
 #include <iostream>
 #include <boost/container/small_vector.hpp>
@@ -72,7 +73,7 @@ struct Segment{
         if(x == x1){
             return y1;
         }
-        return y0 + (x - x0); //*(y1 - y0)/(x1 - x0);
+        return y0 + (x - x0);//*(y1 - y0)/(x1 - x0);
     }
 
     inline Segment constrain(double s, double e) const{
@@ -89,7 +90,6 @@ struct Segment{
         else{
             y1 = y_exc(e);
         }
-        //std::cerr << *this << " " << s << " "<< e << "\n";
         //std::cerr << "y1: " << y1 << "\n";
         return Segment(s, e, y0, y1, payload);
     }

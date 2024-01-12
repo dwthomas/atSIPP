@@ -6,6 +6,7 @@
 #include <boost/container/flat_set.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/timer/timer.hpp>
 #include "constants.hpp"
 
 
@@ -114,13 +115,18 @@ struct MetaData{
     long expanded;
     long decreased;
 
+    boost::timer::cpu_timer search_timer;
+    boost::timer::cpu_timer learning_timer;
+
     inline void init(){
         generated = 0;
         expanded = 0;
         decreased = 0;
     }
     inline friend std::ostream& operator<< (std::ostream& stream, const MetaData& m){
-        stream << "Nodes generated: " << m.generated << " Nodes decreased: " << m.decreased << " Nodes expanded: " << m.expanded; 
+        stream << "Nodes generated: " << m.generated << " Nodes decreased: " << m.decreased << " Nodes expanded: " << m.expanded << "\n"; 
+        stream << "Search: " <<  m.search_timer.format();
+        stream << "Learning: " << m.learning_timer.format();
         return stream;
     }
 };

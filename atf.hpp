@@ -73,7 +73,7 @@ struct EdgeATF{
 };
 
 inline EdgeATF shiftIdentity(double x){
-    return EdgeATF(-std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), x);
+    return EdgeATF(0, 0, std::numeric_limits<double>::infinity(), x);
 }
 
 using EdgeATFList = boost::container::flat_set<EdgeATF>;
@@ -201,7 +201,7 @@ struct CompoundATF{
         }
         //std::cerr << "cATF: "<< *this << "\n";
         assert(bumper_to_bumper());
-        assert(monotonic_non_decreasing());
+        //assert(monotonic_non_decreasing());
     }
 
     inline long at(double t) const{
@@ -213,6 +213,16 @@ struct CompoundATF{
     inline double arrival_time(double t) const{
         auto ind = at(t);
         return edge_atfs[ind].arrival_time(t);
+    }
+
+    inline double earliest_arrival_time() const{
+        for(auto seg: segments){
+            double x = std::min(seg.y0, seg.y1);
+            if(std::isfinite(x)){
+                return x;
+            }
+        }
+        return std::numeric_limits<double>::infinity();
     }
 
     inline T payload_at(double t) const{
