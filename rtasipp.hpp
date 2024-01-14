@@ -65,8 +65,8 @@ namespace rtasipp{
         if(h_dynamic.find(&cur) == h_dynamic.end()){
             h_dynamic[&cur] = CATF();
         }
-        std::cerr << "patf" << patf << "\n";
-        std::cerr << "catf" << h_dynamic[&cur] << "\n";
+        //std::cerr << "patf" << patf << "\n";
+        //std::cerr << "catf" << h_dynamic[&cur] << "\n";
         h_dynamic[&cur].insert(patf, nullptr);
     }
 

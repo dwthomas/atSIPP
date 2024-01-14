@@ -111,6 +111,8 @@ struct EdgeATFholster{
     EdgeATFholster(){
         encumbent = nullptr;
         newcomer = nullptr;
+        enc_payload = payload_T();
+        new_payload = payload_T();
     }
 
     EdgeATFholster(EdgeATF * e, payload_T p){
@@ -161,7 +163,7 @@ struct EdgeATFholster{
         enc_y1 = encumbent->inclusive_arrival_time(interval.upper());
         new_y0 = newcomer->arrival_time(interval.lower());
         new_y1 = newcomer->inclusive_arrival_time(interval.upper());
-        std::cerr << enc_y0 << " " << enc_y1 << " " << new_y0 << " " << new_y1 << "\n";
+        //std::cerr << enc_y0 << " " << enc_y1 << " " << new_y0 << " " << new_y1 << "\n";
         if (enc_y0 <= new_y0 && enc_y1 <= new_y1){
             return EdgeATFholster(encumbent, enc_payload);
         }
@@ -225,9 +227,9 @@ class CompoundATF{
         inline void insert(EdgeATF * e, payload_T p){
             //std::cerr << *this;
             insert_segment(e->zetaalpha(), e, p);
-            std::cerr << *this << "\n";
+            //std::cerr << *this << "\n";
             insert_segment(e->alphabeta(), e, p);
-            std::cerr << *this << "\n \n";
+            //std::cerr << *this << "\n \n";
         }
 
         inline std::pair<interval_t, EdgeATF *> at(double t) const{

@@ -21,7 +21,7 @@ std::vector<GraphNode *> rtasipp::search(GraphNode * source, const Location& des
     double t = start_time;
     while(!isGoal(*cur, dest)){
         //search 
-        std::cerr << *cur << " at " << t << " ";
+        //std::cerr << *cur << " at " << t << " ";
         m.search_timer.resume();
         // run NLASIPP
         path.emplace_back(cur);
@@ -32,8 +32,6 @@ std::vector<GraphNode *> rtasipp::search(GraphNode * source, const Location& des
         m.search_timer.stop();
         //learn
         m.learning_timer.resume();
-        auto x = cur->state.loc;
-        auto s = cur->state;
         double h_s_prime = std::numeric_limits<double>::infinity();
         for (auto node: open_list.queue){
             double h_s_nx = get_h_s(*node.node, dest);
