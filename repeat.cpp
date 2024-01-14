@@ -22,14 +22,14 @@ double update_reference_time(const EdgeATF& path, rePEAT::Open& open_list){
 CompoundATF<std::vector<GraphNode *>> rePEAT::search(GraphNode * source, const Location& dest, MetaData & m, double start_time){
     double t_ref = start_time;
     std::vector<GraphNode *> path;
-    CompoundATF solutions(path);
+    CompoundATF<std::vector<GraphNode *>> solutions;
     m.init();
     while(t_ref < end(source->state.interval)){
         std::cerr << "tref: " << t_ref << "\n";
         Open open_list;
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t_ref, std::numeric_limits<double>::infinity(), 0.0), eightWayDistance(dest, source->state.loc), source, nullptr);
         auto res = asipp::search_core(open_list, dest, m);
-        solutions.add(res.second, res.first);
+        solutions.insert(&res.second, res.first);
         t_ref = update_reference_time(res.second, open_list);
     }
     return solutions;

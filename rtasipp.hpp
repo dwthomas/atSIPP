@@ -36,12 +36,12 @@ namespace rtasipp{
     };
     using Queue = boost::heap::d_ary_heap<Node, boost::heap::arity<4>, boost::heap::mutable_<true>, boost::heap::compare<std::greater<Node>>>;
     typedef typename Queue::handle_type handle_t;
-    
+    using CATF = CompoundATF<std::nullptr_t>;
     extern std::unordered_map<Location, double> h_static;
-    extern std::unordered_map<const GraphNode *, CompoundATF<GraphNode *>> h_dynamic;
+    extern std::unordered_map<const GraphNode *, CATF> h_dynamic;
 
     inline double get_h_s(const GraphNode& cur, const Location& dest){
-        if(!h_static.contains(cur.state.loc)){
+        if(h_static.find(cur.state.loc) == h_static.end()){
             h_static[cur.state.loc] = eightWayDistance(cur.state.loc, dest);
         }
         return h_static[cur.state.loc];
@@ -49,24 +49,25 @@ namespace rtasipp{
 
     inline double get_h(const GraphNode& cur, double cur_t, const Location& dest){
         double h_s = get_h_s(cur, dest);
-        if (!h_dynamic.contains(&cur)){
+        if (h_dynamic.find(&cur) == h_dynamic.end()){
             return h_s;
         }   
         const auto & catf = h_dynamic[&cur];
-        return catf.arrival_time(cur_t) + get_h_s(*catf.payload_at(cur_t), dest);
+        //return catf.arrival_time(cur_t) + get_h_s(catf.payload_at(cur_t), dest);
+        return catf.arrival_time(cur_t);
     }
 
     inline void set_h_s(const Location& loc, double x){
         h_static[loc] = x;
     }
 
-    inline void add_h_dyn(const GraphNode& cur, EdgeATF patf, GraphNode * frontiern){
-        if(!h_dynamic.contains(&cur)){
-            h_dynamic[&cur] = CompoundATF<GraphNode *>(nullptr);
+    inline void add_h_dyn(const GraphNode& cur, EdgeATF * patf){
+        if(h_dynamic.find(&cur) == h_dynamic.end()){
+            h_dynamic[&cur] = CATF();
         }
         std::cerr << "patf" << patf << "\n";
         std::cerr << "catf" << h_dynamic[&cur] << "\n";
-        h_dynamic[&cur].add(patf, frontiern);
+        h_dynamic[&cur].insert(patf, nullptr);
     }
 
     inline bool isGoal(const GraphNode& cur, const Location& dest){

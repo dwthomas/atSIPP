@@ -118,10 +118,18 @@ struct MetaData{
     boost::timer::cpu_timer search_timer;
     boost::timer::cpu_timer learning_timer;
 
+    inline void reset(){
+        search_timer.start();
+        search_timer.stop();
+        learning_timer.start();
+        learning_timer.stop();
+    }
+
     inline void init(){
         generated = 0;
         expanded = 0;
         decreased = 0;
+        reset();
     }
     inline friend std::ostream& operator<< (std::ostream& stream, const MetaData& m){
         stream << "Nodes generated: " << m.generated << " Nodes decreased: " << m.decreased << " Nodes expanded: " << m.expanded << "\n"; 
@@ -130,3 +138,4 @@ struct MetaData{
         return stream;
     }
 };
+
