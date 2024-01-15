@@ -74,6 +74,10 @@ struct EdgeATF{
     inline bool operator<(const EdgeATF& rhs) const{
         return earliest_arrival_time() < rhs.earliest_arrival_time();
     }
+
+    inline bool operator==(const EdgeATF& rhs) const{
+        return zeta == rhs.zeta && alpha == rhs.alpha && beta == rhs.beta && delta == rhs.delta;
+    }
     
     inline friend std::ostream& operator<< (std::ostream& stream, const EdgeATF& eatf){
         stream << "<" << eatf.zeta << "," << eatf.alpha << "," << eatf.beta << "," << eatf.delta << ">";
@@ -94,43 +98,68 @@ struct EdgeATF{
     }
 };
 
+namespace std {
+    template<>
+    struct hash<EdgeATF> {
+        inline std::size_t operator()(const EdgeATF& eatf) const {
+            std::size_t seed = 0;
+            boost::hash_combine(seed, eatf.zeta);
+            boost::hash_combine(seed, eatf.alpha);
+            boost::hash_combine(seed, eatf.beta);
+            boost::hash_combine(seed, eatf.delta);
+            return seed;
+        }
+    };
+}
+
 inline EdgeATF shiftIdentity(double x){
     return EdgeATF(0, 0, std::numeric_limits<double>::infinity(), x);
 }
 
 using EdgeATFList = boost::container::flat_set<EdgeATF>;
 
+inline EdgeATF compose(const EdgeATF& e_prime, const EdgeATF& e){
+    double zeta = e.zeta;
+    double alpha = std::max(e.alpha, e_prime.alpha + e.delta);
+    double beta = std::min(e.beta, e_prime.beta + e.delta);
+    double delta = e.delta + e_prime.delta;
+    return EdgeATF(zeta, alpha, beta, delta);
+}
 
 template <typename payload_T>
 struct EdgeATFholster{
-    EdgeATF * encumbent;
-    EdgeATF * newcomer;
+    int size;
+    EdgeATF encumbent;
+    EdgeATF newcomer;
     payload_T enc_payload;
     payload_T new_payload;
     
     EdgeATFholster(){
-        encumbent = nullptr;
-        newcomer = nullptr;
+        size = 0;
+        encumbent = EdgeATF();
+        newcomer = EdgeATF();
         enc_payload = payload_T();
         new_payload = payload_T();
     }
 
-    EdgeATFholster(EdgeATF * e, payload_T p){
+    EdgeATFholster(const EdgeATF& e, payload_T p){
+        size = 1;
         encumbent = e;
         enc_payload = p;
-        newcomer = nullptr;
+        newcomer = EdgeATF();
+        new_payload = payload_T();
     }
 
     bool full() const{
-        return newcomer != nullptr;
+        return size == 2;
     }
 
     std::pair<std::pair<interval_t, EdgeATFholster>, std::pair<interval_t, EdgeATFholster>> intersection(const interval_t & interval) const{
         double enc_y0, enc_y1, new_y0, new_y1;
-        enc_y0 = encumbent->arrival_time(interval.lower());
-        enc_y1 = encumbent->inclusive_arrival_time(interval.upper());
-        new_y0 = newcomer->arrival_time(interval.lower());
-        new_y1 = newcomer->inclusive_arrival_time(interval.upper());
+        enc_y0 = encumbent.arrival_time(interval.lower());
+        enc_y1 = encumbent.inclusive_arrival_time(interval.upper());
+        new_y0 = newcomer.arrival_time(interval.lower());
+        new_y1 = newcomer.inclusive_arrival_time(interval.upper());
         Segment_2 a(Point_2(interval.lower(), enc_y0), Point_2(interval.upper(), enc_y1));
         Segment_2 b(Point_2(interval.lower(), new_y0), Point_2(interval.upper(), new_y1));
         auto x = CGAL::intersection(a, b);
@@ -139,14 +168,18 @@ struct EdgeATFholster{
         interval_t left(interval.lower(), inter), right(inter, interval.upper());
         EdgeATFholster lh, rh;
         if(enc_y0 < new_y0){
+            lh.size = 1;
             lh.encumbent = encumbent;
             lh.enc_payload = enc_payload;
+            rh.size = 1;
             rh.encumbent = newcomer;
             rh.enc_payload = new_payload;
         }
         else{
+            lh.size = 1;
             lh.encumbent = newcomer;
             lh.enc_payload = new_payload;
+            rh.size = 1;
             rh.encumbent = encumbent;
             rh.enc_payload = enc_payload;
         }
@@ -159,10 +192,10 @@ struct EdgeATFholster{
     EdgeATFholster dominant(const interval_t& interval) const{
         assert(full());
         double enc_y0, enc_y1, new_y0, new_y1;
-        enc_y0 = encumbent->arrival_time(interval.lower());
-        enc_y1 = encumbent->inclusive_arrival_time(interval.upper());
-        new_y0 = newcomer->arrival_time(interval.lower());
-        new_y1 = newcomer->inclusive_arrival_time(interval.upper());
+        enc_y0 = encumbent.arrival_time(interval.lower());
+        enc_y1 = encumbent.inclusive_arrival_time(interval.upper());
+        new_y0 = newcomer.arrival_time(interval.lower());
+        new_y1 = newcomer.inclusive_arrival_time(interval.upper());
         //std::cerr << enc_y0 << " " << enc_y1 << " " << new_y0 << " " << new_y1 << "\n";
         if (enc_y0 <= new_y0 && enc_y1 <= new_y1){
             return EdgeATFholster(encumbent, enc_payload);
@@ -174,7 +207,9 @@ struct EdgeATFholster{
     }
 
     EdgeATFholster& operator+=(const EdgeATFholster& right){
-        assert(!full());
+        
+        assert(size == 1);
+        size = 2;
         newcomer = right.encumbent;
         new_payload = right.enc_payload;
         return *this;
@@ -196,27 +231,55 @@ class CompoundATF{
     private:
         interval_map_t<payload_T> segments;
 
-        void fix_redundant(interval_t interval){
+        // void fix_redundant(interval_t interval){
+        //     auto it = segments.find(interval.lower());
+        //     while(it != segments.end() && it->first.lower() <= interval.upper()){
+        //         if(it->second.full()){
+        //             auto rv = it->second.dominant(it->first);
+        //             if(rv.full()){
+        //                 auto inter = it->second.intersection(it->first);
+        //                 segments.erase(*it);
+        //                 segments.insert(inter.first);
+        //                 segments.insert(inter.second);
+        //                 it = segments.find(inter.second.first.lower());
+        //             }
+        //             else{
+        //                 segments.set(std::make_pair(it->first, rv));
+        //             }
+        //         }
+        //         it++;
+        //     }
+        // }
+
+      void fix_redundant(interval_t interval){
             auto it = segments.find(interval.lower());
+            interval_map_t<payload_T> new_segments;
+            std::vector<std::pair<const interval_t, EdgeATFholster<payload_T>>> to_erase;
             while(it != segments.end() && it->first.lower() <= interval.upper()){
                 if(it->second.full()){
                     auto rv = it->second.dominant(it->first);
                     if(rv.full()){
                         auto inter = it->second.intersection(it->first);
-                        segments.erase(*it);
-                        segments.insert(inter.first);
-                        segments.insert(inter.second);
-                        it = segments.find(inter.second.first.lower());
+                        new_segments.insert(inter.first);
+                        new_segments.insert(inter.second);
+                        auto x = *it;
                     }
                     else{
-                        segments.set(std::make_pair(it->first, rv));
+                        new_segments.insert(std::make_pair(it->first, rv));
                     }
+                    to_erase.emplace_back(*it);
                 }
                 it++;
             }
+            for(auto x: to_erase){
+                segments.erase(x);
+            }
+            for(auto x: new_segments){
+                segments.insert(x);
+            }            
         }
 
-        void insert_segment(interval_t interval, EdgeATF * e, payload_T p){
+        void insert_segment(interval_t interval, EdgeATF e, payload_T p){
             EdgeATFholster es(e, p);
             segments += std::make_pair(interval, es);
             fix_redundant(interval);
@@ -224,15 +287,15 @@ class CompoundATF{
     public:
         CompoundATF() = default;
         
-        inline void insert(EdgeATF * e, payload_T p){
+        inline void insert(EdgeATF e, payload_T p){
             //std::cerr << *this;
-            insert_segment(e->zetaalpha(), e, p);
+            insert_segment(e.zetaalpha(), e, p);
             //std::cerr << *this << "\n";
-            insert_segment(e->alphabeta(), e, p);
+            insert_segment(e.alphabeta(), e, p);
             //std::cerr << *this << "\n \n";
         }
 
-        inline std::pair<interval_t, EdgeATF *> at(double t) const{
+        inline std::pair<interval_t, EdgeATF> at(double t) const{
             auto acc = segments.find(t);
             return std::make_pair(acc->first, acc->second.encumbent);
         }        
@@ -243,16 +306,28 @@ class CompoundATF{
         }
 
         inline double arrival_time(double t) const{
+            auto acc = segments.find(t);
+            if(acc == segments.end()){
+                return std::numeric_limits<double>::infinity();
+            }
             auto x = at(t);
-            return x.second->arrival_time(t);
+            return x.second.arrival_time(t);
+        }
+
+        inline std::unordered_set<EdgeATF> edges() const{
+            std::unordered_set<EdgeATF> retval;
+            for (auto seg: segments){
+                retval.emplace(seg.second.encumbent);
+            }
+            return retval;
         }
 
         inline void dump(std::ostream& stream) const{
             for (auto seg: segments){
                 stream << seg.first;
-                stream << " " << *seg.second.encumbent;
+                stream << " " << seg.second.encumbent;
                 if(seg.second.full()){
-                    stream << " " << *seg.second.newcomer;
+                    stream << " " << seg.second.newcomer;
                 } 
                 stream << std::endl;
             }

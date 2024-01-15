@@ -1,20 +1,20 @@
 #include <unordered_set>
-#include "plrtosipp.hpp"
+#include "plrtosipphonly.hpp"
 #include "atf.hpp"
 #include "augmentedsipp.hpp"
 
-std::unordered_map<Location, double> plrtosipp::h_static;
-std::unordered_map<const GraphNode *, plrtosipp::CATF> plrtosipp::h_dynamic;
+std::unordered_map<Location, double> plrtosipphonly::h_static;
+std::unordered_map<const GraphNode *, plrtosipphonly::CATF> plrtosipphonly::h_dynamic;
 
 inline void dump_h(){
     std::cerr << "h_static\n";
-    for(auto acc: plrtosipp::h_static){
+    for(auto acc: plrtosipphonly::h_static){
         std::cerr << acc.first << " " << acc.second << "\n";
     } 
     std::cerr << "h_static done\n";
 }
 
-void plrtosipp::lsslrtsipp(const Open& open_list, const Location& dest){
+void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest){
     std::unordered_map<Location, double> h_s_prime;
     auto closed = open_list.expanded; 
     LSSOpen dijkstraOpen;
@@ -51,56 +51,34 @@ void plrtosipp::lsslrtsipp(const Open& open_list, const Location& dest){
     }
 }
 
-void plrtosipp::plrtolearn(const Open& open_list, const Location& dest){
-    auto closed = open_list.expanded; 
-    for (const auto& s: closed){ // node in closed
-        h_dynamic[s.first] = CATF();   
-    }
-    DijkstraOpen dijkstraOpen;
-    for (const auto& s: open_list.queue){
-        dijkstraOpen.emplace(s.g, s.node);
-        h_dynamic[s.node] = CATF();
-        h_dynamic[s.node].insert(shiftIdentity(get_h_s(s.node->state.loc, dest)), nullptr);
-    }
-    while(!dijkstraOpen.empty() && !closed.empty()){
-        auto n = dijkstraOpen.top();
-        dijkstraOpen.pop();
-        closed.erase(n.node);
-        auto h_d_n = h_dynamic[n.node];
-        for (auto e: n.node->predecessors){
-            if(closed.find(e->source) == closed.end()){
-                continue;
-            }
-            for (const auto& ap: h_d_n.edges()){
-                const auto& ae = e->edge;
-                auto a_p_prime = compose(ap, ae);
-                add_h_dyn(*e->source, a_p_prime);
-                dijkstraOpen.emplace(a_p_prime, e->source);
-            }
-        }
-    }
-}
 
-std::vector<GraphNode *> plrtosipp::search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
+
+std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
     std::vector<GraphNode *> path;
     m.init();
     auto cur = source;
     double t = start_time;
     while(!isGoal(*cur, dest)){
         //search 
-        //std::cerr << *cur << " at " << t << " ";
+        std::cerr << *cur << " at " << t << " ";
+        dump_h_s(h_static);
         m.search_timer.resume();
         // run NLASIPP
         path.emplace_back(cur);
         Open open_list;
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr);
-        auto res = asipp::search_core(open_list, dest, m, budget, get_h);
+        asipp::search_core_noprune(open_list, dest, m, budget, get_h);
+        if(open_list.empty()){
+            std::cerr << "No path found\n";
+            exit(-1);
+        }
         // Done NLASIPP
         m.search_timer.stop();
         //learn
         // static
         lsslrtsipp(open_list, dest);
         // dynamic
+        asipp::dump_open(open_list);
         // commit 
         if (open_list.queue.size() < 1){
             //asipp::dump_open(open_list);

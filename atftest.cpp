@@ -6,8 +6,8 @@ int main(){
     EdgeATF b(0, 2, 7, 1);
     EdgeATF c(0, 7, 20, 10);
     CompoundATF<void *> catf;
-    catf.insert(&a, nullptr);
-    catf.insert(&b, nullptr);
-    catf.insert(&c, nullptr);
+    catf.insert(a, nullptr);
+    catf.insert(b, nullptr);
+    catf.insert(c, nullptr);
     std::cout << catf << "\n";
 }

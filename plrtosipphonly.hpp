@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "graph.hpp"
 
-namespace plrtosipp{
+namespace plrtosipphonly{
     struct Node;
 
     struct Node{
@@ -149,7 +149,7 @@ namespace plrtosipp{
         std::unordered_map<GraphNode *, Dijkstra_handle_t> handles;
 
         inline void emplace(EdgeATF e, GraphNode * n){
-            handles[n] = queue.push(DijkstraNode(e,  n));
+            handles[n] = queue.push(DijkstraNode(e, n));
         }
 
         inline bool empty() const{
@@ -224,7 +224,6 @@ namespace plrtosipp{
     };
 
     void lsslrtsipp(const Open& open_list, const Location& dest);
-    void plrtolearn(const Open& open_list, const Location& dest);
     std::vector<GraphNode *> search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0);
 }
 

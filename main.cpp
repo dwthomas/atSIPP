@@ -6,7 +6,8 @@
 #include "augmentedsipp.hpp"
 #include "repeat.hpp"
 #include "rtasipp.hpp"
-//#include "plrtosipp.hpp"
+#include "plrtosipp.hpp"
+#include "plrtosipphonly.hpp"
 //#include "grtsipp.hpp"
 #include "structs.hpp"
 #include "graph.hpp"
@@ -93,15 +94,24 @@ int main(int argc, char* argv[]) {
             //     }
             //     std::cout << m << "\n";
             // }
-            // else if(vm["search"].as<std::string>() == "plrtosipp"){
-            //     MetaData m;
-            //     long budget = vm["budget"].as<long>();
-            //     auto res = plrtosipp::search(source, goal_loc, m, budget, start_time);
-            //     for(auto n: res){
-            //         std::cout << *n << "\n";
-            //     }
-            //     std::cout << m << "\n";
-            // }
+            else if(vm["search"].as<std::string>() == "plrtosipp"){
+                MetaData m;
+                long budget = vm["budget"].as<long>();
+                auto res = plrtosipp::search(source, goal_loc, m, budget, start_time);
+                for(auto n: res){
+                    std::cout << *n << "\n";
+                }
+                std::cout << m << "\n";
+            }
+             else if(vm["search"].as<std::string>() == "plrtosipphonly"){
+                MetaData m;
+                long budget = vm["budget"].as<long>();
+                auto res = plrtosipphonly::search(source, goal_loc, m, budget, start_time);
+                for(auto n: res){
+                    std::cout << *n << "\n";
+                }
+                std::cout << m << "\n";
+            }
         }
         else{
             std::cout << desc << std::endl;

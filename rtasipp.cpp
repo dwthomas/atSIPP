@@ -36,7 +36,7 @@ std::vector<GraphNode *> rtasipp::search(GraphNode * source, const Location& des
         for (auto node: open_list.queue){
             double h_s_nx = get_h_s(*node.node, dest);
             h_s_prime = std::min(h_s_prime, node.g.delta + h_s_nx);
-            add_h_dyn(*cur, &node.g);
+            add_h_dyn(*cur, node.g);
         }
         if(h_s_prime > get_h_s(*cur, dest)){
             set_h_s(cur->state.loc, h_s_prime);

@@ -11,7 +11,7 @@ namespace rtasipp{
         double f;
         GraphNode * node;
         Node() = default;
-        Node(EdgeATF e, double _h, GraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
+        Node(const EdgeATF& e, double _h, GraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
@@ -53,6 +53,7 @@ namespace rtasipp{
             return h_s;
         }   
         const auto & catf = h_dynamic[&cur];
+        //std::cerr << catf;
         //return catf.arrival_time(cur_t) + get_h_s(catf.payload_at(cur_t), dest);
         return catf.arrival_time(cur_t);
     }
@@ -61,7 +62,7 @@ namespace rtasipp{
         h_static[loc] = x;
     }
 
-    inline void add_h_dyn(const GraphNode& cur, EdgeATF * patf){
+    inline void add_h_dyn(const GraphNode& cur, EdgeATF patf){
         if(h_dynamic.find(&cur) == h_dynamic.end()){
             h_dynamic[&cur] = CATF();
         }

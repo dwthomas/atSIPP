@@ -29,7 +29,7 @@ CompoundATF<std::vector<GraphNode *>> rePEAT::search(GraphNode * source, const L
         Open open_list;
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t_ref, std::numeric_limits<double>::infinity(), 0.0), eightWayDistance(dest, source->state.loc), source, nullptr);
         auto res = asipp::search_core(open_list, dest, m);
-        solutions.insert(&res.second, res.first);
+        solutions.insert(res.second, res.first);
         t_ref = update_reference_time(res.second, open_list);
     }
     return solutions;

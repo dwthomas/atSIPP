@@ -7,6 +7,8 @@
 namespace asipp{
     struct Node;
 
+
+
     double constexpr h_eight_way_helper(const GraphNode& cur, double cur_t, const Location& dest){
         (void) cur_t;
         return eightWayDistance(cur.state.loc, dest);
@@ -36,6 +38,14 @@ namespace asipp{
         bool operator()(const Node * a, const Node * b){
             return *a > *b;
         }
+    };
+
+    struct Ghost{
+        EdgeATF e; 
+        double h; 
+        GraphNode * n; 
+        GraphNode * p;
+        Ghost(EdgeATF _e, double _h, GraphNode * _n, GraphNode * _p):e(_e),h(_h),n(_n),p(_p){}
     };
 
     using Queue = boost::heap::d_ary_heap<Node, boost::heap::arity<4>, boost::heap::mutable_<true>, boost::heap::compare<std::greater<Node>>>;
@@ -124,6 +134,41 @@ namespace asipp{
         }
     }
 
+    template <typename Node_t, typename Open_t>
+    inline void expand_noprune(const Node_t& cur, Open_t& open_list, std::vector<Ghost>& ghost_open, const Location& goal_loc, MetaData & m, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
+        m.expanded++;
+        double zeta = cur.g.zeta;
+        for(GraphEdge * successor: cur.node->successors){
+            if(cur.g.earliest_arrival_time() >= successor->edge.beta || cur.g.supremum_arrival_time() <= successor->edge.zeta){
+                continue;
+            } 
+            double alpha = std::max(cur.g.alpha, successor->edge.alpha - cur.g.delta);
+            double beta = std::min(cur.g.beta, successor->edge.beta - cur.g.delta);
+            double delta = successor->edge.delta + cur.g.delta;
+            EdgeATF arrival_time_function(zeta, alpha, beta, delta);
+            if(open_list.expanded.contains(successor->destination)){
+                ghost_open.emplace_back(cur.g, cur.f-cur.g.earliest_arrival_time(), cur.node, open_list.parent[cur.node]);
+                continue;
+            }
+            else if (open_list.handles.contains(successor->destination)){
+                auto handle = open_list.handles[successor->destination];
+                if(arrival_time_function.earliest_arrival_time() < (*handle).g.earliest_arrival_time()){
+                    m.decreased++;
+                    double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
+                    //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                    open_list.decrease_key(handle ,arrival_time_function, h, successor->destination, successor->source);
+                }
+            }
+            else{
+                m.generated++;
+                double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
+                //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                open_list.emplace(arrival_time_function, h, successor->destination, successor->source);
+                //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
+            }
+        }
+    }
+
     template<typename Open_t>
     inline void dump_open(const Open_t& open_list){
         auto cur = open_list.queue.ordered_begin();
@@ -156,7 +201,24 @@ namespace asipp{
         exit(-1);
     }
 
-
+    template<typename Open_t>
+    inline void search_core_noprune(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
+        long start_expansions = m.expanded;
+        std::vector<Ghost> ghost_open;
+        while(!open_list.empty()){
+            //dump_open(open_list);
+            auto cur = open_list.top();
+            //std::cout << *cur.node << "\n";
+            if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
+                return;
+            }
+            open_list.pop();
+            expand_noprune(cur, open_list, ghost_open, dest, m, hf);
+        }
+        for (auto ghost: ghost_open){
+            open_list.emplace(ghost.e, ghost.h, ghost.n, ghost.p);
+        }
+    }
 
     std::pair<std::vector<GraphNode *>, EdgeATF> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper);
 }

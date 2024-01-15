@@ -7,9 +7,10 @@ cgal = dependency('CGAL', static:true)
 gmp = dependency('gmp')
 mpfr = dependency('mpfr')
 executable('atsipp',
-           ['main.cpp', 'graph.cpp', 'segment.cpp','sipp.cpp', 'augmentedsipp.cpp', 'repeat.cpp', 'rtasipp.cpp'],
+           ['main.cpp', 'graph.cpp', 'segment.cpp','sipp.cpp', 'augmentedsipp.cpp', 'repeat.cpp', 'rtasipp.cpp', 'plrtosipp.cpp', 'plrtosipphonly.cpp'],
            install : true,
            dependencies : [boost_dep, zdep,  gmp, mpfr],
+           cpp_args: '-DCGAL_DISABLE_ROUNDING_MATH_CHECK=ON'
            )
 executable('lhtest',
             ['lhtest.cpp', 'segment.cpp'],
