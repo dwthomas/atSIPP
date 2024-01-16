@@ -128,10 +128,6 @@ std::size_t std::hash<GraphEdge>::operator()(const GraphEdge& e) const{
 
 void clean_edges(boost::container::flat_set<GraphEdge *> p){
     std::unordered_set<GraphEdge> edges;
-    std::cerr << "cleaning:\n";
-    for(auto x : p){
-        std::cerr << *x << "\n";
-    }
     auto it = p.begin();
     while(it != p.end()){
         auto x = **it;
@@ -143,9 +139,4 @@ void clean_edges(boost::container::flat_set<GraphEdge *> p){
             it++;
         }
     }
-    std::cerr << "cleaned:\n";
-    for(auto x : p){
-        std::cerr << *x << "\n";
-    }
-    std::cerr << "\n";
 }

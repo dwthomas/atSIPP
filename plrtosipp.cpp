@@ -59,7 +59,7 @@ void expand(const plrtosipp::Node& cur, plrtosipp::Open& open_list, const Locati
 
 void search_core(plrtosipp::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
     long start_expansions = m.expanded;
-    asipp::dump_open(open_list);
+    //asipp::dump_open(open_list);
     while(!open_list.empty()){
         //dump_open(open_list);
         auto cur = open_list.top();

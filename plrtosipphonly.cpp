@@ -81,8 +81,8 @@ void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest){
         h_s_prime[n.node->state.loc] = h_s;
         dijkstraOpen.emplace(h_s, n.node);
     }
-    std::cerr << "Dijkstra open:\n";
-    dump_open(dijkstraOpen);
+    //std::cerr << "Dijkstra open:\n";
+    //dump_open(dijkstraOpen);
     while(!dijkstraOpen.empty() && !closed.empty()){
         auto n = dijkstraOpen.top();
         //std::cerr << "Dijkstra n: " << n << "\n";
@@ -122,7 +122,7 @@ std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Locati
     double t = start_time;
     while(!isGoal(*cur, dest)){
         //search 
-        std::cerr << *cur << " at " << t << " ";
+        //std::cerr << *cur << " at " << t << " ";
         m.search_timer.resume();
         // run NLASIPP
         path.emplace_back(cur);
@@ -140,7 +140,7 @@ std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Locati
         //asipp::dump_open(open_list);
         lsslrtsipp(open_list, dest);
         // dynamic
-        dump_h_s(h_static);
+        //dump_h_s(h_static);
         // commit 
         auto e = open_list.top().tla;
         t = e->edge.arrival_time(t);
