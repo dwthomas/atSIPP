@@ -169,7 +169,7 @@ namespace plrtosipp{
         }
 
         inline void decrease_key(Dijkstra_handle_t handle , EdgeATF e, GraphNode * n){
-            queue.increase(handle, DijkstraNode(e, n));
+            queue.update(handle, DijkstraNode(e, n));
         }
     };
 

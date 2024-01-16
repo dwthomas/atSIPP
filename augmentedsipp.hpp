@@ -36,6 +36,7 @@ namespace asipp{
 
     struct NodeComp{
         bool operator()(const Node * a, const Node * b){
+            std::cerr << "comp " << *a << " " << *b << " " << "\n";
             return *a > *b;
         }
     };
@@ -77,7 +78,7 @@ namespace asipp{
 
         inline void decrease_key(handle_t handle , EdgeATF e, double h, GraphNode * n, GraphNode * p){
             parent[n] = p;
-            queue.increase(handle, Node(e, h, n));
+            queue.update(handle, Node(e, h, n));
         }
     };
 
