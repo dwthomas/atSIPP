@@ -101,28 +101,30 @@ std::vector<GraphNode *> plrtosipp::search(GraphNode * source, const Location& d
         // static
         lsslrtsipp(open_list, dest);
         // dynamic
+        plrtolearn(open_list, dest);
         // commit 
-        if (open_list.queue.size() < 1){
-            //asipp::dump_open(open_list);
-            std::cout << "No path for agent!\n";
-            exit(-1); 
-        }
-        auto n = open_list.top().node;
-        while(open_list.parent[n] != nullptr){
-            auto nn = open_list.parent[n];
-            if (open_list.parent[nn] == nullptr){
-                for (auto succ: cur->successors){
-                    if(succ->destination == n){
-                        t = succ->edge.arrival_time(t);
-                        break;
-                    }
-                }
-                cur = n; //best TLA
-                //std::cerr << "best TLA:" << *n << "\n";
-                break;
+        GraphNode * best_successor = nullptr;
+        double best_f = std::numeric_limits<double>::infinity();
+        double best_g;
+        std::cerr << "options:\n";
+        for(const auto& e: cur->successors){
+            double g = e->edge.arrival_time(t);
+            double f = g + get_h(*e->destination, g, dest);
+            std::cerr << *e->destination << " at g:" << g << " f: " << f << "\n";  
+            if (f < best_f){
+                best_f = f;
+                best_g = g;
+                best_successor = e->destination;
             }
-            n = nn;
         }
+        std::cerr << "\n";
+        if (best_successor == nullptr){
+            std::cerr << "No successor found!\n";
+            exit(-1);
+        }
+        cur = best_successor;
+        t = best_g;
     } 
+    path.emplace_back(cur);
     return path;
 }

@@ -76,11 +76,14 @@ Graph read_graph(std::string filename){
         g.edges.back().destination = &g.node_array[entry.dest];
         g.node_array[entry.source].successors.emplace_hint(g.node_array[entry.source].successors.end(), &g.edges.back());
         g.node_array[entry.dest].predecessors.emplace_hint(g.node_array[entry.dest].predecessors.end(), &g.edges.back());
-        g.edges.emplace_back(entry.eATF);
-        g.edges.back().source = &g.node_array[entry.dest];
-        g.edges.back().destination = &g.node_array[entry.source];
-        g.node_array[entry.dest].successors.emplace_hint(g.node_array[entry.dest].successors.end(), &g.edges.back());
-        g.node_array[entry.source].predecessors.emplace_hint(g.node_array[entry.source].predecessors.end(), &g.edges.back());
+        // g.edges.emplace_back(entry.eATF);
+        // g.edges.back().source = &g.node_array[entry.dest];
+        // g.edges.back().destination = &g.node_array[entry.source];
+        // g.node_array[entry.dest].successors.emplace_hint(g.node_array[entry.dest].successors.end(), &g.edges.back());
+        // g.node_array[entry.source].predecessors.emplace_hint(g.node_array[entry.source].predecessors.end(), &g.edges.back());
+    }
+    for(std::size_t i=0; i < g.node_array.size(); i++){
+        g.node_array[i].clean();
     }
     return g;
 }
@@ -98,4 +101,51 @@ GraphNode *  find_earliest(Graph& g, Location loc, double start_time){
         exit(-1);
     }
     return cur;
+}
+
+std::size_t std::hash<GraphNode>::operator()(const GraphNode& e) const{
+    std::size_t seed = 0;
+    auto s = e.state;
+    boost::hash_combine(seed, s.loc.pack());
+    boost::hash_combine(seed, s.interval.first);
+    boost::hash_combine(seed, s.interval.second);
+    return seed;
+}
+
+std::size_t std::hash<GraphEdge>::operator()(const GraphEdge& e) const{
+    std::size_t seed = 0;
+    auto s = e.source->state;
+    boost::hash_combine(seed, s.loc.pack());
+    boost::hash_combine(seed, s.interval.first);
+    boost::hash_combine(seed, s.interval.second);
+    s = e.destination->state;
+    boost::hash_combine(seed, s.loc.pack());
+    boost::hash_combine(seed, s.interval.first);
+    boost::hash_combine(seed, s.interval.second);
+    //boost::hash_combine(seed, e.edge);
+    return seed;
+}
+
+void clean_edges(boost::container::flat_set<GraphEdge *> p){
+    std::unordered_set<GraphEdge> edges;
+    std::cerr << "cleaning:\n";
+    for(auto x : p){
+        std::cerr << *x << "\n";
+    }
+    auto it = p.begin();
+    while(it != p.end()){
+        auto x = **it;
+        if (edges.find(x) != edges.end()){
+            it = p.erase(it);
+        }
+        else{
+            edges.emplace(x);
+            it++;
+        }
+    }
+    std::cerr << "cleaned:\n";
+    for(auto x : p){
+        std::cerr << *x << "\n";
+    }
+    std::cerr << "\n";
 }

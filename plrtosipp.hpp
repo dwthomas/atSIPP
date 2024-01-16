@@ -178,7 +178,7 @@ namespace plrtosipp{
         LSSNode(double _g,  GraphNode * _node):g(_g),node(_node){}
 
         inline friend bool operator>(const LSSNode& a, const LSSNode& b){
-            return a.g < b.g;
+            return a.g > b.g;
         }
 
         inline friend std::ostream& operator<< (std::ostream& stream, const LSSNode& n){

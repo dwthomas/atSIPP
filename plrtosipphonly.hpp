@@ -171,6 +171,17 @@ namespace plrtosipphonly{
         }
     };
 
+    template<typename Open_t>
+    inline void dump_open(const Open_t& open_list){
+        auto cur = open_list.queue.ordered_begin();
+        auto end = open_list.queue.ordered_end();
+        std::cerr << "Open:\n";
+        while(cur != end){
+            std::cerr << "\t" << *cur << "\n";
+            cur = std::next(cur);
+        }
+    }
+
     struct LSSNode{
         double g;
         GraphNode * node;
@@ -178,7 +189,7 @@ namespace plrtosipphonly{
         LSSNode(double _g,  GraphNode * _node):g(_g),node(_node){}
 
         inline friend bool operator>(const LSSNode& a, const LSSNode& b){
-            return a.g < b.g;
+            return a.g > b.g;
         }
 
         inline friend std::ostream& operator<< (std::ostream& stream, const LSSNode& n){

@@ -9,6 +9,11 @@
 struct GraphEdge;
 struct GraphNode;
 
+
+
+void clean_edges(boost::container::flat_set<GraphEdge *> p);
+
+
 struct GraphNode{
     State state;
     boost::container::flat_set<GraphEdge *> predecessors;
@@ -22,7 +27,19 @@ struct GraphNode{
     constexpr friend double operator-(const GraphNode& lhs, const GraphNode& rhs){
         return eightWayDistance(lhs.state.loc, rhs.state.loc);
     }
+
+    inline friend bool operator==(const GraphNode& lhs, const GraphNode& rhs){
+        return lhs.state == rhs.state;
+    }
+
+    inline void clean(){
+        clean_edges(predecessors);
+        clean_edges(successors);
+    }
 };
+
+
+
 
 struct GraphEdge{
     EdgeATF edge;
@@ -44,7 +61,37 @@ struct GraphEdge{
     inline friend bool operator<(const GraphEdge& lhs, const GraphEdge& rhs){
         return lhs < rhs.edge.earliest_arrival_time();
     }
+
+    inline friend bool operator==(const GraphEdge& lhs, const GraphEdge& rhs){
+        return lhs.edge == rhs.edge && *lhs.source == *rhs.source && *lhs.destination == *rhs.destination;
+    }
 };
+
+namespace std {
+    template<>
+    struct hash<GraphNode> {
+        std::size_t operator()(const GraphNode& e) const;
+        // {
+        //     std::size_t seed = 0;
+        //     boost::hash_combine(seed, e.state);
+        //     return seed;
+        // }
+    };
+}
+
+namespace std {
+    template<>
+    struct hash<GraphEdge> {
+        std::size_t operator()(const GraphEdge& e) const ;
+        // {
+        //     std::size_t seed = 0;
+        //     boost::hash_combine(seed, *e.source);
+        //     boost::hash_combine(seed, *e.destination);
+        //     //boost::hash_combine(seed, e.edge);
+        //     return seed;
+        // }
+    };
+}
 
 struct Graph{
     std::vector<GraphEdge> edges;

@@ -10,8 +10,9 @@ namespace rtasipp{
         EdgeATF g;
         double f;
         GraphNode * node;
+        GraphEdge * tla;
         Node() = default;
-        Node(const EdgeATF& e, double _h, GraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
+        Node(const EdgeATF& e, double _h, GraphNode * _node, GraphEdge * _tla):g(e),f(e.earliest_arrival_time() + _h),node(_node),tla(_tla){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
@@ -81,9 +82,9 @@ namespace rtasipp{
         std::unordered_map<GraphNode *, handle_t> handles;
         std::unordered_map<GraphNode *, double> expanded;
 
-        inline void emplace(EdgeATF e, double h, GraphNode * n, GraphNode * p){
+        inline void emplace(EdgeATF e, double h, GraphNode * n, GraphNode * p, GraphEdge * tla){
             parent[n] = p;
-            handles[n] = queue.push(Node(e, h, n));
+            handles[n] = queue.push(Node(e, h, n, tla));
         }
 
         inline bool empty() const{
@@ -100,11 +101,18 @@ namespace rtasipp{
             queue.pop();
         }
 
-        inline void decrease_key(handle_t handle , EdgeATF e, double h, GraphNode * n, GraphNode * p){
+        inline void decrease_key(handle_t handle , EdgeATF e, double h, GraphNode * n, GraphNode * p, GraphEdge * tla){
             parent[n] = p;
-            queue.increase(handle, Node(e, h, n));
+            queue.increase(handle, Node(e, h, n, tla));
         }
     };
+    inline void dump_h_s(std::unordered_map<Location, double> h_static){
+        std::cerr << "h_s\n";
+        for (auto x: h_static){
+            std::cerr << x.first << ": " << x.second << "\n";
+        }
+        std::cerr << "\n";
+    }
 
    std::vector<GraphNode *> search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0);
 }

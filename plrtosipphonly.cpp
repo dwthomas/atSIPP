@@ -23,8 +23,11 @@ void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest){
         h_s_prime[n.node->state.loc] = h_s;
         dijkstraOpen.emplace(h_s, n.node);
     }
+    std::cerr << "Dijkstra open:\n";
+    dump_open(dijkstraOpen);
     while(!dijkstraOpen.empty() && !closed.empty()){
         auto n = dijkstraOpen.top();
+        //std::cerr << "Dijkstra n: " << n << "\n";
         dijkstraOpen.pop();
         closed.erase(n.node);
         auto n_loc = n.node->state.loc;
@@ -41,6 +44,7 @@ void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest){
             double h_s_p = h_s_prime[p_loc];
             double edge_cost =  eightWayDistance(p_loc, n_loc);
             if(h_s_p > edge_cost + h_s_n){
+                //std::cerr << "learning: " <<  edge_cost + h_s_n << " to " << p_loc << " from " << n_loc << "\n";
                 h_s_prime[p_loc] = edge_cost + h_s_n;
                 dijkstraOpen.emplace(edge_cost + h_s_n, p->source);
             }
@@ -61,13 +65,12 @@ std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Locati
     while(!isGoal(*cur, dest)){
         //search 
         std::cerr << *cur << " at " << t << " ";
-        dump_h_s(h_static);
         m.search_timer.resume();
         // run NLASIPP
         path.emplace_back(cur);
         Open open_list;
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr);
-        asipp::search_core_noprune(open_list, dest, m, budget, get_h);
+        auto res = asipp::search_core(open_list, dest, m, budget, get_h);
         if(open_list.empty()){
             std::cerr << "No path found\n";
             exit(-1);
@@ -76,31 +79,33 @@ std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Locati
         m.search_timer.stop();
         //learn
         // static
+        //asipp::dump_open(open_list);
         lsslrtsipp(open_list, dest);
         // dynamic
-        asipp::dump_open(open_list);
+        dump_h_s(h_static);
         // commit 
-        if (open_list.queue.size() < 1){
-            //asipp::dump_open(open_list);
-            std::cout << "No path for agent!\n";
-            exit(-1); 
-        }
-        auto n = open_list.top().node;
-        while(open_list.parent[n] != nullptr){
-            auto nn = open_list.parent[n];
-            if (open_list.parent[nn] == nullptr){
-                for (auto succ: cur->successors){
-                    if(succ->destination == n){
-                        t = succ->edge.arrival_time(t);
-                        break;
-                    }
-                }
-                cur = n; //best TLA
-                //std::cerr << "best TLA:" << *n << "\n";
-                break;
+        GraphNode * best_successor = nullptr;
+        double best_f = std::numeric_limits<double>::infinity();
+        double best_g;
+        std::cerr << "options:\n";
+        for(const auto& e: cur->successors){
+            double g = e->edge.arrival_time(t);
+            double f = g + get_h(*e->destination, g, dest);
+            std::cerr << *e->destination << " at g:" << g << " f: " << f << "\n";  
+            if (f < best_f){
+                best_f = f;
+                best_g = g;
+                best_successor = e->destination;
             }
-            n = nn;
         }
+        std::cerr << "\n";
+        if (best_successor == nullptr){
+            std::cerr << "No successor found!\n";
+            exit(-1);
+        }
+        cur = best_successor;
+        t = best_g;
     } 
+    path.emplace_back(cur);
     return path;
 }
