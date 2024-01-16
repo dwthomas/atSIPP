@@ -14,6 +14,64 @@ inline void dump_h(){
     std::cerr << "h_static done\n";
 }
 
+bool isGoal(const plrtosipphonly::Node& n, const Location& goal_loc){
+    return n.node->state.loc == goal_loc;
+}
+
+void expand(const plrtosipphonly::Node& cur, plrtosipphonly::Open& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const GraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+    m.expanded++;
+    double zeta = cur.g.zeta;
+    for(GraphEdge * successor: cur.node->successors){
+        auto tla = cur.tla;
+        if (tla == nullptr){
+            tla = successor;
+        }
+        if(cur.g.earliest_arrival_time() >= successor->edge.beta || cur.g.supremum_arrival_time() <= successor->edge.zeta){
+            continue;
+        } 
+        double alpha = std::max(cur.g.alpha, successor->edge.alpha - cur.g.delta);
+        double beta = std::min(cur.g.beta, successor->edge.beta - cur.g.delta);
+        double delta = successor->edge.delta + cur.g.delta;
+        EdgeATF arrival_time_function(zeta, alpha, beta, delta);
+        if(open_list.expanded.contains(successor->destination)){
+            continue;
+        }
+        else if (open_list.handles.contains(successor->destination)){
+            auto handle = open_list.handles[successor->destination];
+            if(arrival_time_function.earliest_arrival_time() < (*handle).g.earliest_arrival_time()){
+                m.decreased++;
+                double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
+                //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                open_list.decrease_key(handle ,arrival_time_function, h, successor->destination, successor->source, tla);
+            }
+        }
+        else{
+            m.generated++;
+            double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
+            //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+            open_list.emplace(arrival_time_function, h, successor->destination, successor->source, tla);
+            //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
+        }
+    }
+}
+
+
+void search_core(plrtosipphonly::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+    long start_expansions = m.expanded;
+    while(!open_list.empty()){
+        //dump_open(open_list);
+        auto cur = open_list.top();
+        //std::cout << *cur.node << "\n";
+        if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
+            return;
+        }
+        open_list.pop();
+        expand(cur, open_list, dest, m, hf);
+    }
+    std::cerr << "Failed to find path\n";
+    exit(-1);
+}
+
 void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest){
     std::unordered_map<Location, double> h_s_prime;
     auto closed = open_list.expanded; 
@@ -69,8 +127,8 @@ std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Locati
         // run NLASIPP
         path.emplace_back(cur);
         Open open_list;
-        open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr);
-        auto res = asipp::search_core(open_list, dest, m, budget, get_h);
+        open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr, nullptr);
+        search_core(open_list, dest, m, budget, get_h);
         if(open_list.empty()){
             std::cerr << "No path found\n";
             exit(-1);
@@ -84,27 +142,9 @@ std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Locati
         // dynamic
         dump_h_s(h_static);
         // commit 
-        GraphNode * best_successor = nullptr;
-        double best_f = std::numeric_limits<double>::infinity();
-        double best_g;
-        std::cerr << "options:\n";
-        for(const auto& e: cur->successors){
-            double g = e->edge.arrival_time(t);
-            double f = g + get_h(*e->destination, g, dest);
-            std::cerr << *e->destination << " at g:" << g << " f: " << f << "\n";  
-            if (f < best_f){
-                best_f = f;
-                best_g = g;
-                best_successor = e->destination;
-            }
-        }
-        std::cerr << "\n";
-        if (best_successor == nullptr){
-            std::cerr << "No successor found!\n";
-            exit(-1);
-        }
-        cur = best_successor;
-        t = best_g;
+        auto e = open_list.top().tla;
+        t = e->edge.arrival_time(t);
+        cur = e->destination;
     } 
     path.emplace_back(cur);
     return path;
