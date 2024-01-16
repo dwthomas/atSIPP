@@ -235,7 +235,7 @@ namespace plrtosipphonly{
         }
     };
 
-    void lsslrtsipp(const Open& open_list, const Location& dest);
+    void lsslrtsipp(const Open& open_list, const Location& dest, MetaData& m);
     std::vector<GraphNode *> search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0);
 }
 

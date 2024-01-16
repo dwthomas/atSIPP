@@ -74,7 +74,7 @@ void search_core(plrtosipp::Open& open_list, const Location& dest, MetaData & m,
     exit(-1);
 }
 
-void plrtosipp::lsslrtsipp(const Open& open_list, const Location& dest){
+void plrtosipp::lsslrtsipp(const Open& open_list, const Location& dest, MetaData& m){
     std::unordered_map<Location, double> h_s_prime;
     auto closed = open_list.expanded; 
     LSSOpen dijkstraOpen;
@@ -85,6 +85,7 @@ void plrtosipp::lsslrtsipp(const Open& open_list, const Location& dest){
     }
     while(!dijkstraOpen.empty() && !closed.empty()){
         auto n = dijkstraOpen.top();
+        m.learn_expanded++;
         dijkstraOpen.pop();
         closed.erase(n.node);
         auto n_loc = n.node->state.loc;
@@ -111,7 +112,7 @@ void plrtosipp::lsslrtsipp(const Open& open_list, const Location& dest){
     }
 }
 
-void plrtosipp::plrtolearn(const Open& open_list, const Location& dest){
+void plrtosipp::plrtolearn(const Open& open_list, const Location& dest, MetaData& m){
     auto closed = open_list.expanded; 
     //asipp::dump_open(open_list);
     for (const auto& s: closed){ // node in closed
@@ -125,7 +126,8 @@ void plrtosipp::plrtolearn(const Open& open_list, const Location& dest){
     }
     while(!dijkstraOpen.empty() && !closed.empty()){
         auto n = dijkstraOpen.top();
-        std::cerr << "dijkstra " << n << " " << dijkstraOpen.queue.size() << "\n";
+        m.learn_expanded++;
+        //std::cerr << "dijkstra " << n << " " << dijkstraOpen.queue.size() << "\n";
         dijkstraOpen.pop();
         closed.erase(n.node);
         auto h_d_n = h_dynamic[n.node];
@@ -153,12 +155,13 @@ void plrtosipp::plrtolearn(const Open& open_list, const Location& dest){
 std::vector<GraphNode *> plrtosipp::search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
     std::vector<GraphNode *> path;
     m.init();
+    m.search_timer.start();
     auto cur = source;
     double t = start_time;
     while(!isGoal(*cur, dest)){
         //search 
-        std::cerr << *cur << " at " << t << "\n";
-        std::cerr << "Searching\n";
+        //std::cerr << *cur << " at " << t << "\n";
+        //std::cerr << "Searching\n";
         m.search_timer.resume();
         // run NLASIPP
         path.emplace_back(cur);
@@ -167,18 +170,19 @@ std::vector<GraphNode *> plrtosipp::search(GraphNode * source, const Location& d
         search_core(open_list, dest, m, budget, get_h);
         // Done NLASIPP
         m.search_timer.stop();
-        std::cerr << "learning\n";
+        //std::cerr << "learning\n";
         //learn
         // static
-        lsslrtsipp(open_list, dest);
+        lsslrtsipp(open_list, dest, m);
         // dynamic
-        plrtolearn(open_list, dest);
+        plrtolearn(open_list, dest, m);
         // commit 
-        std::cerr << "commiting\n";
+        //std::cerr << "commiting\n";
         auto e = open_list.top().tla;
         t = e->edge.arrival_time(t);
         cur = e->destination;
     } 
+    m.search_timer.stop();
     path.emplace_back(cur);
     return path;
 }

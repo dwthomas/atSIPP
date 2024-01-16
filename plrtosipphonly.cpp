@@ -72,7 +72,7 @@ void search_core(plrtosipphonly::Open& open_list, const Location& dest, MetaData
     exit(-1);
 }
 
-void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest){
+void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest, MetaData& m){
     std::unordered_map<Location, double> h_s_prime;
     auto closed = open_list.expanded; 
     LSSOpen dijkstraOpen;
@@ -85,6 +85,7 @@ void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest){
     //dump_open(dijkstraOpen);
     while(!dijkstraOpen.empty() && !closed.empty()){
         auto n = dijkstraOpen.top();
+        m.learn_expanded++;
         //std::cerr << "Dijkstra n: " << n << "\n";
         dijkstraOpen.pop();
         closed.erase(n.node);
@@ -118,12 +119,12 @@ void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest){
 std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
     std::vector<GraphNode *> path;
     m.init();
+    m.search_timer.start();
     auto cur = source;
     double t = start_time;
     while(!isGoal(*cur, dest)){
         //search 
         //std::cerr << *cur << " at " << t << " ";
-        m.search_timer.resume();
         // run NLASIPP
         path.emplace_back(cur);
         Open open_list;
@@ -134,11 +135,10 @@ std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Locati
             exit(-1);
         }
         // Done NLASIPP
-        m.search_timer.stop();
         //learn
         // static
         //asipp::dump_open(open_list);
-        lsslrtsipp(open_list, dest);
+        lsslrtsipp(open_list, dest, m);
         // dynamic
         //dump_h_s(h_static);
         // commit 
@@ -147,5 +147,6 @@ std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Locati
         cur = e->destination;
     } 
     path.emplace_back(cur);
+    m.search_timer.stop();
     return path;
 }

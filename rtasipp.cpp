@@ -75,21 +75,19 @@ void search_core(rtasipp::Open& open_list, const Location& dest, MetaData & m, l
 std::vector<GraphNode *> rtasipp::search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
     std::vector<GraphNode *> path;
     m.init();
+    m.search_timer.start();
     auto cur = source;
     double t = start_time;
     while(!isGoal(*cur, dest)){
         //search 
         //std::cerr << "cur: " << *cur << " at " << t << " ";
-        m.search_timer.resume();
         // run NLASIPP
         path.emplace_back(cur);
         Open open_list;
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr, nullptr);
         search_core(open_list, dest, m, budget, get_h);
         // Done NLASIPP
-        m.search_timer.stop();
         //learn
-        m.learning_timer.resume();
         double h_s_prime = std::numeric_limits<double>::infinity();
         for (auto node: open_list.queue){
             double h_s_nx = get_h_s(*node.node, dest);
@@ -101,7 +99,6 @@ std::vector<GraphNode *> rtasipp::search(GraphNode * source, const Location& des
         if(h_s_prime > get_h_s(*cur, dest)){
             set_h_s(cur->state.loc, h_s_prime);
         }
-        m.learning_timer.stop();
         //dump_h_s(h_static);
         auto e = open_list.top().tla;
         t = e->edge.arrival_time(t);
@@ -148,5 +145,6 @@ std::vector<GraphNode *> rtasipp::search(GraphNode * source, const Location& des
         // }
     } 
     path.emplace_back(cur);
+    m.search_timer.stop();
     return path;
 }
