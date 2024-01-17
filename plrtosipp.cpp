@@ -120,9 +120,10 @@ void plrtosipp::plrtolearn(const Open& open_list, const Location& dest, MetaData
     }
     DijkstraOpen dijkstraOpen;
     for (const auto& s: open_list.queue){
-        dijkstraOpen.emplace(s.g, s.node);
+        double h = get_h_s(s.node->state.loc, dest);
         h_dynamic[s.node] = CATF();
-        h_dynamic[s.node].insert(shiftIdentity(get_h_s(s.node->state.loc, dest)), nullptr);
+        h_dynamic[s.node].insert(shiftIdentity(h), nullptr);
+        dijkstraOpen.emplace(h_dynamic[s.node].earliest_arrival_time(), s.node);
     }
     while(!dijkstraOpen.empty() && !closed.empty()){
         auto n = dijkstraOpen.top();
@@ -138,15 +139,20 @@ void plrtosipp::plrtolearn(const Open& open_list, const Location& dest, MetaData
             for (const auto& ap: h_d_n.edges()){
                 const auto& ae = e->edge;
                 auto a_p_prime = compose(ap, ae);
+                double eat_prior = h_dynamic[e->source].earliest_arrival_time();
                 add_h_dyn(*e->source, a_p_prime);
-                if (dijkstraOpen.handles.contains(e->source)){
-                    auto handle = dijkstraOpen.handles[e->source];
-                    //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-                    dijkstraOpen.decrease_key(handle, a_p_prime, e->source);
+                double eat = h_dynamic[e->source].earliest_arrival_time();
+                if(eat < eat_prior){
+                    if (dijkstraOpen.handles.contains(e->source)){
+                        auto handle = dijkstraOpen.handles[e->source];
+                        //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                        dijkstraOpen.decrease_key(handle, eat, e->source);
+                    }
+                    else{
+                        dijkstraOpen.emplace(eat, e->source);
+                    }
                 }
-                else{
-                    dijkstraOpen.emplace(a_p_prime, e->source);
-                }
+                
             }
         }
     }
@@ -162,14 +168,12 @@ std::vector<GraphNode *> plrtosipp::search(GraphNode * source, const Location& d
         //search 
         //std::cerr << *cur << " at " << t << "\n";
         //std::cerr << "Searching\n";
-        m.search_timer.resume();
         // run NLASIPP
         path.emplace_back(cur);
         Open open_list;
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr, nullptr);
         search_core(open_list, dest, m, budget, get_h);
         // Done NLASIPP
-        m.search_timer.stop();
         //std::cerr << "learning\n";
         //learn
         // static

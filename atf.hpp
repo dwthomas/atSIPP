@@ -314,6 +314,14 @@ class CompoundATF{
             return x.second.arrival_time(t);
         }
 
+        inline double earliest_arrival_time() const{
+            auto acc = segments.begin();
+            if (acc == segments.end()){
+                return std::numeric_limits<double>::infinity();
+            }
+            return acc->second.encumbent.earliest_arrival_time();
+        }
+
         inline std::unordered_set<EdgeATF> edges() const{
             std::unordered_set<EdgeATF> retval;
             for (auto seg: segments){

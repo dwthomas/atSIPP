@@ -40,13 +40,13 @@ namespace plrtosipp{
     typedef typename Queue::handle_type handle_t;
 
     struct DijkstraNode{
-        EdgeATF g;
+        double g;
         GraphNode * node;
         DijkstraNode() = default;
-        DijkstraNode(EdgeATF e, GraphNode * _node):g(e),node(_node){}
+        DijkstraNode(double _g, GraphNode * _node):g(_g),node(_node){}
 
         inline friend bool operator>(const DijkstraNode& a, const DijkstraNode& b){
-            return a.g.earliest_arrival_time() > b.g.earliest_arrival_time();
+            return a.g > b.g;
         }
 
         inline friend std::ostream& operator<< (std::ostream& stream, const DijkstraNode& n){
@@ -150,8 +150,8 @@ namespace plrtosipp{
         //std::unordered_map<GraphNode *, GraphNode *> parent;
         std::unordered_map<GraphNode *, Dijkstra_handle_t> handles;
 
-        inline void emplace(EdgeATF e, GraphNode * n){
-            handles[n] = queue.push(DijkstraNode(e,  n));
+        inline void emplace(double g, GraphNode * n){
+            handles[n] = queue.push(DijkstraNode(g,  n));
         }
 
         inline bool empty() const{
@@ -168,8 +168,8 @@ namespace plrtosipp{
             queue.pop();
         }
 
-        inline void decrease_key(Dijkstra_handle_t handle , EdgeATF e, GraphNode * n){
-            queue.update(handle, DijkstraNode(e, n));
+        inline void decrease_key(Dijkstra_handle_t handle , double g, GraphNode * n){
+            queue.update(handle, DijkstraNode(g, n));
         }
     };
 

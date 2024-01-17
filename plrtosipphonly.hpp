@@ -168,7 +168,7 @@ namespace plrtosipphonly{
         }
 
         inline void decrease_key(Dijkstra_handle_t handle , EdgeATF e, GraphNode * n){
-            queue.increase(handle, DijkstraNode(e, n));
+            queue.update(handle, DijkstraNode(e, n));
         }
     };
 
@@ -231,7 +231,7 @@ namespace plrtosipphonly{
         }
 
         inline void decrease_key(LSS_handle_t handle , double g, GraphNode * n){
-            queue.increase(handle, LSSNode(g, n));
+            queue.update(handle, LSSNode(g, n));
         }
     };
 
