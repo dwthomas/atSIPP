@@ -22,3 +22,9 @@ executable('atftest',
             install: true,
             dependencies : [boost_dep,],
             )
+
+executable('testrandom',
+            ['testrandomsipp.cpp', 'randomsippgraph.cpp'],
+            install: true,
+            dependencies : [boost_dep,],
+            )

@@ -6,6 +6,7 @@
 
 #include "constants.hpp"
 #include "map.hpp"
+#include "structs.hpp"
 
 template <typename Configuration_t>
 struct SIPPState{
@@ -16,21 +17,32 @@ struct SIPPState{
     SIPPState(const Configuration_t& c, const atf::interval_t& si):configuration(c),safe_interval(si){}
 
     constexpr bool operator ==(const SIPPState& s) const{
-        return s.configuration == configuration && s.time == time;
+        return s.configuration == configuration && s.safe_interval == safe_interval;
     }
 
     friend std::size_t hash_value(const SIPPState& s){
         std::size_t seed = 0;
-        boost::hash_combine(seed, s.configuration);
-        boost::hash_combine(seed, s.safe_interval);
+        boost::hash_combine(seed, s.configuration.x());
+        boost::hash_combine(seed, s.configuration.y());
+        boost::hash_combine(seed, s.safe_interval.lower());
+        boost::hash_combine(seed, s.safe_interval.upper());
         return seed;
     }
     
     inline friend std::ostream& operator<< (std::ostream& stream, const SIPPState& s){
-        stream << s.configuration << " " << s.time;
+        stream << s.configuration << " " << s.safe_interval.lower() << " " << s.safe_interval.upper();
         return stream;
     }
 };
+
+namespace std {
+    template<typename Configuration_t>
+    struct hash<SIPPState<Configuration_t>> {
+        inline std::size_t operator()(const SIPPState<Configuration_t>& s) const {
+           return hash_value(s);
+        }
+    };
+}
 
 template <typename Configuration_t>
 struct SIPPEdge{
@@ -40,7 +52,7 @@ struct SIPPEdge{
 
 
     SIPPEdge() = default;
-    SIPPEdge(const SIPPState<Configuration_t> & src, const SIPPState<Configuration_t> & dst, atf::time_t dur):source(src),destination(dst),duration(dur){}
+    SIPPEdge(SIPPState<Configuration_t> * src, SIPPState<Configuration_t>* dst, atf::time_t dur):source(src),destination(dst),duration(dur){}
 
     constexpr bool operator ==(const SIPPEdge& s) const{
         return *s.source == *source && *s.destination == *destination;
@@ -52,7 +64,7 @@ struct SIPPEdge{
         boost::hash_combine(seed, *s.destination);
         return seed;
     }
-    
+
     inline friend std::ostream& operator<< (std::ostream& stream, const SIPPEdge& s){
         stream << *s.source << " -> "  << *s.destination << ": " << s.duration;
         return stream;
@@ -62,16 +74,15 @@ struct SIPPEdge{
 template <typename Configuration_t>
 struct SippGraph{
     std::vector<SIPPState<Configuration_t>> vertices;
-    std::vector<SIPPEdge<Configuration_t>> edges;
-    std::unordered_map<SIPPState<Configuration_t>, std::set<SIPPEdge<Configuration_t>>> successors;
-    std::unordered_map<SIPPState<Configuration_t>, std::set<SIPPEdge<Configuration_t>>> predecessors;
+    std::unordered_map<SIPPState<Configuration_t>, std::vector<SIPPEdge<Configuration_t>>> successors;
+    std::unordered_map<SIPPState<Configuration_t>, std::vector<SIPPEdge<Configuration_t>>> predecessors;
 
     SippGraph() = default;
 
     inline friend std::ostream& operator<< (std::ostream& stream, const SippGraph& g){
         for(auto s: g.vertices){
             stream << s << "\n";
-            for (auto succ: g.successors[s]){
+            for (auto succ: g.successors.at(s)){
                 stream << "\t" << succ << "\n";
             }
         }

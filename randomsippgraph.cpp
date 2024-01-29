@@ -1,0 +1,98 @@
+#include "randomsippgraph.hpp"
+#include "constants.hpp"
+#include "structs.hpp"
+#include "sippgraph.hpp"
+#include <unordered_map>
+#include <vector>
+
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/discrete_distribution.hpp>
+
+std::vector<atf::interval_t> generate_safe_intervals(double until, double occupancy, double min_safe_duration, double max_safe_duration, double avg_unsafe_duration, boost::random::mt11213b& generator){
+    std::vector<atf::interval_t> retval;
+    if(occupancy == 0.0){
+        retval.emplace_back(0.0, until);
+        return retval;
+    }
+
+    boost::random::discrete_distribution<> start_safe_flipper({occupancy, 1-occupancy});
+    boost::random::uniform_real_distribution<> safe_duration_rnd(min_safe_duration, max_safe_duration);
+    boost::random::uniform_real_distribution<> unsafe_duration_rnd(0, 2*avg_unsafe_duration);
+
+    bool issafe = start_safe_flipper(generator);
+    double t = 0;
+    while(t < until){
+        if(issafe){
+            double duration = safe_duration_rnd(generator);
+            retval.emplace_back(t, t+duration);
+            t += duration;
+            issafe = false;
+        }
+        else{
+            double duration = unsafe_duration_rnd(generator);
+            t += duration;
+            issafe = true;
+        }
+    }
+    return retval;
+}
+
+SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double occupancy, double min_duration, double max_duration, std::size_t seed){
+    if (occupancy < 0 || min_duration < 0 || max_duration < min_duration || until < 0){
+        std::cerr << "Invalid random graph requested all rates must be non-negative, occ=" <<occupancy << " min_d=" << min_duration << " max_d=" << max_duration << "\n";
+        exit(-1); 
+    }
+
+    double avg_safe_duration = 0.5*(min_duration + max_duration);
+    double avg_unsafe_duration = occupancy * avg_safe_duration;
+    boost::random::mt11213b generator(seed);
+    std::unordered_map<Location, std::vector<atf::interval_t>> states;
+    for(uint y=0; y < map.height; y++){
+        for (uint x =0; x < map.width; x++){
+            if(map.isSafe(x, y)){
+                states[Location(x, y)] = generate_safe_intervals(until,  occupancy, min_duration, max_duration, avg_unsafe_duration, generator);
+            }   
+            else{
+                states[Location(x, y)].clear();
+            }
+        }
+    }
+
+    SippGraph<Location> g;
+    std::unordered_map<SIPPState<Location>, long> indexof;
+    // do vertices
+    for (auto s: states){
+        auto loc = s.first;
+        for(auto interval: s.second){
+            g.vertices.emplace_back(loc,interval);
+            indexof[g.vertices.back()] = g.vertices.size()-1;
+        }
+    }
+    // do edges
+    for (std::size_t i = 0; i < g.vertices.size(); i++){
+        auto v = g.vertices[i];
+        Location l = v.configuration;
+        for(int dx = -1; dx <= 1; dx++){
+            for (int dy = -1; dy <= 1 ; dy++){
+                if(dx == 0 && dy == 0){
+                    continue;
+                }
+                Location sloc(l.x() + dx, l.y() + dy);
+                double dist = eightWayDistance(l, sloc);
+                atf::interval_t shift_source(v.safe_interval.lower() + dist, v.safe_interval.upper()+dist);
+                for(auto di: states[sloc]){
+                    if(boost::icl::intersects(shift_source, di)){
+                        // valid edge exists
+                        SIPPState<Location> vd(sloc, di);
+                        auto vdi = indexof[vd];
+                        SIPPEdge<Location> e(&g.vertices[i], &g.vertices[vdi], dist);
+                        g.successors[v].emplace_back(e);
+                        g.predecessors[vd].emplace_back(e);
+                    }
+                }
+            }
+        }
+    }
+    return g;
+}

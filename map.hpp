@@ -104,9 +104,9 @@ struct Map{
         return getIndex(s.x(), s.y()); 
     }
 
-    inline std::size_t getIndex(State s) const{
-        return getIndex(s.x(), s.y()); 
-    }
+    // inline std::size_t getIndex(State s) const{
+    //     return getIndex(s.x(), s.y()); 
+    // }
 
     inline bool isBlocked(int x, int y) const{
         return occupancy[getIndex(x, y)];
