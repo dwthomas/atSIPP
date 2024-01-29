@@ -26,15 +26,15 @@ struct EdgeATF;
 using interval_t = boost::icl::continuous_interval<double>;
 
 struct EdgeATF{
-    intervalTime_t zeta;
-    intervalTime_t alpha;
-    intervalTime_t beta;
-    intervalTime_t delta;
+    atf::time_t zeta;
+    atf::time_t alpha;
+    atf::time_t beta;
+    atf::time_t delta;
     std::vector<EdgeATF*> successors;
     EdgeATF() = default;
-    EdgeATF(intervalTime_t _zeta, intervalTime_t _alpha, intervalTime_t _beta, intervalTime_t _delta):zeta(_zeta),alpha(_alpha),beta(_beta),delta(_delta){}
+    EdgeATF(atf::time_t _zeta, atf::time_t _alpha, atf::time_t _beta, atf::time_t _delta):zeta(_zeta),alpha(_alpha),beta(_beta),delta(_delta){}
 
-    inline intervalTime_t earliest_arrival_time() const{
+    inline atf::time_t earliest_arrival_time() const{
         return alpha + delta;
     }
     inline interval_t alphabeta() const{
@@ -46,9 +46,9 @@ struct EdgeATF{
         return retval;
     }
 
-    inline intervalTime_t arrival_time(intervalTime_t t) const{
+    inline atf::time_t arrival_time(atf::time_t t) const{
         if(t < zeta || beta <= t){
-            return std::numeric_limits<intervalTime_t>::infinity();
+            return std::numeric_limits<atf::time_t>::infinity();
         }
         if(t < std::min(alpha, beta)){
             return earliest_arrival_time();
@@ -56,9 +56,9 @@ struct EdgeATF{
         return t + delta;
     }
 
-    inline intervalTime_t inclusive_arrival_time(intervalTime_t t) const{
+    inline atf::time_t inclusive_arrival_time(atf::time_t t) const{
         if(t < zeta || beta < t){
-            return std::numeric_limits<intervalTime_t>::infinity();
+            return std::numeric_limits<atf::time_t>::infinity();
         }
         if(t < std::min(alpha, beta)){
             return earliest_arrival_time();
@@ -66,7 +66,7 @@ struct EdgeATF{
         return t + delta;
     }
 
-    inline intervalTime_t supremum_arrival_time() const{
+    inline atf::time_t supremum_arrival_time() const{
         return std::numeric_limits<double>::infinity();
         //return beta + delta;
     }

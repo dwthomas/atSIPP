@@ -10,17 +10,17 @@
 #include "constants.hpp"
 
 
-using SafeInterval = std::pair<intervalTime_t, intervalTime_t>;
+using SafeInterval = atf::interval_t;
 
-inline intervalTime_t begin(const SafeInterval& si){
-    return si.second;
+inline atf::time_t begin(const SafeInterval& si){
+    return si.lower();
 }
 
-inline intervalTime_t end(const SafeInterval& si){
-    return si.first;
+inline atf::time_t end(const SafeInterval& si){
+    return si.upper();
 }
 
-inline bool contains(const SafeInterval& si, intervalTime_t t){
+inline bool contains(const SafeInterval& si, atf::time_t t){
     return begin(si) <= t && t < end(si);
 }
 
@@ -92,7 +92,7 @@ struct State{
         return loc == s.loc && interval == s.interval;
     }
     inline friend std::ostream& operator<< (std::ostream& stream, const State& s){
-        stream << s.loc << " <" << s.interval.second << "," << s.interval.first << ">";
+        stream << s.loc << " <" << s.interval.lower() << "," << s.interval.upper() << ">";
         return stream;
     }
 };
@@ -103,8 +103,8 @@ namespace std {
         inline std::size_t operator()(const State& s) const {
             std::size_t seed = 0;
             boost::hash_combine(seed, s.loc.pack());
-            boost::hash_combine(seed, s.interval.first);
-            boost::hash_combine(seed, s.interval.second);
+            boost::hash_combine(seed, s.interval.lower());
+            boost::hash_combine(seed, s.interval.upper());
             return seed;
         }
     };

@@ -17,7 +17,7 @@ void read_ATF(std::istream& i, std::vector<inATF>& res){
     std::string s;
     if(!(i >> x)){return;}
     i >> y;
-    intervalTime_t zeta, alpha, beta, delta;
+    atf::time_t zeta, alpha, beta, delta;
     i >> s;
     //std::cout << source << " " << dest << " " << s << "\n";
     zeta = stod(s);
@@ -107,8 +107,8 @@ std::size_t std::hash<AtsippGraphNode>::operator()(const AtsippGraphNode& e) con
     std::size_t seed = 0;
     auto s = e.state;
     boost::hash_combine(seed, s.loc.pack());
-    boost::hash_combine(seed, s.interval.first);
-    boost::hash_combine(seed, s.interval.second);
+    boost::hash_combine(seed, s.interval.lower());
+    boost::hash_combine(seed, s.interval.upper());
     return seed;
 }
 
@@ -116,12 +116,12 @@ std::size_t std::hash<GraphEdge>::operator()(const GraphEdge& e) const{
     std::size_t seed = 0;
     auto s = e.source->state;
     boost::hash_combine(seed, s.loc.pack());
-    boost::hash_combine(seed, s.interval.first);
-    boost::hash_combine(seed, s.interval.second);
+    boost::hash_combine(seed, s.interval.lower());
+    boost::hash_combine(seed, s.interval.upper());
     s = e.destination->state;
     boost::hash_combine(seed, s.loc.pack());
-    boost::hash_combine(seed, s.interval.first);
-    boost::hash_combine(seed, s.interval.second);
+    boost::hash_combine(seed, s.interval.lower());
+    boost::hash_combine(seed, s.interval.upper());
     //boost::hash_combine(seed, e.edge);
     return seed;
 }
