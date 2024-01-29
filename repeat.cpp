@@ -19,10 +19,10 @@ double update_reference_time(const EdgeATF& path, rePEAT::Open& open_list){
     return upper_bound;
 }
 
-CompoundATF<std::vector<GraphNode *>> rePEAT::search(GraphNode * source, const Location& dest, MetaData & m, double start_time){
+CompoundATF<std::vector<AtsippGraphNode *>> rePEAT::search(AtsippGraphNode * source, const Location& dest, MetaData & m, double start_time){
     double t_ref = start_time;
-    std::vector<GraphNode *> path;
-    CompoundATF<std::vector<GraphNode *>> solutions;
+    std::vector<AtsippGraphNode *> path;
+    CompoundATF<std::vector<AtsippGraphNode *>> solutions;
     m.init();
     while(t_ref < end(source->state.interval)){
         std::cerr << "tref: " << t_ref << "\n";

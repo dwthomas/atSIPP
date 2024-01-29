@@ -2,14 +2,14 @@
 #include <boost/heap/d_ary_heap.hpp>
 #include <functional>
 #include <unordered_map>
-#include "graph.hpp"
+#include "atsippgraph.hpp"
 
 namespace asipp{
     struct Node;
 
 
 
-    double constexpr h_eight_way_helper(const GraphNode& cur, double cur_t, const Location& dest){
+    double constexpr h_eight_way_helper(const AtsippGraphNode& cur, double cur_t, const Location& dest){
         (void) cur_t;
         return eightWayDistance(cur.state.loc, dest);
     }
@@ -17,9 +17,9 @@ namespace asipp{
     struct Node{
         EdgeATF g;
         double f;
-        GraphNode * node;
+        AtsippGraphNode * node;
         Node() = default;
-        Node(EdgeATF e, double _h, GraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
+        Node(EdgeATF e, double _h, AtsippGraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
@@ -44,20 +44,20 @@ namespace asipp{
     struct Ghost{
         EdgeATF e; 
         double h; 
-        GraphNode * n; 
-        GraphNode * p;
-        Ghost(EdgeATF _e, double _h, GraphNode * _n, GraphNode * _p):e(_e),h(_h),n(_n),p(_p){}
+        AtsippGraphNode * n; 
+        AtsippGraphNode * p;
+        Ghost(EdgeATF _e, double _h, AtsippGraphNode * _n, AtsippGraphNode * _p):e(_e),h(_h),n(_n),p(_p){}
     };
 
     using Queue = boost::heap::d_ary_heap<Node, boost::heap::arity<4>, boost::heap::mutable_<true>, boost::heap::compare<std::greater<Node>>>;
     typedef typename Queue::handle_type handle_t;
     struct Open{
         Queue queue;
-        std::unordered_map<GraphNode *, GraphNode *> parent;
-        std::unordered_map<GraphNode *, handle_t> handles;
-        std::unordered_map<GraphNode *, double> expanded;
+        std::unordered_map<AtsippGraphNode *, AtsippGraphNode *> parent;
+        std::unordered_map<AtsippGraphNode *, handle_t> handles;
+        std::unordered_map<AtsippGraphNode *, double> expanded;
 
-        inline void emplace(EdgeATF e, double h, GraphNode * n, GraphNode * p){
+        inline void emplace(EdgeATF e, double h, AtsippGraphNode * n, AtsippGraphNode * p){
             parent[n] = p;
             handles[n] = queue.push(Node(e, h, n));
         }
@@ -76,7 +76,7 @@ namespace asipp{
             queue.pop();
         }
 
-        inline void decrease_key(handle_t handle , EdgeATF e, double h, GraphNode * n, GraphNode * p){
+        inline void decrease_key(handle_t handle , EdgeATF e, double h, AtsippGraphNode * n, AtsippGraphNode * p){
             parent[n] = p;
             queue.update(handle, Node(e, h, n));
         }
@@ -89,9 +89,9 @@ namespace asipp{
 
 
     template <typename Node_t, typename Open_t>
-    std::vector<GraphNode *> backup(const Node_t& n, Open_t& open_list){
-        std::vector<GraphNode *> res;
-        GraphNode* cur = n.node;
+    std::vector<AtsippGraphNode *> backup(const Node_t& n, Open_t& open_list){
+        std::vector<AtsippGraphNode *> res;
+        AtsippGraphNode* cur = n.node;
         while(cur != nullptr){
             res.push_back(cur);
             cur = open_list.parent[cur];
@@ -102,7 +102,7 @@ namespace asipp{
     }
 
     template <typename Node_t, typename Open_t>
-    inline void expand(const Node_t& cur, Open_t& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
+    inline void expand(const Node_t& cur, Open_t& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const AtsippGraphNode&, double , const Location& ) = h_eight_way_helper){
         m.expanded++;
         double zeta = cur.g.zeta;
         for(GraphEdge * successor: cur.node->successors){
@@ -136,7 +136,7 @@ namespace asipp{
     }
 
     template <typename Node_t, typename Open_t>
-    inline void expand_noprune(const Node_t& cur, Open_t& open_list, std::vector<Ghost>& ghost_open, const Location& goal_loc, MetaData & m, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
+    inline void expand_noprune(const Node_t& cur, Open_t& open_list, std::vector<Ghost>& ghost_open, const Location& goal_loc, MetaData & m, double (*hf)(const AtsippGraphNode&, double , const Location& ) = h_eight_way_helper){
         m.expanded++;
         double zeta = cur.g.zeta;
         for(GraphEdge * successor: cur.node->successors){
@@ -186,7 +186,7 @@ namespace asipp{
 
     }
     template<typename Open_t>
-    inline std::pair<std::vector<GraphNode *>, EdgeATF> search_core(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
+    inline std::pair<std::vector<AtsippGraphNode *>, EdgeATF> search_core(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const AtsippGraphNode&, double , const Location& ) = h_eight_way_helper){
         long start_expansions = m.expanded;
         m.search_timer.start();
         while(!open_list.empty()){
@@ -205,7 +205,7 @@ namespace asipp{
     }
 
     template<typename Open_t>
-    inline void search_core_noprune(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper){
+    inline void search_core_noprune(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const AtsippGraphNode&, double , const Location& ) = h_eight_way_helper){
         long start_expansions = m.expanded;
         std::vector<Ghost> ghost_open;
         while(!open_list.empty()){
@@ -223,6 +223,6 @@ namespace asipp{
         }
     }
 
-    std::pair<std::vector<GraphNode *>, EdgeATF> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = h_eight_way_helper);
+    std::pair<std::vector<AtsippGraphNode *>, EdgeATF> search(AtsippGraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0, long expansion_budget = -1, double (*hf)(const AtsippGraphNode&, double , const Location& ) = h_eight_way_helper);
 }
 

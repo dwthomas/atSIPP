@@ -4,7 +4,7 @@
 #include "augmentedsipp.hpp"
 
 std::unordered_map<Location, double> plrtosipp::h_static;
-std::unordered_map<const GraphNode *, plrtosipp::CATF> plrtosipp::h_dynamic;
+std::unordered_map<const AtsippGraphNode *, plrtosipp::CATF> plrtosipp::h_dynamic;
 
 inline void dump_h(){
     std::cerr << "h_static\n";
@@ -19,7 +19,7 @@ bool isGoal(const plrtosipp::Node& n, const Location& goal_loc){
     return n.node->state.loc == goal_loc;
 }
 
-void expand(const plrtosipp::Node& cur, plrtosipp::Open& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const GraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+void expand(const plrtosipp::Node& cur, plrtosipp::Open& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
     m.expanded++;
     double zeta = cur.g.zeta;
     for(GraphEdge * successor: cur.node->successors){
@@ -57,7 +57,7 @@ void expand(const plrtosipp::Node& cur, plrtosipp::Open& open_list, const Locati
 }
 
 
-void search_core(plrtosipp::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+void search_core(plrtosipp::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
     long start_expansions = m.expanded;
     //asipp::dump_open(open_list);
     while(!open_list.empty()){
@@ -158,8 +158,8 @@ void plrtosipp::plrtolearn(const Open& open_list, const Location& dest, MetaData
     }
 }
 
-std::vector<GraphNode *> plrtosipp::search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
-    std::vector<GraphNode *> path;
+std::vector<AtsippGraphNode *> plrtosipp::search(AtsippGraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
+    std::vector<AtsippGraphNode *> path;
     m.init();
     m.search_timer.start();
     auto cur = source;

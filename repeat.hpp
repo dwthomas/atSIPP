@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
 #include <unordered_map>
-#include "graph.hpp"
+#include "atsippgraph.hpp"
 
 namespace rePEAT{
     struct Node;
@@ -9,9 +9,9 @@ namespace rePEAT{
     struct Node{
         EdgeATF g;
         double f;
-        GraphNode * node;
+        AtsippGraphNode * node;
         Node() = default;
-        Node(EdgeATF e, double _h, GraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
+        Node(EdgeATF e, double _h, AtsippGraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
@@ -39,11 +39,11 @@ namespace rePEAT{
     
     struct Open{
         Queue queue;
-        std::unordered_map<GraphNode *, GraphNode *> parent;
-        std::unordered_map<GraphNode *, handle_t> handles;
-        std::unordered_map<GraphNode *, double> expanded;
+        std::unordered_map<AtsippGraphNode *, AtsippGraphNode *> parent;
+        std::unordered_map<AtsippGraphNode *, handle_t> handles;
+        std::unordered_map<AtsippGraphNode *, double> expanded;
 
-        inline void emplace(EdgeATF e, double h, GraphNode * n, GraphNode * p){
+        inline void emplace(EdgeATF e, double h, AtsippGraphNode * n, AtsippGraphNode * p){
             parent[n] = p;
             handles[n] = queue.push(Node(e, h, n));
         }
@@ -62,12 +62,12 @@ namespace rePEAT{
             queue.pop();
         }
 
-        inline void decrease_key(handle_t handle , EdgeATF e, double h, GraphNode * n, GraphNode * p){
+        inline void decrease_key(handle_t handle , EdgeATF e, double h, AtsippGraphNode * n, AtsippGraphNode * p){
             parent[n] = p;
             queue.increase(handle, Node(e, h, n));
         }
     };
 
-   CompoundATF<std::vector<GraphNode *>> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);
+   CompoundATF<std::vector<AtsippGraphNode *>> search(AtsippGraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);
 }
 

@@ -1,4 +1,4 @@
-#include "graph.hpp"
+#include "atsippgraph.hpp"
 #include "constants.hpp"
 #include <iostream>
 #include <fstream>
@@ -33,7 +33,7 @@ void read_ATF(std::istream& i, std::vector<inATF>& res){
     res.emplace_back(x, y, edge); 
 }
 
-Graph read_graph(std::string filename){
+Atsippgraph read_graph(std::string filename){
     std::ifstream file(filename, std::ios_base::in | std::ios_base::binary);
     boost::iostreams::filtering_streambuf<boost::iostreams::input> inbuf;
     inbuf.push(boost::iostreams::gzip_decompressor());
@@ -43,7 +43,7 @@ Graph read_graph(std::string filename){
     //std::cout << instream.rdbuf();
  
     std::vector<inATF> res;
-    Graph g;
+    Atsippgraph g;
     long n_nodes;
     std::string s;
     instream >> s >> s >> n_nodes;
@@ -88,8 +88,8 @@ Graph read_graph(std::string filename){
     return g;
 }
 
-GraphNode *  find_earliest(Graph& g, Location loc, double start_time){
-    GraphNode * cur = nullptr;
+AtsippGraphNode *  find_earliest(Atsippgraph& g, Location loc, double start_time){
+    AtsippGraphNode * cur = nullptr;
     for (auto& node: g.nodes){
         if (loc == node.first.loc && contains(node.first.interval, start_time) && (cur == nullptr || begin(cur->state.interval) > begin(node.first.interval))){
             cur = node.second;
@@ -103,7 +103,7 @@ GraphNode *  find_earliest(Graph& g, Location loc, double start_time){
     return cur;
 }
 
-std::size_t std::hash<GraphNode>::operator()(const GraphNode& e) const{
+std::size_t std::hash<AtsippGraphNode>::operator()(const AtsippGraphNode& e) const{
     std::size_t seed = 0;
     auto s = e.state;
     boost::hash_combine(seed, s.loc.pack());

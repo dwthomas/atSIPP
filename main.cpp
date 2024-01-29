@@ -10,7 +10,7 @@
 #include "plrtosipphonly.hpp"
 //#include "grtsipp.hpp"
 #include "structs.hpp"
-#include "graph.hpp"
+#include "atsippgraph.hpp"
 
 namespace po = boost::program_options;
 
@@ -42,11 +42,11 @@ int main(int argc, char* argv[]) {
             Location source_loc(vm["startx"].as<int>(), vm["starty"].as<int>());
             Location goal_loc(vm["goalx"].as<int>(), vm["goaly"].as<int>());
             std::cerr << "Reading graph\n";
-            Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
+            Atsippgraph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string());
             std::cerr << g << "\n";
             //g.dump();
             double start_time = vm["startTime"].as<double>();
-            GraphNode * source = find_earliest(g, source_loc, start_time);
+            AtsippGraphNode * source = find_earliest(g, source_loc, start_time);
             if(vm["search"].as<std::string>() == "sipp"){
                 MetaData m;
                 auto res = sipp::search(source, goal_loc, m, start_time);

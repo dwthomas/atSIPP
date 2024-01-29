@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
 #include <unordered_map>
-#include "graph.hpp"
+#include "atsippgraph.hpp"
 
 namespace plrtosipphonly{
     struct Node;
@@ -9,10 +9,10 @@ namespace plrtosipphonly{
     struct Node{
         EdgeATF g;
         double f;
-        GraphNode * node;
+        AtsippGraphNode * node;
         GraphEdge * tla;
         Node() = default;
-        Node(const EdgeATF& e, double _h, GraphNode * _node, GraphEdge * _tla):g(e),f(e.earliest_arrival_time() + _h),node(_node),tla(_tla){}
+        Node(const EdgeATF& e, double _h, AtsippGraphNode * _node, GraphEdge * _tla):g(e),f(e.earliest_arrival_time() + _h),node(_node),tla(_tla){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
@@ -40,9 +40,9 @@ namespace plrtosipphonly{
 
     struct DijkstraNode{
         EdgeATF g;
-        GraphNode * node;
+        AtsippGraphNode * node;
         DijkstraNode() = default;
-        DijkstraNode(EdgeATF e, GraphNode * _node):g(e),node(_node){}
+        DijkstraNode(EdgeATF e, AtsippGraphNode * _node):g(e),node(_node){}
 
         inline friend bool operator>(const DijkstraNode& a, const DijkstraNode& b){
             return a.g.earliest_arrival_time() > b.g.earliest_arrival_time();
@@ -65,7 +65,7 @@ namespace plrtosipphonly{
 
     using CATF = CompoundATF<std::nullptr_t>;
     extern std::unordered_map<Location, double> h_static;
-    extern std::unordered_map<const GraphNode *, CATF> h_dynamic;
+    extern std::unordered_map<const AtsippGraphNode *, CATF> h_dynamic;
 
     inline void dump_h_s(std::unordered_map<Location, double> h_static){
         std::cerr << "h_s\n";
@@ -82,11 +82,11 @@ namespace plrtosipphonly{
         return h_static[cur_loc];
     }
 
-    inline double get_h_s(const GraphNode& cur, const Location& dest){
+    inline double get_h_s(const AtsippGraphNode& cur, const Location& dest){
         return get_h_s(cur.state.loc, dest);
     }
 
-    inline double get_h(const GraphNode& cur, double cur_t, const Location& dest){
+    inline double get_h(const AtsippGraphNode& cur, double cur_t, const Location& dest){
         double h_s = get_h_s(cur, dest);
         if (h_dynamic.find(&cur) == h_dynamic.end()){
             return h_s;
@@ -100,7 +100,7 @@ namespace plrtosipphonly{
         h_static[loc] = x;
     }
 
-    inline void add_h_dyn(const GraphNode& cur, EdgeATF patf){
+    inline void add_h_dyn(const AtsippGraphNode& cur, EdgeATF patf){
         if(h_dynamic.find(&cur) == h_dynamic.end()){
             h_dynamic[&cur] = CATF();
         }
@@ -109,17 +109,17 @@ namespace plrtosipphonly{
         h_dynamic[&cur].insert(patf, nullptr);
     }
 
-    inline bool isGoal(const GraphNode& cur, const Location& dest){
+    inline bool isGoal(const AtsippGraphNode& cur, const Location& dest){
         return cur.state.loc == dest;
     }
 
     struct Open{
         Queue queue;
-        std::unordered_map<GraphNode *, GraphNode *> parent;
-        std::unordered_map<GraphNode *, handle_t> handles;
-        std::unordered_map<GraphNode *, double> expanded;
+        std::unordered_map<AtsippGraphNode *, AtsippGraphNode *> parent;
+        std::unordered_map<AtsippGraphNode *, handle_t> handles;
+        std::unordered_map<AtsippGraphNode *, double> expanded;
 
-        inline void emplace(EdgeATF e, double h, GraphNode * n, GraphNode * p, GraphEdge * tla){
+        inline void emplace(EdgeATF e, double h, AtsippGraphNode * n, AtsippGraphNode * p, GraphEdge * tla){
             parent[n] = p;
             handles[n] = queue.push(Node(e, h, n, tla));
         }
@@ -138,7 +138,7 @@ namespace plrtosipphonly{
             queue.pop();
         }
 
-        inline void decrease_key(handle_t handle , EdgeATF e, double h, GraphNode * n, GraphNode * p, GraphEdge * tla){
+        inline void decrease_key(handle_t handle , EdgeATF e, double h, AtsippGraphNode * n, AtsippGraphNode * p, GraphEdge * tla){
             parent[n] = p;
             queue.increase(handle, Node(e, h, n, tla));
         }
@@ -146,10 +146,10 @@ namespace plrtosipphonly{
 
     struct DijkstraOpen{
         DijkstraQueue queue;
-        //std::unordered_map<GraphNode *, GraphNode *> parent;
-        std::unordered_map<GraphNode *, Dijkstra_handle_t> handles;
+        //std::unordered_map<AtsippGraphNode *, AtsippGraphNode *> parent;
+        std::unordered_map<AtsippGraphNode *, Dijkstra_handle_t> handles;
 
-        inline void emplace(EdgeATF e, GraphNode * n){
+        inline void emplace(EdgeATF e, AtsippGraphNode * n){
             handles[n] = queue.push(DijkstraNode(e, n));
         }
 
@@ -167,7 +167,7 @@ namespace plrtosipphonly{
             queue.pop();
         }
 
-        inline void decrease_key(Dijkstra_handle_t handle , EdgeATF e, GraphNode * n){
+        inline void decrease_key(Dijkstra_handle_t handle , EdgeATF e, AtsippGraphNode * n){
             queue.update(handle, DijkstraNode(e, n));
         }
     };
@@ -185,9 +185,9 @@ namespace plrtosipphonly{
 
     struct LSSNode{
         double g;
-        GraphNode * node;
+        AtsippGraphNode * node;
         LSSNode() = default;
-        LSSNode(double _g,  GraphNode * _node):g(_g),node(_node){}
+        LSSNode(double _g,  AtsippGraphNode * _node):g(_g),node(_node){}
 
         inline friend bool operator>(const LSSNode& a, const LSSNode& b){
             return a.g > b.g;
@@ -209,10 +209,10 @@ namespace plrtosipphonly{
 
     struct LSSOpen{
         LSSQueue queue;
-        //std::unordered_map<GraphNode *, GraphNode *> parent;
-        std::unordered_map<GraphNode *, LSS_handle_t> handles;
+        //std::unordered_map<AtsippGraphNode *, AtsippGraphNode *> parent;
+        std::unordered_map<AtsippGraphNode *, LSS_handle_t> handles;
 
-        inline void emplace(double g, GraphNode * n){
+        inline void emplace(double g, AtsippGraphNode * n){
             handles[n] = queue.push(LSSNode(g, n));
         }
 
@@ -230,12 +230,12 @@ namespace plrtosipphonly{
             queue.pop();
         }
 
-        inline void decrease_key(LSS_handle_t handle , double g, GraphNode * n){
+        inline void decrease_key(LSS_handle_t handle , double g, AtsippGraphNode * n){
             queue.update(handle, LSSNode(g, n));
         }
     };
 
     void lsslrtsipp(const Open& open_list, const Location& dest, MetaData& m);
-    std::vector<GraphNode *> search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0);
+    std::vector<AtsippGraphNode *> search(AtsippGraphNode * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0);
 }
 

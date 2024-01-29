@@ -12,8 +12,8 @@ inline void dump_h(){
     std::cerr << "h_static done\n";
 }
 
-std::vector<GraphNode *> grtsipp::search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
-    std::vector<GraphNode *> path;
+std::vector<AtsippGraphNode *> grtsipp::search(AtsippGraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
+    std::vector<AtsippGraphNode *> path;
     CompoundATF solutions(path);
     m.init();
     auto cur = source;

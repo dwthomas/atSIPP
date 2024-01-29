@@ -4,7 +4,7 @@
 #include "augmentedsipp.hpp"
 
 std::unordered_map<Location, double> plrtosipphonly::h_static;
-std::unordered_map<const GraphNode *, plrtosipphonly::CATF> plrtosipphonly::h_dynamic;
+std::unordered_map<const AtsippGraphNode *, plrtosipphonly::CATF> plrtosipphonly::h_dynamic;
 
 inline void dump_h(){
     std::cerr << "h_static\n";
@@ -18,7 +18,7 @@ bool isGoal(const plrtosipphonly::Node& n, const Location& goal_loc){
     return n.node->state.loc == goal_loc;
 }
 
-void expand(const plrtosipphonly::Node& cur, plrtosipphonly::Open& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const GraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+void expand(const plrtosipphonly::Node& cur, plrtosipphonly::Open& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
     m.expanded++;
     double zeta = cur.g.zeta;
     for(GraphEdge * successor: cur.node->successors){
@@ -56,7 +56,7 @@ void expand(const plrtosipphonly::Node& cur, plrtosipphonly::Open& open_list, co
 }
 
 
-void search_core(plrtosipphonly::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+void search_core(plrtosipphonly::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
     long start_expansions = m.expanded;
     while(!open_list.empty()){
         //dump_open(open_list);
@@ -116,8 +116,8 @@ void plrtosipphonly::lsslrtsipp(const Open& open_list, const Location& dest, Met
 
 
 
-std::vector<GraphNode *> plrtosipphonly::search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
-    std::vector<GraphNode *> path;
+std::vector<AtsippGraphNode *> plrtosipphonly::search(AtsippGraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
+    std::vector<AtsippGraphNode *> path;
     m.init();
     m.search_timer.start();
     auto cur = source;

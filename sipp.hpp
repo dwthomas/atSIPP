@@ -2,7 +2,7 @@
 #include <boost/heap/d_ary_heap.hpp>
 #include <functional>
 #include <unordered_map>
-#include "graph.hpp"
+#include "atsippgraph.hpp"
 #include "structs.hpp"
 
 namespace sipp{
@@ -11,9 +11,9 @@ namespace sipp{
     struct Node{
         double g;
         double f;
-        GraphNode * node;
+        AtsippGraphNode * node;
         Node() = default;
-        Node(double _g, double _h, GraphNode * _node):g(_g),f(_g + _h),node(_node){}
+        Node(double _g, double _h, AtsippGraphNode * _node):g(_g),f(_g + _h),node(_node){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
@@ -38,11 +38,11 @@ namespace sipp{
     typedef typename Queue::handle_type handle_t;
     struct Open{
         Queue queue;
-        std::unordered_map<GraphNode *, GraphNode *> parent;
-        std::unordered_map<GraphNode *, handle_t> handles;
-        std::unordered_map<GraphNode *, double> expanded;
+        std::unordered_map<AtsippGraphNode *, AtsippGraphNode *> parent;
+        std::unordered_map<AtsippGraphNode *, handle_t> handles;
+        std::unordered_map<AtsippGraphNode *, double> expanded;
 
-        inline void emplace(double g, double h, GraphNode * n, GraphNode * p){
+        inline void emplace(double g, double h, AtsippGraphNode * n, AtsippGraphNode * p){
             parent[n] = p;
             handles[n] = queue.push(Node(g, h, n));
         }
@@ -61,13 +61,13 @@ namespace sipp{
             queue.pop();
         }
 
-        inline void decrease_key(handle_t handle ,double g, double h, GraphNode * n, GraphNode * p){
+        inline void decrease_key(handle_t handle ,double g, double h, AtsippGraphNode * n, AtsippGraphNode * p){
             parent[n] = p;
             queue.update(handle, Node(g, h, n));
         }
     };
 
 
-   std::vector<GraphNode *> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);
+   std::vector<AtsippGraphNode *> search(AtsippGraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);
 }
 

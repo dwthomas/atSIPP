@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
 #include <unordered_map>
-#include "graph.hpp"
+#include "atsippgraph.hpp"
 
 
 
@@ -11,9 +11,9 @@ namespace grtsipp{
     struct Node{
         EdgeATF g;
         double f;
-        GraphNode * node;
+        AtsippGraphNode * node;
         Node() = default;
-        Node(EdgeATF e, double _h, GraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
+        Node(EdgeATF e, double _h, AtsippGraphNode * _node):g(e),f(e.earliest_arrival_time() + _h),node(_node){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
@@ -41,10 +41,10 @@ namespace grtsipp{
     typedef typename Queue::handle_type handle_t;
     
     struct DijkstraNode{
-        GraphNode * s;
+        AtsippGraphNode * s;
         double h;
         DijkstraNode() = default;
-        DijkstraNode(GraphNode * st, double _h):s(st),h(_h){}
+        DijkstraNode(AtsippGraphNode * st, double _h):s(st),h(_h){}
 
         inline friend bool operator>(const DijkstraNode& a, const DijkstraNode& b){
             return a.h > b.h;
@@ -68,7 +68,7 @@ namespace grtsipp{
 
     extern std::unordered_map<State, double> h;
 
-    inline double get_h(const GraphNode& cur, double cur_t, const Location& dest){
+    inline double get_h(const AtsippGraphNode& cur, double cur_t, const Location& dest){
         (void) cur_t;
         State s = cur.state;
         if (!h.contains(s)){
@@ -81,17 +81,17 @@ namespace grtsipp{
         h[s] = new_h;
     }
 
-    inline bool isGoal(const GraphNode& cur, const Location& dest){
+    inline bool isGoal(const AtsippGraphNode& cur, const Location& dest){
         return cur.state.loc == dest;
     }
 
     struct Open{
         Queue queue;
-        std::unordered_map<GraphNode *, GraphNode *> parent;
-        std::unordered_map<GraphNode *, handle_t> handles;
-        std::unordered_map<GraphNode *, double> expanded;
+        std::unordered_map<AtsippGraphNode *, AtsippGraphNode *> parent;
+        std::unordered_map<AtsippGraphNode *, handle_t> handles;
+        std::unordered_map<AtsippGraphNode *, double> expanded;
 
-        inline void emplace(EdgeATF e, double h, GraphNode * n, GraphNode * p){
+        inline void emplace(EdgeATF e, double h, AtsippGraphNode * n, AtsippGraphNode * p){
             parent[n] = p;
             handles[n] = queue.push(Node(e, h, n));
         }
@@ -110,13 +110,13 @@ namespace grtsipp{
             queue.pop();
         }
 
-        inline void decrease_key(handle_t handle , EdgeATF e, double h, GraphNode * n, GraphNode * p){
+        inline void decrease_key(handle_t handle , EdgeATF e, double h, AtsippGraphNode * n, AtsippGraphNode * p){
             parent[n] = p;
             queue.increase(handle, Node(e, h, n));
         }
     };
 
-   std::vector<GraphNode *> search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0);
+   std::vector<AtsippGraphNode *> search(AtsippGraphNode * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0);
 }
 
 

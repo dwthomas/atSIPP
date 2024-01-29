@@ -1,5 +1,5 @@
 #include "sipp.hpp"
-#include "graph.hpp"
+#include "atsippgraph.hpp"
 #include "structs.hpp"
 #include <algorithm>
 #include <cmath>
@@ -48,9 +48,9 @@ void dump_open(const Open& open_list){
     }
 }
 
-std::vector<GraphNode *> backup(const Node& n, Open& open_list){
-    std::vector<GraphNode *> res;
-    GraphNode* cur = n.node;
+std::vector<AtsippGraphNode *> backup(const Node& n, Open& open_list){
+    std::vector<AtsippGraphNode *> res;
+    AtsippGraphNode* cur = n.node;
     while(cur != nullptr){
         res.push_back(cur);
         cur = open_list.parent[cur];
@@ -60,7 +60,7 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
     return res;
 }
 
-std::vector<GraphNode *> sipp::search(GraphNode * source, const Location& dest, MetaData& m, double start_time){
+std::vector<AtsippGraphNode *> sipp::search(AtsippGraphNode * source, const Location& dest, MetaData& m, double start_time){
     Open open_list;
     m.init();
     m.search_timer.start();

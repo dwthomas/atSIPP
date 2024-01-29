@@ -4,7 +4,7 @@
 #include "augmentedsipp.hpp"
 
 std::unordered_map<Location, double> rtasipp::h_static;
-std::unordered_map<const GraphNode *, rtasipp::CATF> rtasipp::h_dynamic;
+std::unordered_map<const AtsippGraphNode *, rtasipp::CATF> rtasipp::h_dynamic;
 
 inline void dump_h(){
     std::cerr << "h_static\n";
@@ -18,7 +18,7 @@ bool isGoal(const rtasipp::Node& n, const Location& goal_loc){
     return n.node->state.loc == goal_loc;
 }
 
-void expand(const rtasipp::Node& cur, rtasipp::Open& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const GraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+void expand(const rtasipp::Node& cur, rtasipp::Open& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
     m.expanded++;
     double zeta = cur.g.zeta;
     for(GraphEdge * successor: cur.node->successors){
@@ -56,7 +56,7 @@ void expand(const rtasipp::Node& cur, rtasipp::Open& open_list, const Location& 
 }
 
 
-void search_core(rtasipp::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const GraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+void search_core(rtasipp::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
     long start_expansions = m.expanded;
     while(!open_list.empty()){
         //dump_open(open_list);
@@ -72,8 +72,8 @@ void search_core(rtasipp::Open& open_list, const Location& dest, MetaData & m, l
     exit(-1);
 }
 
-std::vector<GraphNode *> rtasipp::search(GraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
-    std::vector<GraphNode *> path;
+std::vector<AtsippGraphNode *> rtasipp::search(AtsippGraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
+    std::vector<AtsippGraphNode *> path;
     m.init();
     m.search_timer.start();
     auto cur = source;
@@ -103,7 +103,7 @@ std::vector<GraphNode *> rtasipp::search(GraphNode * source, const Location& des
         auto e = open_list.top().tla;
         t = e->edge.arrival_time(t);
         cur = e->destination;
-        // GraphNode * best_successor = nullptr;
+        // AtsippGraphNode * best_successor = nullptr;
         // GraphEdge * best_edge;
         // double best_f = std::numeric_limits<double>::infinity();
         // double best_g;

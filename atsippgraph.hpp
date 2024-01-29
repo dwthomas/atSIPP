@@ -7,28 +7,25 @@
 #include <boost/unordered/unordered_flat_map.hpp>
 
 struct GraphEdge;
-struct GraphNode;
-
-
+struct AtsippGraphNode;
 
 void clean_edges(boost::container::flat_set<GraphEdge *> p);
 
-
-struct GraphNode{
+struct AtsippGraphNode{
     State state;
     boost::container::flat_set<GraphEdge *> predecessors;
     boost::container::flat_set<GraphEdge *> successors;
-    GraphNode() = default;
-    GraphNode(const State& s):state(s){}
-    inline friend std::ostream& operator<<(std::ostream& stream, const GraphNode& gn){
+    AtsippGraphNode() = default;
+    AtsippGraphNode(const State& s):state(s){}
+    inline friend std::ostream& operator<<(std::ostream& stream, const AtsippGraphNode& gn){
         stream << gn.state << " ns:" << gn.successors.size();
         return stream;
     }
-    constexpr friend double operator-(const GraphNode& lhs, const GraphNode& rhs){
+    constexpr friend double operator-(const AtsippGraphNode& lhs, const AtsippGraphNode& rhs){
         return eightWayDistance(lhs.state.loc, rhs.state.loc);
     }
 
-    inline friend bool operator==(const GraphNode& lhs, const GraphNode& rhs){
+    inline friend bool operator==(const AtsippGraphNode& lhs, const AtsippGraphNode& rhs){
         return lhs.state == rhs.state;
     }
 
@@ -43,8 +40,8 @@ struct GraphNode{
 
 struct GraphEdge{
     EdgeATF edge;
-    GraphNode * source;
-    GraphNode * destination;
+    AtsippGraphNode * source;
+    AtsippGraphNode * destination;
     GraphEdge(const EdgeATF& e):edge(e){
         source = nullptr;
         destination = nullptr;
@@ -69,8 +66,8 @@ struct GraphEdge{
 
 namespace std {
     template<>
-    struct hash<GraphNode> {
-        std::size_t operator()(const GraphNode& e) const;
+    struct hash<AtsippGraphNode> {
+        std::size_t operator()(const AtsippGraphNode& e) const;
         // {
         //     std::size_t seed = 0;
         //     boost::hash_combine(seed, e.state);
@@ -93,11 +90,11 @@ namespace std {
     };
 }
 
-struct Graph{
+struct Atsippgraph{
     std::vector<GraphEdge> edges;
-    std::vector<GraphNode> node_array;
-    boost::unordered::unordered_flat_map<State, GraphNode *, std::hash<State>> nodes;
-    Graph() = default;
+    std::vector<AtsippGraphNode> node_array;
+    boost::unordered::unordered_flat_map<State, AtsippGraphNode *, std::hash<State>> nodes;
+    Atsippgraph() = default;
     inline void dump() const{
         for (const auto & n: nodes){
             std::cout << *n.second;
@@ -111,12 +108,12 @@ struct Graph{
             std::cout << e << "\n";
         }
     }
-    inline friend std::ostream& operator<< (std::ostream& stream, const Graph& g){
+    inline friend std::ostream& operator<< (std::ostream& stream, const Atsippgraph& g){
         stream << g.edges.size() << " edges, " << g.nodes.size() << " nodes";       
         return stream;
     }
 };
 
-Graph read_graph(std::string filename);
-GraphNode * find_earliest(Graph& g, Location loc, double start_time);
+Atsippgraph read_graph(std::string filename);
+AtsippGraphNode * find_earliest(Atsippgraph& g, Location loc, double start_time);
 
