@@ -86,7 +86,7 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
                         // valid edge exists
                         SIPPState<Location> vd(sloc, di);
                         auto vdi = indexof[vd];
-                        SIPPEdge<Location> e(&g.vertices[i], &g.vertices[vdi], dist);
+                        SIPPEdge<Location> e(&g.vertices[i], &g.vertices[vdi], dist, atf::interval_t(0, atf::infty()));
                         g.successors[v].emplace_back(e);
                         g.predecessors[vd].emplace_back(e);
                     }

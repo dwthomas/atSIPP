@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <boost/container/flat_set.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
+#include "sippgraph.hpp"
 
 struct GraphEdge;
 struct AtsippGraphNode;

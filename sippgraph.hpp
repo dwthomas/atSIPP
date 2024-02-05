@@ -49,19 +49,22 @@ struct SIPPEdge{
     SIPPState<Configuration_t> * source;
     SIPPState<Configuration_t> * destination;
     atf::time_t duration;
+    atf::interval_t safe_interval;
 
 
     SIPPEdge() = default;
-    SIPPEdge(SIPPState<Configuration_t> * src, SIPPState<Configuration_t>* dst, atf::time_t dur):source(src),destination(dst),duration(dur){}
+    SIPPEdge(SIPPState<Configuration_t> * src, SIPPState<Configuration_t>* dst, atf::time_t dur, atf::interval_t interval):source(src),destination(dst),duration(dur),safe_interval(interval){}
 
     constexpr bool operator ==(const SIPPEdge& s) const{
-        return *s.source == *source && *s.destination == *destination;
+        return *s.source == *source && *s.destination == *destination && safe_interval == s.safe_interval;
     }
 
     friend std::size_t hash_value(const SIPPEdge& s){
         std::size_t seed = 0;
         boost::hash_combine(seed, *s.source);
         boost::hash_combine(seed, *s.destination);
+        boost::hash_combine(seed, s.safe_interval.lower());
+        boost::hash_combine(seed, s.safe_interval.upper());
         return seed;
     }
 
