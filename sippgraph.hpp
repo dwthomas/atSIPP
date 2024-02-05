@@ -69,7 +69,7 @@ struct SIPPEdge{
     }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const SIPPEdge& s){
-        stream << *s.source << " -> "  << *s.destination << ": " << s.duration;
+        stream << *s.source << " -> "  << *s.destination << " [" << s.safe_interval.lower() << "," << s.safe_interval.upper() << "): " << s.duration;
         return stream;
     }
 };

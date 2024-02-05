@@ -78,6 +78,9 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
                 if(dx == 0 && dy == 0){
                     continue;
                 }
+                else if (dx != 0  && dy != 0) {
+                    continue;
+                }
                 Location sloc(l.x() + dx, l.y() + dy);
                 double dist = eightWayDistance(l, sloc);
                 atf::interval_t shift_source(v.safe_interval.lower() + dist, v.safe_interval.upper()+dist);

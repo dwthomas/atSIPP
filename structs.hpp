@@ -65,6 +65,11 @@ constexpr double eightWayDistance(const Location& l1, const Location& l2){
     return (double)(flat +  sqrt2()*diag);
 }
 
+constexpr double manhattanDistance(const Location& l1, const Location& l2){
+    int dx = std::abs(l1.x() - l2.x()); 
+    int dy = std::abs(l1.y() - l2.y()); 
+    return dx + dy;
+}
 
 namespace std {
     template<>
