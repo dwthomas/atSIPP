@@ -40,7 +40,7 @@ AtSIPPEdge<Configuration_t> compile(const SIPPEdge<Configuration_t>& sipp_edge){
         sipp_edge.safe_interval.lower(),
         std::max(
             u.safe_interval.lower(),
-            v.safe_interval.lower()-sipp_edge.duration
+            v.safe_interval.lower() - sipp_edge.duration
         )
     );
     double beta = std::min(
@@ -88,3 +88,20 @@ struct AtSippGraph{
         return stream;
     }
 };
+
+template <typename Configuration_t>
+const SIPPState<Configuration_t> *  find_earliest(const SippGraph<Configuration_t>& g, Configuration_t loc, double start_time){
+    SIPPState<Configuration_t> * cur = nullptr;
+    for (std::size_t i = 0; i < g.vertices.size(); i++){
+        const auto& v = g.vertices.at(i);
+        if (loc == v.configuration && contains(v.safe_interval, start_time)){
+            return &v;
+        }
+    }
+    if(cur == nullptr){
+        std::cerr << "Error: unable to find safe starting state: tried to find ";
+        std::cerr << loc << " at time t=" << start_time << "\n";
+        exit(-1);
+    }
+    return cur;
+}

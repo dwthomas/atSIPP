@@ -11,9 +11,9 @@ namespace sipp{
     struct Node{
         double g;
         double f;
-        AtsippGraphNode * node;
+        const SIPPState<Location> * state;
         Node() = default;
-        Node(double _g, double _h, AtsippGraphNode * _node):g(_g),f(_g + _h),node(_node){}
+        Node(double _g, double _h, const SIPPState<Location> * _node):g(_g),f(_g + _h),state(_node){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
@@ -23,7 +23,7 @@ namespace sipp{
         }
 
         inline friend std::ostream& operator<< (std::ostream& stream, const Node& n){
-            stream << *n.node << " g:" << n.g << ", f:" << n.f;
+            stream << *n.state << " g:" << n.g << ", f:" << n.f;
             return stream;
         }
     };
@@ -38,11 +38,11 @@ namespace sipp{
     typedef typename Queue::handle_type handle_t;
     struct Open{
         Queue queue;
-        std::unordered_map<AtsippGraphNode *, AtsippGraphNode *> parent;
-        std::unordered_map<AtsippGraphNode *, handle_t> handles;
-        std::unordered_map<AtsippGraphNode *, double> expanded;
+        std::unordered_map<const SIPPState<Location> *, const SIPPState<Location> *> parent;
+        std::unordered_map<const SIPPState<Location> *, handle_t> handles;
+        std::unordered_map<const SIPPState<Location> *, double> expanded;
 
-        inline void emplace(double g, double h, AtsippGraphNode * n, AtsippGraphNode * p){
+        inline void emplace(double g, double h, const SIPPState<Location> * n, const SIPPState<Location> * p){
             parent[n] = p;
             handles[n] = queue.push(Node(g, h, n));
         }
@@ -57,17 +57,17 @@ namespace sipp{
 
         inline void pop(){
             Node n = top();
-            expanded[n.node] = n.g;
+            expanded[n.state] = n.g;
             queue.pop();
         }
 
-        inline void decrease_key(handle_t handle ,double g, double h, AtsippGraphNode * n, AtsippGraphNode * p){
+        inline void decrease_key(handle_t handle ,double g, double h, SIPPState<Location> * n, SIPPState<Location> * p){
             parent[n] = p;
             queue.update(handle, Node(g, h, n));
         }
     };
 
 
-   std::vector<AtsippGraphNode *> search(AtsippGraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);
+   std::vector<const SIPPState<Location> *> search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0);
 }
 

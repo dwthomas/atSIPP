@@ -1,5 +1,6 @@
 #include "sipp.hpp"
 #include "atsippgraph.hpp"
+#include "sippgraph.hpp"
 #include "structs.hpp"
 #include <algorithm>
 #include <cmath>
@@ -7,33 +8,41 @@
 using namespace sipp;
 
 bool isGoal(const Node& n, const Location& goal_loc){
-    return n.node->state.loc == goal_loc;
+    return n.state->configuration == goal_loc;
 }
 
-void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
+void expand(const SippGraph<Location>g, const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
     m.expanded++;
-    for(GraphEdge * successor: cur.node->successors){
-        double arrival_time = successor->edge.arrival_time(cur.g);
-        if(cur.g >= successor->edge.beta || end(cur.node->state.interval) <= successor->edge.zeta){
-            continue;
-        } 
-        if(open_list.expanded.contains(successor->destination)){
+    auto successors = g.successors.at(*cur.state);
+    for(const auto & successor : successors){
+        if(open_list.expanded.contains(successor.destination)){
             continue;
         }
-        else if (open_list.handles.contains(successor->destination)){
-            auto handle = open_list.handles[successor->destination];
-            if(arrival_time < (*handle).g){
+        double earliest_arrival_time = std::max(
+            cur.g + successor.duration, // no wait
+            std::max(
+                successor.safe_interval.lower(),
+                successor.destination->safe_interval.lower() - successor.duration
+            )
+        );
+        if(!contains(cur.state->safe_interval, earliest_arrival_time) || 
+           !contains(successor.safe_interval, earliest_arrival_time) || 
+           !contains(successor.destination->safe_interval, earliest_arrival_time + successor.duration)){
+            continue;
+        }
+        if (open_list.handles.contains(successor.destination)){
+            auto handle = open_list.handles[successor.destination];
+            if(earliest_arrival_time < (*handle).g){
                 m.decreased++;
                 //std::cerr << "Decrease " << *handle << "\n";
-                double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-                open_list.decrease_key(handle, arrival_time, h, successor->destination, successor->source);
+                double h = eightWayDistance(successor.destination->configuration, goal_loc);
+                open_list.decrease_key(handle, earliest_arrival_time, h, successor.destination, successor.source);
             }
         }
         else{
             m.generated++;
-            double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-            open_list.emplace(arrival_time, h, successor->destination, successor->source);
-            //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
+            double h = eightWayDistance(successor.destination->configuration, goal_loc);
+            open_list.emplace(earliest_arrival_time, h, successor.destination, successor.source);
         }
     }
 }
@@ -48,9 +57,9 @@ void dump_open(const Open& open_list){
     }
 }
 
-std::vector<AtsippGraphNode *> backup(const Node& n, Open& open_list){
-    std::vector<AtsippGraphNode *> res;
-    AtsippGraphNode* cur = n.node;
+std::vector<const SIPPState<Location> *> backup(const Node& n, Open& open_list){
+    std::vector<const SIPPState<Location> *> res;
+    const SIPPState<Location> * cur = n.state;
     while(cur != nullptr){
         res.push_back(cur);
         cur = open_list.parent[cur];
@@ -60,11 +69,11 @@ std::vector<AtsippGraphNode *> backup(const Node& n, Open& open_list){
     return res;
 }
 
-std::vector<AtsippGraphNode *> sipp::search(AtsippGraphNode * source, const Location& dest, MetaData& m, double start_time){
+std::vector<const SIPPState<Location> *> sipp::search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData& m, double start_time){
     Open open_list;
     m.init();
     m.search_timer.start();
-    open_list.emplace(start_time, eightWayDistance(dest, source->state.loc), source, nullptr);
+    open_list.emplace(start_time, eightWayDistance(dest, source->configuration), source, nullptr);
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
@@ -74,7 +83,7 @@ std::vector<AtsippGraphNode *> sipp::search(AtsippGraphNode * source, const Loca
             return backup(cur, open_list);
         }
         open_list.pop();
-        expand(cur, open_list, dest, m);
+        expand(g, cur, open_list, dest, m);
     }
     std::cerr << "Failed to find path\n";
     exit(-1);
