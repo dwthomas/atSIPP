@@ -21,13 +21,13 @@ void expand(const SippGraph<Location>& g, const Node& cur, Open& open_list, cons
         double earliest_arrival_time = std::max(
             cur.g + successor.duration, // no wait
             std::max(
-                successor.safe_interval.lower(),
-                successor.destination->safe_interval.lower() - successor.duration
+                successor.safe_interval.lower() + successor.duration,
+                successor.destination->safe_interval.lower()
             )
         );
-        if(!contains(cur.state->safe_interval, earliest_arrival_time) || 
-           !contains(successor.safe_interval, earliest_arrival_time) || 
-           !contains(successor.destination->safe_interval, earliest_arrival_time + successor.duration)){
+        if(!contains(cur.state->safe_interval, earliest_arrival_time - successor.duration) || 
+           !contains(successor.safe_interval, earliest_arrival_time - successor.duration) || 
+           !contains(successor.destination->safe_interval, earliest_arrival_time)){
             continue;
         }
         if (open_list.handles.contains(successor.destination)){
