@@ -46,15 +46,17 @@ int main(int argc, char* argv[]) {
             // read map
             Location source_loc(vm["startx"].as<int>(), vm["starty"].as<int>());
             Location goal_loc(vm["goalx"].as<int>(), vm["goaly"].as<int>());
-            std::cerr << "Reading graph\n";
+            std::cerr << "Reading graph...";
             Map m(vm["map"].as<std::filesystem::path>().string());
             double until = vm["until"].as<double>();
             double occupancy = vm["occupancy"].as<double>();
             double min_duration = vm["minDuration"].as<double>();
             double max_duration = vm["maxDuration"].as<double>();
-            SippGraph<Location> g = make_random_sipp_graph(m, until, occupancy, min_duration, max_duration);
+            SippGraph<Location> g = make_random_sipp_graph(m, until, occupancy, min_duration, max_duration, source_loc, goal_loc);
             //std::cout << g << "\n";
+            std::cerr << "SIPP graph made, compiling...";
             AtSippGraph<Location> atg(g);
+            std::cerr << "compiled!\n";
             //g.dump();
             double start_time = vm["startTime"].as<double>();
             const SIPPState<Location> * source = find_earliest(g, source_loc, start_time);
@@ -66,15 +68,15 @@ int main(int argc, char* argv[]) {
                 }
                 std::cout << m << "\n";
             }
-            // else if(vm["search"].as<std::string>() == "asipp"){
-            //     MetaData m;
-            //     auto res = asipp::search(source, goal_loc, m, start_time);
-            //     for(auto n: res.first){
-            //         std::cout << *n << "\n";
-            //     }
-            //     std::cout << res.second << "\n";
-            //     std::cout << m << "\n";
-            // }
+            else if(vm["search"].as<std::string>() == "asipp"){
+                MetaData m;
+                auto res = asipp::search(atg, source, goal_loc, m, start_time);
+                for(auto n: res.first){
+                    std::cout << *n << "\n";
+                }
+                std::cout << res.second << "\n";
+                std::cout << m << "\n";
+            }
             // else if(vm["search"].as<std::string>() == "repeat"){
             //     MetaData m;
             //     auto res = rePEAT::search(source, goal_loc, m, start_time);

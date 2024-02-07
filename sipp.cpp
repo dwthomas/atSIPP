@@ -11,7 +11,7 @@ bool isGoal(const Node& n, const Location& goal_loc){
     return n.state->configuration == goal_loc;
 }
 
-void expand(const SippGraph<Location>g, const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
+void expand(const SippGraph<Location>& g, const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
     m.expanded++;
     auto successors = g.successors.at(*cur.state);
     for(const auto & successor : successors){

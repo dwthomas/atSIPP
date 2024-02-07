@@ -38,7 +38,7 @@ std::vector<atf::interval_t> generate_safe_intervals(double until, double occupa
     return retval;
 }
 
-SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double occupancy, double min_duration, double max_duration, std::size_t seed){
+SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double occupancy, double min_duration, double max_duration, const Location& start_location, const Location& goal_location, std::size_t seed){
     if (occupancy < 0 || min_duration < 0 || max_duration < min_duration || until < 0){
         std::cerr << "Invalid random graph requested all rates must be non-negative, occ=" <<occupancy << " min_d=" << min_duration << " max_d=" << max_duration << "\n";
         exit(-1); 
@@ -50,11 +50,16 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
     std::unordered_map<Location, std::vector<atf::interval_t>> states;
     for(uint y=0; y < map.height; y++){
         for (uint x =0; x < map.width; x++){
-            if(map.isSafe(x, y)){
-                states[Location(x, y)] = generate_safe_intervals(until,  occupancy, min_duration, max_duration, avg_unsafe_duration, generator);
+            Location l(x, y);
+            if(map.isSafe(x, y) && (l == start_location || l == goal_location)){
+                //std::cerr << l << "\n";
+                states[l].emplace_back(0, atf::infty());
+            }
+            else if(map.isSafe(x, y)){
+                states[l] = generate_safe_intervals(until,  occupancy, min_duration, max_duration, avg_unsafe_duration, generator);
             }   
             else{
-                states[Location(x, y)].clear();
+                states[l].clear();
             }
         }
     }
@@ -73,6 +78,12 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
     for (std::size_t i = 0; i < g.vertices.size(); i++){
         auto v = g.vertices[i];
         Location l = v.configuration;
+        if(!g.successors.contains(v)){
+           g.successors[v].clear(); 
+        }
+        if(!g.predecessors.contains(v)){
+           g.predecessors[v].clear(); 
+        }
         for(int dx = -1; dx <= 1; dx++){
             for (int dy = -1; dy <= 1 ; dy++){
                 if(dx == 0 && dy == 0){
