@@ -9,11 +9,10 @@
 #include <boost/random/uniform_real_distribution.hpp>
 #include <boost/random/discrete_distribution.hpp>
 
-std::vector<atf::interval_t> generate_safe_intervals(double until, double occupancy, double min_safe_duration, double max_safe_duration, double avg_unsafe_duration, boost::random::mt11213b& generator){
-    std::vector<atf::interval_t> retval;
+void generate_safe_intervals(std::vector<atf::interval_t>& retval, double until, double occupancy, double min_safe_duration, double max_safe_duration, double avg_unsafe_duration, boost::random::mt11213b& generator){
     if(occupancy == 0.0){
         retval.emplace_back(0.0, until);
-        return retval;
+        return;
     }
 
     boost::random::discrete_distribution<> start_safe_flipper({occupancy, 1-occupancy});
@@ -35,7 +34,6 @@ std::vector<atf::interval_t> generate_safe_intervals(double until, double occupa
             issafe = true;
         }
     }
-    return retval;
 }
 
 SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double occupancy, double min_duration, double max_duration, const Location& start_location, const Location& goal_location, std::size_t seed){
@@ -47,19 +45,20 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
     double avg_safe_duration = 0.5*(min_duration + max_duration);
     double avg_unsafe_duration = occupancy * avg_safe_duration;
     boost::random::mt11213b generator(seed);
-    std::unordered_map<Location, std::vector<atf::interval_t>> states;
+    std::vector<std::vector<atf::interval_t>> states;
+    states.resize(map.size);
     for(uint y=0; y < map.height; y++){
         for (uint x =0; x < map.width; x++){
             Location l(x, y);
             if(map.isSafe(x, y) && (l == start_location || l == goal_location)){
                 //std::cerr << l << "\n";
-                states[l].emplace_back(0, atf::infty());
+                states[map.getIndex(l)].emplace_back(0, atf::infty());
             }
             else if(map.isSafe(x, y)){
-                states[l] = generate_safe_intervals(until,  occupancy, min_duration, max_duration, avg_unsafe_duration, generator);
+                generate_safe_intervals(states[map.getIndex(l)], until,  occupancy, min_duration, max_duration, avg_unsafe_duration, generator);
             }   
             else{
-                states[l].clear();
+                states[map.getIndex(l)].clear();
             }
         }
     }
@@ -67,17 +66,18 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
     SippGraph<Location> g;
     std::unordered_map<SIPPState<Location>, long> indexof;
     // do vertices
-    for (auto s: states){
-        auto loc = s.first;
-        for(auto interval: s.second){
+    for (std::size_t i = 0; i < states.size(); i++){
+        auto loc = map.index2Location(i);
+        for(auto interval: states[i]){
             g.vertices.emplace_back(loc,interval);
             indexof[g.vertices.back()] = g.vertices.size()-1;
         }
     }
     // do edges
+    SIPPState<Location> vd;
     for (std::size_t i = 0; i < g.vertices.size(); i++){
-        auto v = g.vertices[i];
-        Location l = v.configuration;
+        SIPPState<Location> * v = &g.vertices[i];
+        Location l = v->configuration;
         if(!g.successors.contains(v)){
            g.successors[v].clear(); 
         }
@@ -94,15 +94,19 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
                 }
                 Location sloc(l.x() + dx, l.y() + dy);
                 double dist = eightWayDistance(l, sloc);
-                atf::interval_t shift_source(v.safe_interval.lower() + dist, v.safe_interval.upper()+dist);
-                for(auto di: states[sloc]){
+                atf::interval_t shift_source(v->safe_interval.lower() + dist, v->safe_interval.upper()+dist);
+                if(!map.inBounds(sloc.x(), sloc.y())){
+                    continue;
+                }
+                for(const auto& di: states[map.getIndex(sloc)]){
                     if(boost::icl::intersects(shift_source, di)){
                         // valid edge exists
-                        SIPPState<Location> vd(sloc, di);
+                        vd.configuration = sloc;
+                        vd.safe_interval =  di;
                         auto vdi = indexof[vd];
-                        SIPPEdge<Location> e(&g.vertices[i], &g.vertices[vdi], dist, atf::interval_t(0, atf::infty()));
-                        g.successors[v].emplace_back(e);
-                        g.predecessors[vd].emplace_back(e);
+                        //SIPPEdge<Location> e(&g.vertices[i], &g.vertices[vdi], dist, atf::interval_t(0, atf::infty()));
+                        g.successors[v].emplace_back(&g.vertices[i], &g.vertices[vdi], dist, atf::interval_t(0, atf::infty()));
+                        g.predecessors[&g.vertices[vdi]].emplace_back(&g.vertices[i], &g.vertices[vdi], dist, atf::interval_t(0, atf::infty()));
                     }
                 }
             }

@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
             // read map
             Location source_loc(vm["startx"].as<int>(), vm["starty"].as<int>());
             Location goal_loc(vm["goalx"].as<int>(), vm["goaly"].as<int>());
-            std::cerr << "Reading graph...";
+            std::cerr << "Generating SIPP graph...";
             Map m(vm["map"].as<std::filesystem::path>().string());
             double until = vm["until"].as<double>();
             double occupancy = vm["occupancy"].as<double>();
@@ -54,9 +54,10 @@ int main(int argc, char* argv[]) {
             double max_duration = vm["maxDuration"].as<double>();
             SippGraph<Location> g = make_random_sipp_graph(m, until, occupancy, min_duration, max_duration, source_loc, goal_loc);
             //std::cout << g << "\n";
-            std::cerr << "SIPP graph made, compiling...";
-            AtSippGraph<Location> atg(g);
+            std::cerr << "SIPP graph made, compiling @SIPP graph...";
+            AtSippGraph<Location> atg(&g);
             std::cerr << "compiled!\n";
+            //std::cerr << atg << "\n";
             //g.dump();
             double start_time = vm["startTime"].as<double>();
             const SIPPState<Location> * source = find_earliest(g, source_loc, start_time);
@@ -89,15 +90,15 @@ int main(int argc, char* argv[]) {
             //     std::cout << m << "\n";
             //     std::cout << res;
             // }
-            // else if(vm["search"].as<std::string>() == "rtasipp"){
-            //     MetaData m;
-            //     long budget = vm["budget"].as<long>();
-            //     auto res = rtasipp::search(source, goal_loc, m, budget, start_time);
-            //     for(auto n: res){
-            //         std::cout << *n << "\n";
-            //     }
-            //     std::cout << m << "\n";
-            // }
+            else if(vm["search"].as<std::string>() == "rtasipp"){
+                MetaData m;
+                long budget = vm["budget"].as<long>();
+                auto res = rtasipp::search(atg, source, goal_loc, m, start_time, budget);
+                for(auto n: res){
+                    std::cout << *n << "\n";
+                }
+                std::cout << m << "\n";
+            }
             // else if(vm["search"].as<std::string>() == "grtsipp"){
             //     MetaData m;
             //     long budget = vm["budget"].as<long>();

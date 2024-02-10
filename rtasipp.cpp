@@ -2,9 +2,10 @@
 #include "rtasipp.hpp"
 #include "atf.hpp"
 #include "augmentedsipp.hpp"
+#include "sippgraph.hpp"
 
 std::unordered_map<Location, double> rtasipp::h_static;
-std::unordered_map<const AtsippGraphNode *, rtasipp::CATF> rtasipp::h_dynamic;
+std::unordered_map<const SIPPState<Location> *, rtasipp::CATF> rtasipp::h_dynamic;
 
 inline void dump_h(){
     std::cerr << "h_static\n";
@@ -14,94 +15,97 @@ inline void dump_h(){
     std::cerr << "h_static done\n";
 }
 
-bool isGoal(const rtasipp::Node& n, const Location& goal_loc){
-    return n.node->state.loc == goal_loc;
-}
+// bool isGoal(const rtasipp::Node& n, const Location& goal_loc){
+//     return n.node->state.loc == goal_loc;
+// }
 
-void expand(const rtasipp::Node& cur, rtasipp::Open& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
-    m.expanded++;
-    double zeta = cur.g.zeta;
-    for(GraphEdge * successor: cur.node->successors){
-        auto tla = cur.tla;
-        if (tla == nullptr){
-            tla = successor;
-        }
-        if(cur.g.earliest_arrival_time() >= successor->edge.beta || cur.g.supremum_arrival_time() <= successor->edge.zeta){
-            continue;
-        } 
-        double alpha = std::max(cur.g.alpha, successor->edge.alpha - cur.g.delta);
-        double beta = std::min(cur.g.beta, successor->edge.beta - cur.g.delta);
-        double delta = successor->edge.delta + cur.g.delta;
-        EdgeATF arrival_time_function(zeta, alpha, beta, delta);
-        if(open_list.expanded.contains(successor->destination)){
-            continue;
-        }
-        else if (open_list.handles.contains(successor->destination)){
-            auto handle = open_list.handles[successor->destination];
-            if(arrival_time_function.earliest_arrival_time() < (*handle).g.earliest_arrival_time()){
-                m.decreased++;
-                double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
-                //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-                open_list.decrease_key(handle ,arrival_time_function, h, successor->destination, successor->source, tla);
-            }
-        }
-        else{
-            m.generated++;
-            double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
-            //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-            open_list.emplace(arrival_time_function, h, successor->destination, successor->source, tla);
-            //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
-        }
-    }
-}
+// void expand(const rtasipp::Node& cur, rtasipp::Open& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+//     m.expanded++;
+//     double zeta = cur.g.zeta;
+//     for(GraphEdge * successor: cur.node->successors){
+//         auto tla = cur.tla;
+//         if (tla == nullptr){
+//             tla = successor;
+//         }
+//         if(cur.g.earliest_arrival_time() >= successor->edge.beta || cur.g.supremum_arrival_time() <= successor->edge.zeta){
+//             continue;
+//         } 
+//         double alpha = std::max(cur.g.alpha, successor->edge.alpha - cur.g.delta);
+//         double beta = std::min(cur.g.beta, successor->edge.beta - cur.g.delta);
+//         double delta = successor->edge.delta + cur.g.delta;
+//         EdgeATF arrival_time_function(zeta, alpha, beta, delta);
+//         if(open_list.expanded.contains(successor->destination)){
+//             continue;
+//         }
+//         else if (open_list.handles.contains(successor->destination)){
+//             auto handle = open_list.handles[successor->destination];
+//             if(arrival_time_function.earliest_arrival_time() < (*handle).g.earliest_arrival_time()){
+//                 m.decreased++;
+//                 double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
+//                 //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+//                 open_list.decrease_key(handle ,arrival_time_function, h, successor->destination, successor->source, tla);
+//             }
+//         }
+//         else{
+//             m.generated++;
+//             double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
+//             //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+//             open_list.emplace(arrival_time_function, h, successor->destination, successor->source, tla);
+//             //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
+//         }
+//     }
+// }
 
 
-void search_core(rtasipp::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
-    long start_expansions = m.expanded;
-    while(!open_list.empty()){
-        //dump_open(open_list);
-        auto cur = open_list.top();
-        //std::cout << *cur.node << "\n";
-        if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
-            return;
-        }
-        open_list.pop();
-        expand(cur, open_list, dest, m, hf);
-    }
-    std::cerr << "Failed to find path\n";
-    exit(-1);
-}
+// void search_core(rtasipp::Open& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const AtsippGraphNode&, double , const Location& ) = asipp::h_eight_way_helper){
+//     long start_expansions = m.expanded;
+//     while(!open_list.empty()){
+//         //dump_open(open_list);
+//         auto cur = open_list.top();
+//         //std::cout << *cur.node << "\n";
+//         if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
+//             return;
+//         }
+//         open_list.pop();
+//         expand(cur, open_list, dest, m, hf);
+//     }
+//     std::cerr << "Failed to find path\n";
+//     exit(-1);
+// }
 
-std::vector<AtsippGraphNode *> rtasipp::search(AtsippGraphNode * source, const Location& dest, MetaData & m, long budget, double start_time){
-    std::vector<AtsippGraphNode *> path;
+std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time, long expansion_budget){
+    std::vector<const SIPPState<Location> *> path;
     m.init();
-    m.search_timer.start();
     auto cur = source;
     double t = start_time;
-    while(!isGoal(*cur, dest)){
+    while(cur->configuration != dest){
         //search 
         //std::cerr << "cur: " << *cur << " at " << t << " ";
         // run NLASIPP
         path.emplace_back(cur);
-        Open open_list;
+        asipp::Open open_list;
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr, nullptr);
-        search_core(open_list, dest, m, budget, get_h);
+        //std::cerr << "pre:" << m << "\n";
+        asipp::search_core(g, open_list, dest, m, expansion_budget, &get_h);
+        //std::cerr << "post: " << m << "\n";
         // Done NLASIPP
         //learn
         double h_s_prime = std::numeric_limits<double>::infinity();
-        for (auto node: open_list.queue){
-            double h_s_nx = get_h_s(*node.node, dest);
+        for (const auto& node: open_list.queue){
+            double h_s_nx = get_h_s(node.state, dest);
             h_s_prime = std::min(h_s_prime, node.g.delta + h_s_nx);
             EdgeATF eatf = node.g;
             eatf.delta += h_s_nx;
-            add_h_dyn(*cur, eatf);
+            add_h_dyn(cur, eatf);
+            //std::cerr << "n: " << node << "\n";
         }
-        if(h_s_prime > get_h_s(*cur, dest)){
-            set_h_s(cur->state.loc, h_s_prime);
+        if(h_s_prime > get_h_s(cur, dest)){
+            set_h_s(cur->configuration, h_s_prime);
         }
         //dump_h_s(h_static);
+        //asipp::dump_open(open_list);
         auto e = open_list.top().tla;
-        t = e->edge.arrival_time(t);
+        t = e->duration.arrival_time(t);
         cur = e->destination;
         // AtsippGraphNode * best_successor = nullptr;
         // GraphEdge * best_edge;

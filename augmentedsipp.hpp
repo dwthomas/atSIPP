@@ -20,8 +20,9 @@ namespace asipp{
         EdgeATF g;
         double f;
         const SIPPState<Location> * state;
+        const AtSIPPEdge<Location> * tla;
         Node() = default;
-        Node(EdgeATF e, double _h, const SIPPState<Location> * _state):g(e),f(e.earliest_arrival_time() + _h),state(_state){}
+        Node(EdgeATF e, double _h, const SIPPState<Location> * _state, const AtSIPPEdge<Location> * _tla):g(e),f(e.earliest_arrival_time() + _h),state(_state),tla(_tla){}
 
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
@@ -59,9 +60,9 @@ namespace asipp{
         std::unordered_map<const SIPPState<Location> *, handle_t> handles;
         std::unordered_map<const SIPPState<Location> *, double> expanded;
 
-        inline void emplace(EdgeATF e, double h, const SIPPState<Location> * n, const SIPPState<Location> * p){
+        inline void emplace(EdgeATF e, double h, const SIPPState<Location> * n, const SIPPState<Location> * p, const AtSIPPEdge<Location> * tla){
             parent[n] = p;
-            handles[n] = queue.push(Node(e, h, n));
+            handles[n] = queue.push(Node(e, h, n, tla));
         }
 
         inline bool empty() const{
@@ -78,9 +79,9 @@ namespace asipp{
             queue.pop();
         }
 
-        inline void decrease_key(handle_t handle , EdgeATF e, double h, const SIPPState<Location> * n, const SIPPState<Location> * p){
+        inline void decrease_key(handle_t handle , EdgeATF e, double h, const SIPPState<Location> * n, const SIPPState<Location> * p, const AtSIPPEdge<Location> * tla){
             parent[n] = p;
-            queue.update(handle, Node(e, h, n));
+            queue.update(handle, Node(e, h, n, tla));
         }
     };
 
@@ -107,10 +108,15 @@ namespace asipp{
     inline void expand(const AtSippGraph<Location>& g, const Node_t& cur, Open_t& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
         m.expanded++;
         double zeta = cur.g.zeta;
-        for(const AtSIPPEdge<Location>& successor: g.successors.at(*cur.state)){
+        //std::cerr << cur.state << *cur.state << "\n";
+        for(const AtSIPPEdge<Location>& successor: g.successors.at(cur.state)){
             if(cur.g.earliest_arrival_time() >= successor.duration.beta || cur.g.supremum_arrival_time() <= successor.duration.zeta){
                 continue;
             } 
+            auto tla = cur.tla;
+            if (tla == nullptr){
+                tla = &successor;
+            }
             double alpha = std::max(cur.g.alpha, successor.duration.alpha - cur.g.delta);
             double beta = std::min(cur.g.beta, successor.duration.beta - cur.g.delta);
             double delta = successor.duration.delta + cur.g.delta;
@@ -124,14 +130,14 @@ namespace asipp{
                     m.decreased++;
                     double h = hf(*successor.destination, arrival_time_function.earliest_arrival_time(), goal_loc);
                     //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-                    open_list.decrease_key(handle ,arrival_time_function, h, successor.destination, successor.source);
+                    open_list.decrease_key(handle ,arrival_time_function, h, successor.destination, successor.source, tla);
                 }
             }
             else{
                 m.generated++;
                 double h = hf(*successor.destination, arrival_time_function.earliest_arrival_time(), goal_loc);
                 //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-                open_list.emplace(arrival_time_function, h, successor.destination, successor.source);
+                open_list.emplace(arrival_time_function, h, successor.destination, successor.source, tla);
                 //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
             }
         }
@@ -192,9 +198,11 @@ namespace asipp{
         long start_expansions = m.expanded;
         m.search_timer.start();
         while(!open_list.empty()){
-            //dump_open(open_list);
+           //dump_open(open_list);
             auto cur = open_list.top();
             //std::cout << *cur.node << "\n";
+           // std::cerr << expansion_budget << "\n";
+            //std::cerr << isGoal(cur, dest) << " " << (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget) << "\n";
             if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
                 m.search_timer.stop();
                 return std::make_pair(backup(cur, open_list), cur.g);

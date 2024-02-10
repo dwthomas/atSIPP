@@ -77,15 +77,15 @@ struct SIPPEdge{
 template <typename Configuration_t>
 struct SippGraph{
     std::vector<SIPPState<Configuration_t>> vertices;
-    std::unordered_map<SIPPState<Configuration_t>, std::vector<SIPPEdge<Configuration_t>>> successors;
-    std::unordered_map<SIPPState<Configuration_t>, std::vector<SIPPEdge<Configuration_t>>> predecessors;
+    std::unordered_map<const SIPPState<Configuration_t> *, std::vector<SIPPEdge<Configuration_t>>> successors;
+    std::unordered_map<const SIPPState<Configuration_t> *, std::vector<SIPPEdge<Configuration_t>>> predecessors;
 
     SippGraph() = default;
 
     inline friend std::ostream& operator<< (std::ostream& stream, const SippGraph& g){
-        for(auto s: g.vertices){
+        for(const auto& s: g.vertices){
             stream << s << "\n";
-            for (auto succ: g.successors.at(s)){
+            for (const auto& succ: g.successors.at(&s)){
                 stream << "\t" << succ << "\n";
             }
         }

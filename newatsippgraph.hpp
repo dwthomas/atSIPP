@@ -57,31 +57,47 @@ AtSIPPEdge<Configuration_t> compile(const SIPPEdge<Configuration_t>& sipp_edge){
 
 template <typename Configuration_t>
 struct AtSippGraph{
-    SippGraph<Configuration_t> sipp_graph;
-    std::unordered_map<SIPPState<Configuration_t>, std::vector<AtSIPPEdge<Configuration_t>>> successors;
-    std::unordered_map<SIPPState<Configuration_t>, std::vector<AtSIPPEdge<Configuration_t>>> predecessors;
+    const SippGraph<Configuration_t> * sipp_graph;
+    std::unordered_map<const SIPPState<Configuration_t> *, std::vector<AtSIPPEdge<Configuration_t>>> successors;
+    std::unordered_map<const SIPPState<Configuration_t> *, std::vector<AtSIPPEdge<Configuration_t>>> predecessors;
 
     AtSippGraph() = default;
 
-    AtSippGraph(const SippGraph<Configuration_t>& g):sipp_graph(g){
-        for(auto s: sipp_graph.vertices){
-            const auto& succ = sipp_graph.successors[s];
-            successors[s].reserve(succ.size());
+    AtSippGraph(const SippGraph<Configuration_t> * g):sipp_graph(g){
+
+        // for(const auto& s: g.vertices){
+        //     stream << s << "\n";
+        //     for (const auto& succ: g.successors.at(&s)){
+        //         stream << "\t" << succ << "\n";
+        //     }
+        // }
+        for(const auto& s: sipp_graph->vertices){
+            //std::cerr << s << " " << &s << "\n";
+            const auto& succ = sipp_graph->successors.at(&s);
+            successors[&s].reserve(succ.size());
             for (const auto& successor: succ){
-                successors[s].emplace_back(compile(successor));
+                //std::cerr << "adding " << successor << " to " << s << "\n";
+                successors[&s].emplace_back(compile(successor));
             }
-            const auto& pred = sipp_graph.predecessors[s];
-            predecessors[s].reserve(pred.size());
+            const auto& pred = sipp_graph->predecessors.at(&s);
+            predecessors[&s].reserve(pred.size());
             for (const auto& predecessor: pred){
-                predecessors[s].emplace_back(compile(predecessor));
+                predecessors[&s].emplace_back(compile(predecessor));
             }
         }
+        //std::cerr << *this << "\n";
     }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const AtSippGraph& g){
-        for(auto s: g.sipp_graph.vertices){
-            stream << s << "\n";
-            for (auto succ: g.successors.at(s)){
+        stream << "g size: "  << g.successors.size() << "\n";
+        for(const auto& x: g.successors){
+                stream << x.first << " " <<  *x.first <<  "\n"; 
+        }   
+        for(std::size_t i = 0; i < g.sipp_graph->vertices.size(); i++){
+            const auto * s = &g.sipp_graph->vertices[i];
+            //stream <<"Successors of " << s << " " << *s << ":\n";
+            
+            for (const auto& succ: g.successors.at(s)){
                 stream << "\t" << succ << "\n";
             }
         }

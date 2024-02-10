@@ -45,6 +45,10 @@ struct EdgeATF{
         interval_t retval(zeta, alpha);
         return retval;
     }
+    inline interval_t zetabeta() const{
+        interval_t retval(zeta, beta);
+        return retval;
+    }
 
     inline atf::time_t arrival_time(atf::time_t t) const{
         if(t < zeta || beta <= t){
@@ -60,7 +64,7 @@ struct EdgeATF{
         if(t < zeta || beta < t){
             return std::numeric_limits<atf::time_t>::infinity();
         }
-        if(t < std::min(alpha, beta)){
+        if(t <= std::min(alpha, beta)){
             return earliest_arrival_time();
         }
         return t + delta;
@@ -155,6 +159,7 @@ struct EdgeATFholster{
     }
 
     std::pair<std::pair<interval_t, EdgeATFholster>, std::pair<interval_t, EdgeATFholster>> intersection(const interval_t & interval) const{
+        assert(full());
         double enc_y0, enc_y1, new_y0, new_y1;
         enc_y0 = encumbent.arrival_time(interval.lower());
         enc_y1 = encumbent.inclusive_arrival_time(interval.upper());
@@ -164,6 +169,11 @@ struct EdgeATFholster{
         Segment_2 b(Point_2(interval.lower(), new_y0), Point_2(interval.upper(), new_y1));
         auto x = CGAL::intersection(a, b);
         const Point_2* p = boost::get<Point_2 >(&*x);
+        if(p == nullptr){
+            std::cerr << interval.lower() << " " << interval.upper() << "\n";  
+            std::cerr << encumbent << "\n" << newcomer << "\n";
+            std::cerr <<enc_y0 << " " <<  enc_y1 << " " <<  new_y0 << " " << new_y1 << "\n";
+        }
         double inter = CGAL::to_double(p->x());
         interval_t left(interval.lower(), inter), right(inter, interval.upper());
         EdgeATFholster lh, rh;
@@ -288,11 +298,17 @@ class CompoundATF{
         CompoundATF() = default;
         
         inline void insert(EdgeATF e, payload_T p){
-            //std::cerr << *this;
-            insert_segment(e.zetaalpha(), e, p);
-            //std::cerr << *this << "\n";
-            insert_segment(e.alphabeta(), e, p);
-            //std::cerr << *this << "\n \n";
+            if(e.beta <= e.alpha){
+                insert_segment(e.zetabeta(), e, p);
+            }
+            else{
+                //std::cerr << *this;
+                insert_segment(e.zetaalpha(), e, p);
+                //std::cerr << *this << "\n";
+                insert_segment(e.alphabeta(), e, p);
+                //std::cerr << *this << "\n \n";
+            }
+         
         }
 
         inline std::pair<interval_t, EdgeATF> at(double t) const{
