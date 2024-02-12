@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <ostream>
 #include <boost/program_options.hpp>
+#include "hybrid.hpp"
 #include "newatsippgraph.hpp"
 #include "randomsippgraph.hpp"
 #include "sipp.hpp"
@@ -108,24 +109,33 @@ int main(int argc, char* argv[]) {
             //     }
             //     std::cout << m << "\n";
             // }
-            // else if(vm["search"].as<std::string>() == "plrtosipp"){
-            //     MetaData m;
-            //     long budget = vm["budget"].as<long>();
-            //     auto res = plrtosipp::search(source, goal_loc, m, budget, start_time);
-            //     for(auto n: res){
-            //         std::cout << *n << "\n";
-            //     }
-            //     std::cout << m << "\n";
-            // }
-            //  else if(vm["search"].as<std::string>() == "plrtosipphonly"){
-            //     MetaData m;
-            //     long budget = vm["budget"].as<long>();
-            //     auto res = plrtosipphonly::search(source, goal_loc, m, budget, start_time);
-            //     for(auto n: res){
-            //         std::cout << *n << "\n";
-            //     }
-            //     std::cout << m << "\n";
-            // }
+            else if(vm["search"].as<std::string>() == "plrtosipp"){
+                MetaData m;
+                long budget = vm["budget"].as<long>();
+                auto res = plrtosipp::search(atg, source, goal_loc, m, budget, start_time);
+                for(auto n: res){
+                    std::cout << *n << "\n";
+                }
+                std::cout << m << "\n";
+            }
+            else if(vm["search"].as<std::string>() == "plrtosipphonly"){
+                MetaData m;
+                long budget = vm["budget"].as<long>();
+                auto res = plrtosipphonly::search(atg, source, goal_loc, m, budget, start_time);
+                for(auto n: res){
+                    std::cout << *n << "\n";
+                }
+                std::cout << m << "\n";
+            }
+            else if(vm["search"].as<std::string>() == "hybrid"){
+                MetaData m;
+                long budget = vm["budget"].as<long>();
+                auto res = hybrid::search(atg, source, goal_loc, m, budget, start_time);
+                for(auto n: res){
+                    std::cout << *n << "\n";
+                }
+                std::cout << m << "\n";
+            }
         }
         else{
             std::cout << desc << std::endl;
