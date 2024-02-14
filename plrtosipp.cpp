@@ -9,13 +9,18 @@
 // std::unordered_map<Location, double> plrtosipp::h_static;
 std::unordered_map<const SIPPState<Location> *, plrtosipp::CATF> plrtosipp::h_dynamic;
 
-// inline void dump_h(){
-//     std::cerr << "h_static\n";
-//     for(auto acc: plrtosipp::h_static){
-//         std::cerr << acc.first << " " << acc.second << "\n";
-//     } 
-//     std::cerr << "h_static done\n";
-// }
+inline void dump_h(){
+    std::cerr << "h_static\n";
+    for(auto acc: plrtosipphonly::h_static){
+        std::cerr << acc.first << " " << acc.second << "\n";
+    } 
+    std::cerr << "h_static done\n";
+    std::cerr << "h_dynamic\n";
+    for(auto acc: plrtosipp::h_dynamic){
+        std::cerr << *acc.first << " " << acc.second;
+    } 
+    std::cerr << "h_dynamic done\n";
+}
 
 
 // bool isGoal(const plrtosipp::Node& n, const Location& goal_loc){
@@ -169,7 +174,8 @@ std::vector<const SIPPState<Location> *> plrtosipp::search(const AtSippGraph<Loc
     double t = start_time;
     while(cur->configuration != dest){
         //search 
-        //std::cerr << *cur << " at " << t << "\n";
+        std::cerr << *cur << " at " << t << "\n";
+        dump_h();
         //std::cerr << "Searching\n";
         // run NLASIPP
         path.emplace_back(cur);

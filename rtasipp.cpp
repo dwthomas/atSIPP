@@ -76,6 +76,7 @@ inline void dump_h(){
 std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time, long expansion_budget){
     std::vector<const SIPPState<Location> *> path;
     m.init();
+    m.search_timer.start();
     auto cur = source;
     double t = start_time;
     while(cur->configuration != dest){

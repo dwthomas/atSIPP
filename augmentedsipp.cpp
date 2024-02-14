@@ -11,5 +11,7 @@ std::pair<std::vector<const SIPPState<Location> *>, EdgeATF> asipp::search(const
     Open open_list;
     m.init();
     open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), start_time, std::numeric_limits<double>::infinity(), 0.0), eightWayDistance(dest, source->configuration), source, nullptr, nullptr);
-    return search_core(g, open_list, dest, m, expansion_budget, hf);
+    auto res =  search_core(g, open_list, dest, m, expansion_budget, hf);
+    m.search_timer.stop();
+    return res;
 }

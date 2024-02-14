@@ -196,7 +196,7 @@ namespace asipp{
     template<typename Open_t>
     inline std::pair<std::vector<const SIPPState<Location> *>, EdgeATF> search_core(const AtSippGraph<Location>& g, Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
         long start_expansions = m.expanded;
-        m.search_timer.start();
+        //m.search_timer.start();
         while(!open_list.empty()){
            //dump_open(open_list);
             auto cur = open_list.top();
@@ -204,7 +204,7 @@ namespace asipp{
            // std::cerr << expansion_budget << "\n";
             //std::cerr << isGoal(cur, dest) << " " << (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget) << "\n";
             if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
-                m.search_timer.stop();
+                //m.search_timer.stop();
                 return std::make_pair(backup(cur, open_list), cur.g);
             }
             open_list.pop();
