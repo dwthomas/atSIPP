@@ -124,8 +124,8 @@ using EdgeATFList = boost::container::flat_set<EdgeATF>;
 
 inline EdgeATF compose(const EdgeATF& e_prime, const EdgeATF& e){
     double zeta = e.zeta;
-    double alpha = std::max(e.alpha, e_prime.alpha + e.delta);
-    double beta = std::min(e.beta, e_prime.beta + e.delta);
+    double alpha = std::max(e.alpha, e_prime.alpha - e.delta);
+    double beta = std::min(e.beta, e_prime.beta - e.delta);
     double delta = e.delta + e_prime.delta;
     return EdgeATF(zeta, alpha, beta, delta);
 }
@@ -298,6 +298,7 @@ class CompoundATF{
         CompoundATF() = default;
         
         inline void insert(EdgeATF e, payload_T p){
+            //std::cerr << "Insert: " << e << "\n";
             if(e.beta <= e.alpha){
                 insert_segment(e.zetabeta(), e, p);
             }

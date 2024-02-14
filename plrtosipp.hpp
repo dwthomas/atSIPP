@@ -97,7 +97,8 @@ namespace plrtosipp{
         }   
         const auto & catf = h_dynamic[&cur];
         //return catf.arrival_time(cur_t) + get_h_s(catf.payload_at(cur_t), dest);
-        return catf.arrival_time(cur_t);
+        //std::cerr << "catf: " << cur_t << " " << catf.arrival_time(cur_t)  << "\n";
+        return catf.arrival_time(cur_t) + h_s;
     }
 
     // inline void set_h_s(const Location& loc, double x){

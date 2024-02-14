@@ -13,6 +13,11 @@ inline void dump_h(){
         std::cerr << acc.first << " " << acc.second << "\n";
     } 
     std::cerr << "h_static done\n";
+    std::cerr << "h_dynamic\n";
+    for(auto acc: rtasipp::h_dynamic){
+        std::cerr << *acc.first << " " << acc.second;
+    } 
+    std::cerr << "h_dynamic done\n";
 }
 
 // bool isGoal(const rtasipp::Node& n, const Location& goal_loc){
@@ -82,6 +87,7 @@ std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Locat
     while(cur->configuration != dest){
         //search 
         //std::cerr << "cur: " << *cur << " at " << t << " ";
+        //dump_h();
         // run NLASIPP
         path.emplace_back(cur);
         asipp::Open open_list;

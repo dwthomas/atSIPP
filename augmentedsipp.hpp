@@ -24,6 +24,8 @@ namespace asipp{
         Node() = default;
         Node(EdgeATF e, double _h, const SIPPState<Location> * _state, const AtSIPPEdge<Location> * _tla):g(e),f(e.earliest_arrival_time() + _h),state(_state),tla(_tla){}
 
+        Node(double _f, EdgeATF e, const SIPPState<Location> * _state, const AtSIPPEdge<Location> * _tla):g(e),f(_f),state(_state),tla(_tla){}
+
         inline friend bool operator>(const Node& a, const Node& b){
             if(a.f == b.f){
                 return a.g < b.g;
@@ -100,7 +102,7 @@ namespace asipp{
             cur = open_list.parent[cur];
         }
         std::reverse(res.begin(), res.end());
-        std::cout << "Arrival time: " << n.f << "\n";
+        std::cout << "Arrival time: " << n.f << " " << n << "\n";
         return res;
     }
 

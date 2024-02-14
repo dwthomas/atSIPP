@@ -128,12 +128,14 @@ void plrtosipp::plrtolearn(const AtSippGraph<Location>& g, const asipp::Open& op
     }
     plrtosipphonly::LSSOpen dijkstraOpen;
     for (const auto& s: open_list.queue){
+        //std::cerr << "inserting open";
         double h = plrtosipphonly::get_h_s(s.state->configuration, dest);
         h_dynamic[s.state] = CATF();
         h_dynamic[s.state].insert(shiftIdentity(h), nullptr);
         dijkstraOpen.emplace(h_dynamic[s.state].earliest_arrival_time(), s.state);
     }
     while(!dijkstraOpen.empty() && !closed.empty()){
+        //std::cerr << "... Backing up\n";
         auto n = dijkstraOpen.top();
         m.learn_expanded++;
         //std::cerr << "dijkstra " << n << " " << dijkstraOpen.queue.size() << "\n";
@@ -147,6 +149,7 @@ void plrtosipp::plrtolearn(const AtSippGraph<Location>& g, const asipp::Open& op
             for (const auto& ap: h_d_n.edges()){
                 const auto& ae = e.duration;
                 auto a_p_prime = compose(ap, ae);
+                //std::cerr << "compose " << ap << " " << ae << " = " << a_p_prime << "\n";
                 double eat_prior = h_dynamic[e.source].earliest_arrival_time();
                 add_h_dyn(*e.source, a_p_prime);
                 double eat = h_dynamic[e.source].earliest_arrival_time();
@@ -175,6 +178,7 @@ std::vector<const SIPPState<Location> *> plrtosipp::search(const AtSippGraph<Loc
     while(cur->configuration != dest){
         //search 
         std::cerr << *cur << " at " << t << "\n";
+        std::cout << get_h(*cur, t, dest) << "\n";
         dump_h();
         //std::cerr << "Searching\n";
         // run NLASIPP
@@ -182,6 +186,7 @@ std::vector<const SIPPState<Location> *> plrtosipp::search(const AtSippGraph<Loc
         asipp::Open open_list;
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr, nullptr);
         asipp::search_core(g, open_list, dest, m, budget, get_h);
+        asipp::dump_open(open_list);
         // Done NLASIPP
         //std::cerr << "learning\n";
         //learn
@@ -190,7 +195,9 @@ std::vector<const SIPPState<Location> *> plrtosipp::search(const AtSippGraph<Loc
         // dynamic
         plrtolearn(g, open_list, dest, m);
         // commit 
-        //std::cerr << "commiting\n";
+        std::cerr << "commiting\n";
+        std::cerr << open_list.top() << "\n";
+
         auto e = open_list.top().tla;
         t = e->duration.arrival_time(t);
         cur = e->destination;
