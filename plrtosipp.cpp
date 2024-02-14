@@ -130,7 +130,7 @@ void plrtosipp::plrtolearn(const AtSippGraph<Location>& g, const asipp::Open& op
     for (const auto& s: open_list.queue){
         //std::cerr << "inserting open";
         double h = plrtosipphonly::get_h_s(s.state->configuration, dest);
-        h_dynamic[s.state] = CATF();
+        //h_dynamic[s.state] = CATF();
         h_dynamic[s.state].insert(shiftIdentity(h), nullptr);
         dijkstraOpen.emplace(h_dynamic[s.state].earliest_arrival_time(), s.state);
     }

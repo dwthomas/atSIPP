@@ -14,7 +14,7 @@ std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Locati
     double t = start_time;
     while(cur->configuration != dest){
         //search 
-        //std::cerr << *cur << " at " << t << " ";
+        std::cerr << *cur << " at " << t << " ";
         // run NLASIPP
         path.emplace_back(cur);
         asipp::Open open_list;
