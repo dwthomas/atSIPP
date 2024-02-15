@@ -66,51 +66,51 @@ namespace plrtosipphonly{
     typedef typename DijkstraQueue::handle_type Dijkstra_handle_t;
 
 
-    using CATF = CompoundATF<std::nullptr_t>;
-    extern std::unordered_map<Location, double> h_static;
-    extern std::unordered_map<const SIPPState<Location> *, CATF> h_dynamic;
+    // using CATF = CompoundATF<std::nullptr_t>;
+    // extern std::unordered_map<Location, double> h_static;
+    // extern std::unordered_map<const SIPPState<Location> *, CATF> h_dynamic;
 
-    inline void dump_h_s(std::unordered_map<Location, double> h_static){
-        std::cerr << "h_s\n";
-        for (auto x: h_static){
-            std::cerr << x.first << ": " << x.second << "\n";
-        }
-        std::cerr << "\n";
-    }
+    // inline void dump_h_s(std::unordered_map<Location, double> h_static){
+    //     std::cerr << "h_s\n";
+    //     for (auto x: h_static){
+    //         std::cerr << x.first << ": " << x.second << "\n";
+    //     }
+    //     std::cerr << "\n";
+    // }
 
-    inline double get_h_s(const Location& cur_loc, const Location& dest){
-        if(h_static.find(cur_loc) == h_static.end()){
-            h_static[cur_loc] = eightWayDistance(cur_loc, dest);
-        }
-        return h_static[cur_loc];
-    }
+    // inline double get_h_s(const Location& cur_loc, const Location& dest){
+    //     if(h_static.find(cur_loc) == h_static.end()){
+    //         h_static[cur_loc] = eightWayDistance(cur_loc, dest);
+    //     }
+    //     return h_static[cur_loc];
+    // }
 
-    inline double get_h_s(const SIPPState<Location>& cur, const Location& dest){
-        return get_h_s(cur.configuration, dest);
-    }
+    // inline double get_h_s(const SIPPState<Location>& cur, const Location& dest){
+    //     return get_h_s(cur.configuration, dest);
+    // }
 
-    inline double get_h(const SIPPState<Location>& cur, double cur_t, const Location& dest){
-        double h_s = get_h_s(cur, dest);
-        if (h_dynamic.find(&cur) == h_dynamic.end()){
-            return h_s;
-        }   
-        const auto & catf = h_dynamic[&cur];
-        //return catf.arrival_time(cur_t) + get_h_s(catf.payload_at(cur_t), dest);
-        return catf.arrival_time(cur_t);
-    }
+    // inline double get_h(const SIPPState<Location>& cur, double cur_t, const Location& dest){
+    //     double h_s = get_h_s(cur, dest);
+    //     if (h_dynamic.find(&cur) == h_dynamic.end()){
+    //         return h_s;
+    //     }   
+    //     const auto & catf = h_dynamic[&cur];
+    //     //return catf.arrival_time(cur_t) + get_h_s(catf.payload_at(cur_t), dest);
+    //     return catf.arrival_time(cur_t);
+    // }
 
-    inline void set_h_s(const Location& loc, double x){
-        h_static[loc] = x;
-    }
+    // inline void set_h_s(const Location& loc, double x){
+    //     h_static[loc] = x;
+    // }
 
-    inline void add_h_dyn(const SIPPState<Location>& cur, EdgeATF patf){
-        if(h_dynamic.find(&cur) == h_dynamic.end()){
-            h_dynamic[&cur] = CATF();
-        }
-        //std::cerr << "patf" << patf << "\n";
-        //std::cerr << "catf" << h_dynamic[&cur] << "\n";
-        h_dynamic[&cur].insert(patf, nullptr);
-    }
+    // inline void add_h_dyn(const SIPPState<Location>& cur, EdgeATF patf){
+    //     if(h_dynamic.find(&cur) == h_dynamic.end()){
+    //         h_dynamic[&cur] = CATF();
+    //     }
+    //     //std::cerr << "patf" << patf << "\n";
+    //     //std::cerr << "catf" << h_dynamic[&cur] << "\n";
+    //     h_dynamic[&cur].insert(patf, nullptr);
+    // }
 
     // inline bool isGoal(const SIPPState<Location>& cur, const Location& dest){
     //     return cur.configuration == dest;

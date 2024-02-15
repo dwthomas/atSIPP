@@ -43,11 +43,15 @@ namespace rtasipp{
     extern std::unordered_map<Location, double> h_static;
     extern std::unordered_map<const SIPPState<Location> *, CATF> h_dynamic;
 
-    inline double get_h_s(const SIPPState<Location>* cur, const Location& dest){
-        if(h_static.find(cur->configuration) == h_static.end()){
-            h_static[cur->configuration] = eightWayDistance(cur->configuration, dest);
+    inline double get_h_s(const Location& cur, const Location& dest){
+        if(h_static.find(cur) == h_static.end()){
+            h_static[cur] = eightWayDistance(cur, dest);
         }
-        return h_static[cur->configuration];
+        return h_static[cur];
+    }
+
+    inline double get_h_s(const SIPPState<Location>* cur, const Location& dest){
+        return get_h_s(cur->configuration, dest);
     }
 
     inline double get_h(const SIPPState<Location>& cur, double cur_t, const Location& dest){

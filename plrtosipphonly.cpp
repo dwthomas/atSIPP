@@ -2,19 +2,20 @@
 #include "plrtosipphonly.hpp"
 #include "atf.hpp"
 #include "augmentedsipp.hpp"
+#include "rtasipp.hpp"
 #include "newatsippgraph.hpp"
 #include "sippgraph.hpp"
 
-std::unordered_map<Location, double> plrtosipphonly::h_static;
-std::unordered_map<const SIPPState<Location> *, plrtosipphonly::CATF> plrtosipphonly::h_dynamic;
+//std::unordered_map<Location, double> plrtosipphonly::h_static;
+//std::unordered_map<const SIPPState<Location> *, plrtosipphonly::CATF> plrtosipphonly::h_dynamic;
 
-inline void dump_h(){
-    std::cerr << "h_static\n";
-    for(auto acc: plrtosipphonly::h_static){
-        std::cerr << acc.first << " " << acc.second << "\n";
-    } 
-    std::cerr << "h_static done\n";
-}
+// inline void dump_h(){
+//     std::cerr << "h_static\n";
+//     for(auto acc: plrtosipphonly::h_static){
+//         std::cerr << acc.first << " " << acc.second << "\n";
+//     } 
+//     std::cerr << "h_static done\n";
+// }
 
 // bool isGoal(const plrtosipphonly::Node& n, const Location& goal_loc){
 //     return n.node->state.loc == goal_loc;
@@ -79,7 +80,7 @@ void plrtosipphonly::lsslrtsipp(const AtSippGraph<Location>& g, const asipp::Ope
     auto closed = open_list.expanded; 
     LSSOpen dijkstraOpen;
     for(auto n: open_list.queue){
-        auto h_s = get_h_s(n.state->configuration, dest);
+        auto h_s = rtasipp::get_h_s(n.state, dest);
         h_s_prime[n.state->configuration] = h_s;
         dijkstraOpen.emplace(h_s, n.state);
     }
@@ -112,9 +113,9 @@ void plrtosipphonly::lsslrtsipp(const AtSippGraph<Location>& g, const asipp::Ope
         }
     }
     for(auto x: h_s_prime){
-        set_h_s(x.first, std::max(get_h_s(x.first, dest), x.second));
+        rtasipp::set_h_s(x.first, std::max(rtasipp::get_h_s(x.first, dest), x.second));
     }
-}
+} 
 
 
 
@@ -130,8 +131,8 @@ std::vector<const SIPPState<Location> *> plrtosipphonly::search(const AtSippGrap
         // run NLASIPP
         path.emplace_back(cur);
         asipp::Open open_list;
-        open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr, nullptr);
-        asipp::search_core(g, open_list, dest, m, budget, get_h);
+        open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), rtasipp::get_h(*cur, t, dest) , cur, nullptr, nullptr);
+        asipp::search_core(g, open_list, dest, m, budget, rtasipp::get_h);
         if(open_list.empty()){
             std::cerr << "No path found\n";
             exit(-1);

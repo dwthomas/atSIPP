@@ -4,6 +4,7 @@
 #include "augmentedsipp.hpp"
 #include "newatsippgraph.hpp"
 #include "sippgraph.hpp"
+#include "rtasipp.hpp"
 #include "hybrid.hpp"
 
 std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, long budget, double start_time){
@@ -18,8 +19,8 @@ std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Locati
         // run NLASIPP
         path.emplace_back(cur);
         asipp::Open open_list;
-        open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), plrtosipphonly::get_h(*cur, t, dest) , cur, nullptr, nullptr);
-        asipp::search_core(g, open_list, dest, m, budget, plrtosipphonly::get_h);
+        open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), rtasipp::get_h(*cur, t, dest) , cur, nullptr, nullptr);
+        asipp::search_core(g, open_list, dest, m, budget, rtasipp::get_h);
         if(open_list.empty()){
             std::cerr << "No path found\n";
             exit(-1);
@@ -30,17 +31,19 @@ std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Locati
         //asipp::dump_open(open_list);
         plrtosipphonly::lsslrtsipp(g, open_list, dest, m);
         //rtasipp learning
+        rtasipp::h_dynamic[cur] = rtasipp::CATF();
+
         double h_s_prime = std::numeric_limits<double>::infinity();
         for (const auto& node: open_list.queue){
-            double h_s_nx = plrtosipphonly::get_h_s(node.state->configuration, dest);
+            double h_s_nx = rtasipp::get_h_s(node.state->configuration, dest);
             h_s_prime = std::min(h_s_prime, node.g.delta + h_s_nx);
             EdgeATF eatf = node.g;
             eatf.delta += h_s_nx;
-            plrtosipphonly::add_h_dyn(*cur, eatf);
+            rtasipp::add_h_dyn(cur, eatf);
             //std::cerr << "n: " << node << "\n";
         }
-        if(h_s_prime > plrtosipphonly::get_h_s(cur->configuration, dest)){
-            plrtosipphonly::set_h_s(cur->configuration, h_s_prime);
+        if(h_s_prime > rtasipp::get_h_s(cur, dest)){
+            rtasipp::set_h_s(cur->configuration, h_s_prime);
         }
 
         // dynamic
