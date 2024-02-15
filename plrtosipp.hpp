@@ -67,9 +67,9 @@ namespace plrtosipp{
     typedef typename DijkstraQueue::handle_type Dijkstra_handle_t;
 
 
-    using CATF = CompoundATF<std::nullptr_t>;
+    //using CATF = CompoundATF<std::nullptr_t>;
     //extern std::unordered_map<Location, double> h_static;
-    extern std::unordered_map<const SIPPState<Location> *, CATF> h_dynamic;
+    //extern std::unordered_map<const SIPPState<Location> *, CATF> h_dynamic;
 
     // inline void dump_h_s(std::unordered_map<Location, double> h_static){
     //     std::cerr << "h_s\n";
@@ -90,29 +90,29 @@ namespace plrtosipp{
     //     return get_h_s(cur.configuration, dest);
     // }
 
-    inline double get_h(const SIPPState<Location>& cur, double cur_t, const Location& dest){
-        double h_s = plrtosipphonly::get_h_s(cur, dest);
-        if (h_dynamic.find(&cur) == h_dynamic.end()){
-            return h_s;
-        }   
-        const auto & catf = h_dynamic[&cur];
-        //return catf.arrival_time(cur_t) + get_h_s(catf.payload_at(cur_t), dest);
-        //std::cerr << "catf: " << cur_t << " " << catf.arrival_time(cur_t)  << "\n";
-        return catf.arrival_time(cur_t) + h_s;
-    }
+    // inline double get_h(const SIPPState<Location>& cur, double cur_t, const Location& dest){
+    //     double h_s = plrtosipphonly::get_h_s(cur, dest);
+    //     if (h_dynamic.find(&cur) == h_dynamic.end()){
+    //         return h_s;
+    //     }   
+    //     const auto & catf = h_dynamic[&cur];
+    //     //return catf.arrival_time(cur_t) + get_h_s(catf.payload_at(cur_t), dest);
+    //     //std::cerr << "catf: " << cur_t << " " << catf.arrival_time(cur_t)  << "\n";
+    //     return catf.arrival_time(cur_t) + h_s;
+    // }
 
     // inline void set_h_s(const Location& loc, double x){
     //     h_static[loc] = x;
     // }
 
-    inline void add_h_dyn(const SIPPState<Location>& cur, EdgeATF patf){
-        if(h_dynamic.find(&cur) == h_dynamic.end()){
-            h_dynamic[&cur] = CATF();
-        }
-        //std::cerr << "patf" << patf << "\n";
-        //std::cerr << "catf" << h_dynamic[&cur] << "\n";
-        h_dynamic[&cur].insert(patf, nullptr);
-    }
+    // inline void add_h_dyn(const SIPPState<Location>& cur, EdgeATF patf){
+    //     if(h_dynamic.find(&cur) == h_dynamic.end()){
+    //         h_dynamic[&cur] = CATF();
+    //     }
+    //     //std::cerr << "patf" << patf << "\n";
+    //     //std::cerr << "catf" << h_dynamic[&cur] << "\n";
+    //     h_dynamic[&cur].insert(patf, nullptr);
+    // }
     // inline bool isGoal(const AtsippGraphNode& cur, const Location& dest){
     //     return cur.state.loc == dest;
     // }

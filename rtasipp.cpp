@@ -86,8 +86,8 @@ std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Locat
     double t = start_time;
     while(cur->configuration != dest){
         //search 
-        std::cerr << "cur: " << *cur << " at " << t << " ";
-        dump_h();
+        //std::cerr << "cur: " << *cur << " at " << t << " ";
+        //dump_h();
         // run NLASIPP
         path.emplace_back(cur);
         asipp::Open open_list;
@@ -158,5 +158,6 @@ std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Locat
     } 
     path.emplace_back(cur);
     m.search_timer.stop();
+    std::cout << "Arrival time: " << t << "\n";
     return path;
 }

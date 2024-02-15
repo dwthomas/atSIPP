@@ -55,5 +55,6 @@ std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Locati
     } 
     path.emplace_back(cur);
     m.search_timer.stop();
+    std::cout << "Arrival time: " << t << "\n";
     return path;
 }

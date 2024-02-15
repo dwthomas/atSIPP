@@ -94,7 +94,7 @@ namespace asipp{
 
 
     template <typename Node_t, typename Open_t>
-    std::vector<const SIPPState<Location> *> backup(const Node_t& n, Open_t& open_list){
+    std::pair<std::vector<const SIPPState<Location> *>, double> backup(const Node_t& n, Open_t& open_list){
         std::vector<const SIPPState<Location> *> res;
         const SIPPState<Location>* cur = n.state;
         while(cur != nullptr){
@@ -102,8 +102,8 @@ namespace asipp{
             cur = open_list.parent[cur];
         }
         std::reverse(res.begin(), res.end());
-        std::cout << "Arrival time: " << n.f << " " << n << "\n";
-        return res;
+        //std::cout << "Arrival time: " << n.f << " " << n << "\n";
+        return std::make_pair(res, n.f);
     }
 
     template <typename Node_t, typename Open_t>
@@ -207,7 +207,7 @@ namespace asipp{
             //std::cerr << isGoal(cur, dest) << " " << (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget) << "\n";
             if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
                 //m.search_timer.stop();
-                return std::make_pair(backup(cur, open_list), cur.g);
+                return std::make_pair(backup(cur, open_list).first, cur.g);
             }
             open_list.pop();
             expand(g, cur, open_list, dest, m, hf);

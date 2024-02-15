@@ -151,5 +151,6 @@ std::vector<const SIPPState<Location> *> plrtosipphonly::search(const AtSippGrap
     } 
     path.emplace_back(cur);
     m.search_timer.stop();
+    std::cout << "Arrival time: " << t << "\n";
     return path;
 }
