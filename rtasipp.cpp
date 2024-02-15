@@ -86,8 +86,8 @@ std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Locat
     double t = start_time;
     while(cur->configuration != dest){
         //search 
-        //std::cerr << "cur: " << *cur << " at " << t << " ";
-        //dump_h();
+        std::cerr << "cur: " << *cur << " at " << t << " ";
+        dump_h();
         // run NLASIPP
         path.emplace_back(cur);
         asipp::Open open_list;
@@ -98,6 +98,7 @@ std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Locat
         // Done NLASIPP
         //learn
         double h_s_prime = std::numeric_limits<double>::infinity();
+        h_dynamic[cur] = CATF();
         for (const auto& node: open_list.queue){
             double h_s_nx = get_h_s(node.state, dest);
             h_s_prime = std::min(h_s_prime, node.g.delta + h_s_nx);

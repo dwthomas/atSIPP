@@ -58,7 +58,7 @@ namespace rtasipp{
         const auto & catf = h_dynamic[&cur];
         //std::cerr << catf;
         //return catf.arrival_time(cur_t) + get_h_s(catf.payload_at(cur_t), dest);
-        return catf.arrival_time(cur_t);
+        return catf.arrival_time(cur_t) - cur_t;
     }
 
     inline void set_h_s(const Location& loc, double x){
