@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
         ("minDuration", po::value<double>()->default_value(1.0), "Min interval duration")
         ("maxDuration", po::value<double>()->default_value(10.0), "Max interval duration")
         ("budget,b", po::value<long>()->default_value(1), "Search budget in num of expansions")
+        ("seed", po::value<long>()->default_value(0), "Random seed")
         ;
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -47,17 +48,17 @@ int main(int argc, char* argv[]) {
             // read map
             Location source_loc(vm["startx"].as<int>(), vm["starty"].as<int>());
             Location goal_loc(vm["goalx"].as<int>(), vm["goaly"].as<int>());
-            std::cerr << "Generating SIPP graph...";
+            //std::cerr << "Generating SIPP graph...";
             Map m(vm["map"].as<std::filesystem::path>().string());
             double until = vm["until"].as<double>();
             double occupancy = vm["occupancy"].as<double>();
             double min_duration = vm["minDuration"].as<double>();
             double max_duration = vm["maxDuration"].as<double>();
-            SippGraph<Location> g = make_random_sipp_graph(m, until, occupancy, min_duration, max_duration, source_loc, goal_loc);
+            SippGraph<Location> g = make_random_sipp_graph(m, until, occupancy, min_duration, max_duration, source_loc, goal_loc, vm["seed"].as<long>());
             //std::cout << g << "\n";
-            std::cerr << "SIPP graph made, compiling @SIPP graph...";
+            //std::cerr << "SIPP graph made, compiling @SIPP graph...";
             AtSippGraph<Location> atg(&g);
-            std::cerr << "compiled!\n";
+            //std::cerr << "compiled!\n";
             //std::cerr << atg << "\n";
             //g.dump();
             double start_time = vm["startTime"].as<double>();

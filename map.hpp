@@ -95,8 +95,8 @@ struct Map{
     }
 
     inline Location index2Location(std::size_t index) const{
-        int x = index % height;
-        int y = index / height;
+        int x = index % width;
+        int y = index / width;
         return Location(x, y);
     }
 
