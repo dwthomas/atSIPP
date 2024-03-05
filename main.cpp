@@ -48,6 +48,17 @@ int main(int argc, char* argv[]) {
             Graph g = read_graph(vm["edgegraph"].as<std::filesystem::path>().string(), agentSpeed, walkingSpeed);
             // std::cerr << g << "\n";
             // g.dump();
+            
+            // Check start and goal location exist in the graph
+            bool foundStart = false;
+            bool foundGoal = false;
+            for (GraphNode n: g.node_array) {
+                if (n.state.loc == source_loc) foundStart = true;
+                if (n.state.loc == goal_loc) foundGoal = true;
+            }
+            if (!foundStart) std::cout << "[ERROR] Start location {" << source_loc.name << "} does not exist in graph\n";
+            if (!foundGoal) std::cout << "[ERROR] Goal location {" << goal_loc.name << "} does not exist in graph\n";
+
             double start_time = vm["startTime"].as<double>();
             GraphNode * source = find_earliest(g, source_loc, start_time);
             if(vm["search"].as<std::string>() == "sipp"){
