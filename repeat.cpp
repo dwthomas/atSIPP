@@ -2,7 +2,7 @@
 #include "atf.hpp"
 #include "augmentedsipp.hpp"
 
-double update_reference_time(const EdgeATF& path, rePEAT::Open& open_list){
+double update_reference_time(const EdgeATF& path, asipp::Open& open_list){
     double upper_bound = path.beta;
     double lower_bound = path.alpha;
     while(lower_bound < upper_bound){
@@ -19,16 +19,16 @@ double update_reference_time(const EdgeATF& path, rePEAT::Open& open_list){
     return upper_bound;
 }
 
-CompoundATF<std::vector<AtsippGraphNode *>> rePEAT::search(AtsippGraphNode * source, const Location& dest, MetaData & m, double start_time){
+CompoundATF<std::vector<const SIPPState<Location> *>> rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time){
     double t_ref = start_time;
-    std::vector<AtsippGraphNode *> path;
-    CompoundATF<std::vector<AtsippGraphNode *>> solutions;
+    std::vector<const SIPPState<Location> *> path;
+    CompoundATF<std::vector<const SIPPState<Location> *>> solutions;
     m.init();
-    while(t_ref < end(source->state.interval)){
+    while(t_ref < end(source->safe_interval)){
         std::cerr << "tref: " << t_ref << "\n";
-        Open open_list;
-        open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t_ref, std::numeric_limits<double>::infinity(), 0.0), eightWayDistance(dest, source->state.loc), source, nullptr);
-        auto res = asipp::search_core(open_list, dest, m);
+        asipp::Open open_list;
+        open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t_ref, std::numeric_limits<double>::infinity(), 0.0), eightWayDistance(dest, source->configuration), source, nullptr, nullptr);
+        auto res = asipp::search_core(g, open_list, dest, m);
         solutions.insert(res.second, res.first);
         t_ref = update_reference_time(res.second, open_list);
     }
