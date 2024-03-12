@@ -88,6 +88,7 @@ namespace asipp{
 
     template <typename Node_t, typename Open_t>
     inline void expand(const Node_t& cur, Open_t& open_list, const Location& goal_loc, MetaData & m){
+        (void)goal_loc;
         m.expanded++;
         double zeta = cur.g.zeta;
         for(GraphEdge * successor: cur.node->successors){

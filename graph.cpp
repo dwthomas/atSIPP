@@ -9,6 +9,10 @@ struct inATF{
     long source;
     long dest;
     EdgeATF eATF;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 95086b936f179f604d14bffbacc68ca2fc880c31
     inATF(long s, long d, EdgeATF e):source(s),dest(d),eATF(e){}
 };
 
