@@ -94,11 +94,11 @@ int main(int argc, char* argv[]) {
                 std::cout << res;
                 std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
                 auto c = res.time_lookup(vm["lookups"].as<long>());
-                double acc = 0.0;
-                for (auto i : c){
-                    acc += i;
-                }
-                std::cerr << acc << " " << c.size() << "\n";
+                // double acc = 0.0;
+                // for (auto i : c){
+                //     acc += i;
+                // }
+                // std::cerr << acc << " " << c.size() << "\n";
             }
 
         }
