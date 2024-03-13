@@ -61,33 +61,38 @@ int main(int argc, char* argv[]) {
             GraphNode * source = find_earliest(g, source_loc, start_time);
             if(vm["search"].as<std::string>() == "sipp"){
                 MetaData m;
+                auto search_start_time = std::chrono::high_resolution_clock::now();
                 auto res = sipp::search(source, goal_loc, m, start_time);
-                //auto search_time = std::chrono::high_resolution_clock::now();
-                //auto search_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(search_time - search_start_time);                                
+                auto search_time = std::chrono::high_resolution_clock::now();
+                auto search_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(search_time - search_start_time);                                
                 for(auto n: res){
                     std::cout << *n << "\n";
                 }
                 std::cout << m << "\n";
-               // std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
+                std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
             }
             else if(vm["search"].as<std::string>() == "asipp"){
                 MetaData m;
+                auto search_start_time = std::chrono::high_resolution_clock::now();
                 auto res = asipp::search(source, goal_loc, m, start_time);
-                //auto search_time = std::chrono::high_resolution_clock::now();
-                //auto search_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(search_time - search_start_time);
+                auto search_time = std::chrono::high_resolution_clock::now();
+                auto search_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(search_time - search_start_time);
                 for(auto n: res.first){
                     std::cout << *n << "\n";
                 }
                 std::cout << res.second << "\n";
                 std::cout << m << "\n";
-                //std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
+                std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
             }
             else if(vm["search"].as<std::string>() == "repeat"){
                 MetaData m;
+                auto search_start_time = std::chrono::high_resolution_clock::now();
                 auto res = rePEAT::search(source, goal_loc, m, start_time);
+                auto search_time = std::chrono::high_resolution_clock::now();
+                auto search_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(search_time - search_start_time);
                 std::cout << m << "\n";
                 std::cout << res;
-              //  std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
+                std::cout << "Search time: " << search_duration.count() << " nanoseconds\n";
                 auto c = res.time_lookup(vm["lookups"].as<long>());
                 double acc = 0.0;
                 for (auto i : c){
