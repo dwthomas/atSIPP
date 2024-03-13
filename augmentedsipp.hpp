@@ -3,6 +3,7 @@
 #include <functional>
 #include <unordered_map>
 #include <chrono>
+#include <utility>
 #include "graph.hpp"
 
 namespace asipp{
@@ -147,8 +148,7 @@ namespace asipp{
             open_list.pop();
             expand(cur, open_list, dest, m);
         }
-        std::cerr << "Failed to find path\n";
-        exit(-1);
+        return std::make_pair(std::vector<GraphNode *>(), EdgeATF());
     }
 
    std::pair<std::vector<GraphNode *>, EdgeATF> search(GraphNode * source, const Location& dest, MetaData & m, double start_time = 0.0);

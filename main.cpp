@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
         ("start,x", po::value<std::string>(), "starting location")
         ("goal,y", po::value<std::string>(), "goal location")
         ("edgegraph,g", po::value<std::filesystem::path>(),"gzip'd file containing the edge arrival time functions.")
-        ("search,s", po::value<std::string>(), "Search algorithm to use")
+        ("search,s", po::value<std::string>()->default_value("repeat"), "Search algorithm to use")
         ("startTime,t", po::value<double>()->default_value(0.0), "Start Time of search.")
         ("agentSpeed,a", po::value<double>()->default_value(15.0), "Traveling speed of the agent.")
         ("walkingSpeed,w", po::value<double>()->default_value(1.0), "Walking speed for reversing train.")
