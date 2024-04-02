@@ -80,8 +80,8 @@ inline void dump_h(){
 
 std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time, long expansion_budget){
     std::vector<const SIPPState<Location> *> path;
+    struct timespec ts1, ts2;
     m.init();
-    m.search_timer.start();
     auto cur = source;
     double t = start_time;
     while(cur->configuration != dest){
@@ -91,12 +91,17 @@ std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Locat
         // run NLASIPP
         path.emplace_back(cur);
         asipp::Open open_list;
+        clock_gettime(CLOCK_MONOTONIC, &ts1);
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), get_h(*cur, t, dest) , cur, nullptr, nullptr);
         //std::cerr << "pre:" << m << "\n";
         asipp::search_core(g, open_list, dest, m, expansion_budget, &get_h);
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+        m.search_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
+
         //std::cerr << "post: " << m << "\n";
         // Done NLASIPP
         //learn
+        clock_gettime(CLOCK_MONOTONIC, &ts1);
         double h_s_prime = std::numeric_limits<double>::infinity();
         h_dynamic[cur] = CATF();
         for (const auto& node: open_list.queue){
@@ -110,6 +115,9 @@ std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Locat
         if(h_s_prime > get_h_s(cur, dest)){
             set_h_s(cur->configuration, h_s_prime);
         }
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+        m.learning_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
+
         //dump_h_s(h_static);
         //asipp::dump_open(open_list);
         auto e = open_list.top().tla;
@@ -157,7 +165,6 @@ std::vector<const SIPPState<Location> *> rtasipp::search(const AtSippGraph<Locat
         // }
     } 
     path.emplace_back(cur);
-    m.search_timer.stop();
     std::cout << "Arrival time: " << t << "\n";
     return path;
 }

@@ -172,8 +172,8 @@ void plrtosipp::plrtolearn(const AtSippGraph<Location>& g, const asipp::Open& op
 
 std::vector<const SIPPState<Location> *> plrtosipp::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, long budget, double start_time){
     std::vector<const SIPPState<Location> *> path;
+    struct timespec ts1, ts2;
     m.init();
-    m.search_timer.start();
     auto cur = source;
     double t = start_time;
     while(cur->configuration != dest){
@@ -185,16 +185,22 @@ std::vector<const SIPPState<Location> *> plrtosipp::search(const AtSippGraph<Loc
         // run NLASIPP
         path.emplace_back(cur);
         asipp::Open open_list;
+        clock_gettime(CLOCK_MONOTONIC, &ts1);
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), rtasipp::get_h(*cur, t, dest) , cur, nullptr, nullptr);
         asipp::search_core(g, open_list, dest, m, budget, rtasipp::get_h);
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+        m.search_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
         //asipp::dump_open(open_list);
         // Done NLASIPP
         //std::cerr << "learning\n";
         //learn
         // static
+        clock_gettime(CLOCK_MONOTONIC, &ts1);
         plrtosipphonly::lsslrtsipp(g, open_list, dest, m);
         // dynamic
         plrtolearn(g, open_list, dest, m);
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+        m.learning_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
         // commit 
         // std::cerr << "commiting\n";
         // std::cerr << open_list.top() << "\n";
@@ -204,7 +210,6 @@ std::vector<const SIPPState<Location> *> plrtosipp::search(const AtSippGraph<Loc
         cur = e->destination;
     } 
     path.emplace_back(cur);
-    m.search_timer.stop();
     std::cout << "Arrival time: " << t << "\n";
     return path;
 }

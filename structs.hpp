@@ -8,6 +8,7 @@
 #include <boost/functional/hash.hpp>
 #include <boost/timer/timer.hpp>
 #include "constants.hpp"
+#include <ctime>
 
 
 using SafeInterval = atf::interval_t;
@@ -120,15 +121,12 @@ struct MetaData{
     long expanded;
     long decreased;
     long learn_expanded;
-
-    boost::timer::cpu_timer search_timer;
-    boost::timer::cpu_timer learning_timer;
+    double search_time;
+    double learning_time;
 
     inline void reset(){
-        search_timer.start();
-        search_timer.stop();
-        learning_timer.start();
-        learning_timer.stop();
+        search_time = 0;
+        learning_time = 0;
     }
 
     inline void init(){
@@ -138,10 +136,11 @@ struct MetaData{
         learn_expanded = 0;
         reset();
     }
+
     inline friend std::ostream& operator<< (std::ostream& stream, const MetaData& m){
         stream << "Nodes generated: " << m.generated << " Nodes decreased: " << m.decreased << " Nodes expanded: " << m.expanded << " Learning Nodes expanded: " << m.learn_expanded << "\n"; 
-        stream << "Search: " <<  m.search_timer.format();
-        stream << "Learning: " << m.learning_timer.format();
+        stream << "Search: " <<  m.search_time << " ms";
+        stream << " Learning: " << m.learning_time << " ms" ;
         return stream;
     }
 };

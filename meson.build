@@ -1,6 +1,6 @@
 project('gridbenchmark2sipp', 'cpp',
   version : '0.1',
-  default_options : ['warning_level=3', 'default_library=static', 'cpp_std=c++20'])
+  default_options : ['warning_level=3', 'default_library=static', 'cpp_std=c++20', 'b_ndebug=if-release'])
 boost_dep = dependency('boost', static:true, modules : ['program_options', 'random', 'iostreams', 'timer'])
 zdep = dependency('zlib', static:true)
 cgal = dependency('CGAL', static:true)

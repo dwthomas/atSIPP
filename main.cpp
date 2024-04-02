@@ -79,18 +79,18 @@ int main(int argc, char* argv[]) {
                 }
                 std::cout << m << "\n";
             }
-            // else if(vm["search"].as<std::string>() == "repeat"){
-            //     MetaData m;
-            //     auto res = rePEAT::search(source, goal_loc, m, start_time);
-            //     /*
-            //     for(auto n: res.first){
-            //         std::cout << *n << "\n";
-            //     }
-            //     std::cout << res.second << "\n";
-            //     */
-            //     std::cout << m << "\n";
-            //     std::cout << res;
-            // }
+            else if(vm["search"].as<std::string>() == "repeat"){
+                MetaData m;
+                auto res = rePEAT::search(atg, source, goal_loc, m, start_time);
+                /*
+                for(auto n: res.first){
+                    std::cout << *n << "\n";
+                }
+                std::cout << res.second << "\n";
+                */
+                std::cout << m << "\n";
+                std::cout << res;
+            }
             else if(vm["search"].as<std::string>() == "rtasipp"){
                 MetaData m;
                 long budget = vm["budget"].as<long>();

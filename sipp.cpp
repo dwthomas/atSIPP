@@ -4,6 +4,7 @@
 #include "structs.hpp"
 #include <algorithm>
 #include <cmath>
+#include <time.h>
 
 using namespace sipp;
 
@@ -72,14 +73,16 @@ std::vector<const SIPPState<Location> *> backup(const Node& n, Open& open_list){
 std::vector<const SIPPState<Location> *> sipp::search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData& m, double start_time){
     Open open_list;
     m.init();
-    m.search_timer.start();
+    struct timespec ts1, ts2;
+    clock_gettime(CLOCK_MONOTONIC, &ts1);
     open_list.emplace(start_time, eightWayDistance(dest, source->configuration), source, nullptr);
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
         //std::cout << *cur.node << "\n";
         if(isGoal(cur, dest)){
-            m.search_timer.stop();
+            clock_gettime(CLOCK_MONOTONIC, &ts2);
+            m.search_time = 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
             return backup(cur, open_list);
         }
         open_list.pop();

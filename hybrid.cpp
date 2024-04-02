@@ -9,8 +9,8 @@
 
 std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, long budget, double start_time){
     std::vector<const SIPPState<Location> *> path;
+    struct timespec ts1, ts2;
     m.init();
-    m.search_timer.start();
     auto cur = source;
     double t = start_time;
     while(cur->configuration != dest){
@@ -19,8 +19,11 @@ std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Locati
         // run NLASIPP
         path.emplace_back(cur);
         asipp::Open open_list;
+        clock_gettime(CLOCK_MONOTONIC, &ts1);
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), rtasipp::get_h(*cur, t, dest) , cur, nullptr, nullptr);
         asipp::search_core(g, open_list, dest, m, budget, rtasipp::get_h);
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+        m.search_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
         if(open_list.empty()){
             std::cerr << "No path found\n";
             exit(-1);
@@ -29,6 +32,8 @@ std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Locati
         //learn
         // static
         //asipp::dump_open(open_list);
+        clock_gettime(CLOCK_MONOTONIC, &ts1);
+
         plrtosipphonly::lsslrtsipp(g, open_list, dest, m);
         //rtasipp learning
         rtasipp::h_dynamic[cur] = rtasipp::CATF();
@@ -45,6 +50,8 @@ std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Locati
         if(h_s_prime > rtasipp::get_h_s(cur, dest)){
             rtasipp::set_h_s(cur->configuration, h_s_prime);
         }
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+        m.learning_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
 
         // dynamic
         //dump_h_s(h_static);
@@ -54,7 +61,6 @@ std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Locati
         cur = e->destination;
     } 
     path.emplace_back(cur);
-    m.search_timer.stop();
     std::cout << "Arrival time: " << t << "\n";
     return path;
 }
