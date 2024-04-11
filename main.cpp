@@ -11,7 +11,6 @@
 #include "rtasipp.hpp"
 #include "plrtosipp.hpp"
 #include "plrtosipphonly.hpp"
-//#include "grtsipp.hpp"
 #include "sippgraph.hpp"
 #include "structs.hpp"
 
@@ -91,7 +90,7 @@ int main(int argc, char* argv[]) {
                 std::cout << m << "\n";
                 std::cout << res;
             }
-            else if(vm["search"].as<std::string>() == "rtasipp"){
+            else if(vm["search"].as<std::string>() == "rtas"){
                 MetaData m;
                 long budget = vm["budget"].as<long>();
                 auto res = rtasipp::search(atg, source, goal_loc, m, start_time, budget);
@@ -109,7 +108,7 @@ int main(int argc, char* argv[]) {
             //     }
             //     std::cout << m << "\n";
             // }
-            else if(vm["search"].as<std::string>() == "plrtosipp"){
+            else if(vm["search"].as<std::string>() == "maxatfs"){
                 MetaData m;
                 long budget = vm["budget"].as<long>();
                 auto res = plrtosipp::search(atg, source, goal_loc, m, budget, start_time);
@@ -118,7 +117,7 @@ int main(int argc, char* argv[]) {
                 }
                 std::cout << m << "\n";
             }
-            else if(vm["search"].as<std::string>() == "plrtosipphonly"){
+            else if(vm["search"].as<std::string>() == "plrts"){
                 MetaData m;
                 long budget = vm["budget"].as<long>();
                 auto res = plrtosipphonly::search(atg, source, goal_loc, m, budget, start_time);
@@ -127,7 +126,7 @@ int main(int argc, char* argv[]) {
                 }
                 std::cout << m << "\n";
             }
-            else if(vm["search"].as<std::string>() == "hybrid"){
+            else if(vm["search"].as<std::string>() == "medatfs"){
                 MetaData m;
                 long budget = vm["budget"].as<long>();
                 auto res = hybrid::search(atg, source, goal_loc, m, budget, start_time);
