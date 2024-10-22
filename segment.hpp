@@ -54,7 +54,7 @@ struct Segment{
         if(x == x1){
             return y1;
         }
-        return y0 + (x - x0)*(y1 - y0)/(x1 - x0);
+        return y0 + (x - x0);//*(y1 - y0)/(x1 - x0);
     }
 
     inline double y_exc(double x) const{
@@ -72,7 +72,7 @@ struct Segment{
         if(x == x1){
             return y1;
         }
-        return y0 + (x - x0)*(y1 - y0)/(x1 - x0);
+        return y0 + (x - x0);//*(y1 - y0)/(x1 - x0);
     }
 
     inline Segment constrain(double s, double e) const{

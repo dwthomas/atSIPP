@@ -1,39 +1,49 @@
 #include "sipp.hpp"
-#include "graph.hpp"
+#include "atsippgraph.hpp"
+#include "sippgraph.hpp"
 #include "structs.hpp"
 #include <algorithm>
 #include <cmath>
+#include <time.h>
 
 using namespace sipp;
 
 bool isGoal(const Node& n, const Location& goal_loc){
-    return n.node->state.loc == goal_loc;
+    return n.state->configuration == goal_loc;
 }
 
-void expand(const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
+void expand(const SippGraph<Location>& g, const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
     m.expanded++;
-    for(GraphEdge * successor: cur.node->successors){
-        double arrival_time = successor->edge.arrival_time(cur.g);
-        if(cur.g >= successor->edge.beta || end(cur.node->state.interval) <= successor->edge.zeta){
-            continue;
-        } 
-        if(open_list.expanded.contains(successor->destination)){
+    auto successors = g.successors.at(cur.state);
+    for(const auto & successor : successors){
+        if(open_list.expanded.contains(successor.destination)){
             continue;
         }
-        else if (open_list.handles.contains(successor->destination)){
-            auto handle = open_list.handles[successor->destination];
-            if(arrival_time < (*handle).g){
+        double earliest_arrival_time = std::max(
+            cur.g + successor.duration, // no wait
+            std::max(
+                successor.safe_interval.lower() + successor.duration,
+                successor.destination->safe_interval.lower()
+            )
+        );
+        if(!contains(cur.state->safe_interval, earliest_arrival_time - successor.duration) || 
+           !contains(successor.safe_interval, earliest_arrival_time - successor.duration) || 
+           !contains(successor.destination->safe_interval, earliest_arrival_time)){
+            continue;
+        }
+        if (open_list.handles.contains(successor.destination)){
+            auto handle = open_list.handles[successor.destination];
+            if(earliest_arrival_time < (*handle).g){
                 m.decreased++;
-                std::cerr << "Decrease " << *handle << "\n";
-                double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-                open_list.decrease_key(handle, arrival_time, h, successor->destination, successor->source);
+                //std::cerr << "Decrease " << *handle << "\n";
+                double h = eightWayDistance(successor.destination->configuration, goal_loc);
+                open_list.decrease_key(handle, earliest_arrival_time, h, successor.destination, successor.source);
             }
         }
         else{
             m.generated++;
-            double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-            open_list.emplace(arrival_time, h, successor->destination, successor->source);
-            //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
+            double h = eightWayDistance(successor.destination->configuration, goal_loc);
+            open_list.emplace(earliest_arrival_time, h, successor.destination, successor.source);
         }
     }
 }
@@ -48,9 +58,9 @@ void dump_open(const Open& open_list){
     }
 }
 
-std::vector<GraphNode *> backup(const Node& n, Open& open_list){
-    std::vector<GraphNode *> res;
-    GraphNode* cur = n.node;
+std::vector<const SIPPState<Location> *> backup(const Node& n, Open& open_list){
+    std::vector<const SIPPState<Location> *> res;
+    const SIPPState<Location> * cur = n.state;
     while(cur != nullptr){
         res.push_back(cur);
         cur = open_list.parent[cur];
@@ -60,19 +70,23 @@ std::vector<GraphNode *> backup(const Node& n, Open& open_list){
     return res;
 }
 
-std::vector<GraphNode *> sipp::search(GraphNode * source, const Location& dest, MetaData& m, double start_time){
+std::vector<const SIPPState<Location> *> sipp::search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData& m, double start_time){
     Open open_list;
     m.init();
-    open_list.emplace(start_time, eightWayDistance(dest, source->state.loc), source, nullptr);
+    struct timespec ts1, ts2;
+    clock_gettime(CLOCK_MONOTONIC, &ts1);
+    open_list.emplace(start_time, eightWayDistance(dest, source->configuration), source, nullptr);
     while(!open_list.empty()){
-        dump_open(open_list);
+        //dump_open(open_list);
         Node cur = open_list.top();
         //std::cout << *cur.node << "\n";
         if(isGoal(cur, dest)){
+            clock_gettime(CLOCK_MONOTONIC, &ts2);
+            m.search_time = 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
             return backup(cur, open_list);
         }
         open_list.pop();
-        expand(cur, open_list, dest, m);
+        expand(g, cur, open_list, dest, m);
     }
     std::cerr << "Failed to find path\n";
     exit(-1);
