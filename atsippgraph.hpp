@@ -1,11 +1,8 @@
 #pragma once
-#include "structs.hpp"
-#include "atf.hpp"
-#include <limits>
-#include <unordered_map>
+#include "data_structures/structs.hpp"
+#include "data_structures/atf.hpp"
 #include <boost/container/flat_set.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
-#include "sippgraph.hpp"
 
 struct GraphEdge;
 struct AtsippGraphNode;

@@ -1,7 +1,7 @@
 #pragma once
-#include "atf.hpp"
+#include "data_structures/atf.hpp"
 #include "sippgraph.hpp"
-#include "structs.hpp"
+#include "data_structures/structs.hpp"
 #include <boost/multiprecision/detail/number_base.hpp>
 
 template <typename Configuration_t>

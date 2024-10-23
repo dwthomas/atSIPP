@@ -1,6 +1,6 @@
 #include "randomsippgraph.hpp"
-#include "constants.hpp"
-#include "structs.hpp"
+#include "data_structures/constants.hpp"
+#include "data_structures/structs.hpp"
 #include "sippgraph.hpp"
 #include <unordered_map>
 #include <vector>

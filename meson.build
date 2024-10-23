@@ -4,7 +4,7 @@ project('gridbenchmark2sipp', 'cpp',
 boost_dep = dependency('boost', static:true, modules : ['program_options', 'random', 'iostreams', 'timer'])
 gmp_dep = dependency('gmp', static:true)
 executable('atsipp',
-           ['main.cpp', 'randomsippgraph.cpp', 'segment.cpp',
+           ['main.cpp', 'randomsippgraph.cpp', 'data_structures/segment.cpp',
             'search_algorithms/SIPP/sipp.cpp', 'search_algorithms/augmentedSIPP/augmentedsipp.cpp',
             'search_algorithms/RePEAT/repeat.cpp','search_algorithms/RTAS/rtasipp.cpp',
             'search_algorithms/PLRTS/plrtosipphonly.cpp', 'search_algorithms/MinATFS/hybrid.cpp',
@@ -14,12 +14,12 @@ executable('atsipp',
            cpp_args: '-DCGAL_DISABLE_ROUNDING_MATH_CHECK=ON'
            )
 executable('lhtest',
-            ['lhtest.cpp', 'segment.cpp'],
+            ['lhtest.cpp', 'data_structures/segment.cpp'],
             install: true,
             dependencies : [boost_dep,],
             )
 executable('atftest',
-            ['atftest.cpp', 'segment.cpp'],
+            ['atftest.cpp', 'data_structures/segment.cpp'],
             install: true,
             dependencies : [boost_dep, gmp_dep],
             )

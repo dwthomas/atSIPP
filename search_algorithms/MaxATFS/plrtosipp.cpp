@@ -1,5 +1,5 @@
 #include "plrtosipp.hpp"
-#include "atf.hpp"
+#include "data_structures/atf.hpp"
 #include "../augmentedSIPP/augmentedsipp.hpp"
 #include "newatsippgraph.hpp"
 #include "../PLRTS/plrtosipphonly.hpp"

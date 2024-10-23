@@ -1,5 +1,5 @@
 #include "atsippgraph.hpp"
-#include "constants.hpp"
+#include "data_structures/constants.hpp"
 #include <iostream>
 #include <fstream>
 #include <boost/iostreams/filtering_streambuf.hpp>

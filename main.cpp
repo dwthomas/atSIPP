@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <ostream>
 #include <boost/program_options.hpp>
-#include "structs.hpp"
+#include "data_structures/structs.hpp"
 #include "newatsippgraph.hpp"
 #include "randomsippgraph.hpp"
 

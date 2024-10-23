@@ -1,8 +1,10 @@
 #include "hybrid.hpp"
-#include "../PLRTS/plrtosipphonly.hpp"
-#include "atf.hpp"
-#include "../augmentedSIPP/augmentedsipp.hpp"
+
+#include "data_structures/atf.hpp"
 #include "newatsippgraph.hpp"
+
+#include "../PLRTS/plrtosipphonly.hpp"
+#include "../augmentedSIPP/augmentedsipp.hpp"
 #include "../RTAS/rtasipp.hpp"
 
 std::vector<const SIPPState<Location> *> hybrid::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, long budget, double start_time){

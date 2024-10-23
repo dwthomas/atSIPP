@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
 #include <unordered_map>
-#include "atf.hpp"
+#include "data_structures/atf.hpp"
 #include "../augmentedSIPP/augmentedsipp.hpp"
 #include "sippgraph.hpp"
 

@@ -1,12 +1,9 @@
 #pragma once
 #include <bits/types/time_t.h>
 #include <boost/functional/hash.hpp>
-#include <set>
 #include <unordered_map>
 
-#include "constants.hpp"
-#include "map.hpp"
-#include "structs.hpp"
+#include "data_structures/constants.hpp"
 
 template <typename Configuration_t>
 struct SIPPState{

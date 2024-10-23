@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
 #include <functional>
-#include "structs.hpp"
+#include "data_structures/structs.hpp"
 #include "sippgraph.hpp"
 
 

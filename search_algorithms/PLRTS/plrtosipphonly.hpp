@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "../augmentedSIPP/augmentedsipp.hpp"
 #include "sippgraph.hpp"
-#include "structs.hpp"
+#include "data_structures/structs.hpp"
 
 namespace plrtosipphonly{
     // struct Node;

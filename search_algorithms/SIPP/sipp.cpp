@@ -1,6 +1,6 @@
 #include "sipp.hpp"
 #include "sippgraph.hpp"
-#include "structs.hpp"
+#include "data_structures/structs.hpp"
 #include <algorithm>
 #include <cmath>
 #include <time.h>

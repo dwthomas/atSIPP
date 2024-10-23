@@ -10,8 +10,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include "structs.hpp"
-#include "constants.hpp"
+#include "data_structures/structs.hpp"
+#include "data_structures/constants.hpp"
 
 
 
