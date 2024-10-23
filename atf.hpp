@@ -168,7 +168,7 @@ struct EdgeATFholster{
         Segment_2 a(Point_2(interval.lower(), enc_y0), Point_2(interval.upper(), enc_y1));
         Segment_2 b(Point_2(interval.lower(), new_y0), Point_2(interval.upper(), new_y1));
         auto x = CGAL::intersection(a, b);
-        const Point_2* p = boost::get<Point_2 >(&*x);
+        const Point_2* p = std::get_if<Point_2 >(&*x);
         if(p == nullptr){
             std::cerr << interval.lower() << " " << interval.upper() << "\n";  
             std::cerr << encumbent << "\n" << newcomer << "\n";
