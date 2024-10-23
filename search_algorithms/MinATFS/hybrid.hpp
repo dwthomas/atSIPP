@@ -1,9 +1,6 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
-#include <unordered_map>
-#include "atsippgraph.hpp"
-#include "augmentedsipp.hpp"
-#include "sippgraph.hpp"
+#include "newatsippgraph.hpp"
 #include "structs.hpp"
 
 namespace hybrid{

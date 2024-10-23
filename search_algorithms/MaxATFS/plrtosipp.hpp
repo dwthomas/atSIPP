@@ -2,9 +2,7 @@
 #include <boost/heap/d_ary_heap.hpp>
 #include <unordered_map>
 #include "atf.hpp"
-#include "atsippgraph.hpp"
-#include "augmentedsipp.hpp"
-#include "plrtosipphonly.hpp"
+#include "../augmentedSIPP/augmentedsipp.hpp"
 #include "sippgraph.hpp"
 
 namespace plrtosipp{

@@ -1,6 +1,6 @@
 #include "repeat.hpp"
 #include "atf.hpp"
-#include "augmentedsipp.hpp"
+#include "../augmentedSIPP/augmentedsipp.hpp"
 #include <time.h>
 
 double update_reference_time(const EdgeATF& path, asipp::Open& open_list){

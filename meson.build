@@ -4,7 +4,11 @@ project('gridbenchmark2sipp', 'cpp',
 boost_dep = dependency('boost', static:true, modules : ['program_options', 'random', 'iostreams', 'timer'])
 gmp_dep = dependency('gmp', static:true)
 executable('atsipp',
-           ['main.cpp', 'randomsippgraph.cpp', 'segment.cpp','sipp.cpp', 'augmentedsipp.cpp', 'repeat.cpp','rtasipp.cpp', 'plrtosipphonly.cpp', 'hybrid.cpp', 'plrtosipp.cpp'],
+           ['main.cpp', 'randomsippgraph.cpp', 'segment.cpp',
+            'search_algorithms/SIPP/sipp.cpp', 'search_algorithms/augmentedSIPP/augmentedsipp.cpp',
+            'search_algorithms/RePEAT/repeat.cpp','search_algorithms/RTAS/rtasipp.cpp',
+            'search_algorithms/PLRTS/plrtosipphonly.cpp', 'search_algorithms/MinATFS/hybrid.cpp',
+            'search_algorithms/MaxATFS/plrtosipp.cpp'],
            install : true,
            dependencies : [boost_dep, gmp_dep],
            cpp_args: '-DCGAL_DISABLE_ROUNDING_MATH_CHECK=ON'

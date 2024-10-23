@@ -2,17 +2,23 @@
 #include <filesystem>
 #include <ostream>
 #include <boost/program_options.hpp>
-#include "hybrid.hpp"
+#include "structs.hpp"
 #include "newatsippgraph.hpp"
 #include "randomsippgraph.hpp"
-#include "sipp.hpp"
-#include "augmentedsipp.hpp"
-#include "repeat.hpp"
-#include "rtasipp.hpp"
-#include "plrtosipp.hpp"
-#include "plrtosipphonly.hpp"
-#include "sippgraph.hpp"
-#include "structs.hpp"
+
+// SIPP Search algorithms 
+#include "search_algorithms/SIPP/sipp.hpp"
+#include "search_algorithms/augmentedSIPP/augmentedsipp.hpp"
+
+// Any-start-time SIPP algorithms
+#include "search_algorithms/RePEAT/repeat.hpp"
+
+// Real-time SIPP algorithms
+#include "search_algorithms/MinATFS/hybrid.hpp"
+#include "search_algorithms/RTAS/rtasipp.hpp"
+#include "search_algorithms/MaxATFS/plrtosipp.hpp"
+#include "search_algorithms/PLRTS/plrtosipphonly.hpp"
+
 
 namespace po = boost::program_options;
 
@@ -99,15 +105,6 @@ int main(int argc, char* argv[]) {
                 }
                 std::cout << m << "\n";
             }
-            // else if(vm["search"].as<std::string>() == "grtsipp"){
-            //     MetaData m;
-            //     long budget = vm["budget"].as<long>();
-            //     auto res = grtsipp::search(source, goal_loc, m, budget, start_time);
-            //     for(auto n: res){
-            //         std::cout << *n << "\n";
-            //     }
-            //     std::cout << m << "\n";
-            // }
             else if(vm["search"].as<std::string>() == "maxatfs"){
                 MetaData m;
                 long budget = vm["budget"].as<long>();

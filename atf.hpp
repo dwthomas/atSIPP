@@ -1,9 +1,7 @@
 #pragma once
 #include <boost/container/flat_set.hpp>
 #include <vector>
-#include <set>
 #include <limits>
-#include <format>
 
 #include "constants.hpp"
 #include "segment.hpp"

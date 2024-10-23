@@ -1,6 +1,5 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
-#include <unordered_map>
 #include "newatsippgraph.hpp"
 
 namespace rePEAT{

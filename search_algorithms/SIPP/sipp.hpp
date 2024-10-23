@@ -1,9 +1,9 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
 #include <functional>
-#include <unordered_map>
-#include "atsippgraph.hpp"
 #include "structs.hpp"
+#include "sippgraph.hpp"
+
 
 namespace sipp{
     struct Node;

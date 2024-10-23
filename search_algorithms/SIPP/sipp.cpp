@@ -1,5 +1,4 @@
 #include "sipp.hpp"
-#include "atsippgraph.hpp"
 #include "sippgraph.hpp"
 #include "structs.hpp"
 #include <algorithm>
