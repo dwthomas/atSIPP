@@ -1,8 +1,8 @@
 #include "plrtosipphonly.hpp"
 #include "data_structures/atf.hpp"
 #include "../RTAS/rtasipp.hpp"
-#include "newatsippgraph.hpp"
-#include "sippgraph.hpp"
+#include "search_algorithms/newatsippgraph.hpp"
+#include "search_algorithms/sippgraph.hpp"
 
 //std::unordered_map<Location, double> plrtosipphonly::h_static;
 //std::unordered_map<const SIPPState<Location> *, plrtosipphonly::CATF> plrtosipphonly::h_dynamic;

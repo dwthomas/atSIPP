@@ -2,7 +2,7 @@
 #include <boost/heap/d_ary_heap.hpp>
 #include <functional>
 #include "data_structures/structs.hpp"
-#include "sippgraph.hpp"
+#include "search_algorithms/sippgraph.hpp"
 
 
 namespace sipp{

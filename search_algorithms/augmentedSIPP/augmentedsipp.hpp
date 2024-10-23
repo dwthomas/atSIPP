@@ -2,8 +2,8 @@
 #include <boost/heap/d_ary_heap.hpp>
 #include <functional>
 #include <unordered_map>
-#include "newatsippgraph.hpp"
-#include "sippgraph.hpp"
+#include "search_algorithms/newatsippgraph.hpp"
+#include "search_algorithms/sippgraph.hpp"
 
 namespace asipp{
     struct Node;

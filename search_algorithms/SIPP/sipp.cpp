@@ -1,5 +1,5 @@
 #include "sipp.hpp"
-#include "sippgraph.hpp"
+#include "search_algorithms/sippgraph.hpp"
 #include "data_structures/structs.hpp"
 #include <algorithm>
 #include <cmath>

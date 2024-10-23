@@ -1,7 +1,7 @@
 #include "rtasipp.hpp"
 #include "data_structures/atf.hpp"
 #include "../augmentedSIPP/augmentedsipp.hpp"
-#include "sippgraph.hpp"
+#include "search_algorithms/sippgraph.hpp"
 
 std::unordered_map<Location, double> rtasipp::h_static;
 std::unordered_map<const SIPPState<Location> *, rtasipp::CATF> rtasipp::h_dynamic;

@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "data_structures/atf.hpp"
 #include "../augmentedSIPP/augmentedsipp.hpp"
-#include "sippgraph.hpp"
+#include "search_algorithms/sippgraph.hpp"
 
 namespace plrtosipp{
     // struct Node;

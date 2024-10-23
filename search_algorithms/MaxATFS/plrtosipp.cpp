@@ -1,7 +1,7 @@
 #include "plrtosipp.hpp"
 #include "data_structures/atf.hpp"
 #include "../augmentedSIPP/augmentedsipp.hpp"
-#include "newatsippgraph.hpp"
+#include "search_algorithms/newatsippgraph.hpp"
 #include "../PLRTS/plrtosipphonly.hpp"
 #include "../RTAS/rtasipp.hpp"
 

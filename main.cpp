@@ -3,8 +3,8 @@
 #include <ostream>
 #include <boost/program_options.hpp>
 #include "data_structures/structs.hpp"
-#include "newatsippgraph.hpp"
-#include "randomsippgraph.hpp"
+#include "search_algorithms/newatsippgraph.hpp"
+#include "domains/grid2d/randomsippgraph.hpp"
 
 // SIPP Search algorithms 
 #include "search_algorithms/SIPP/sipp.hpp"

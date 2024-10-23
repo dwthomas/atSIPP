@@ -2,8 +2,8 @@
 #include <boost/heap/d_ary_heap.hpp>
 #include <unordered_map>
 #include "data_structures/atf.hpp"
-#include "sippgraph.hpp"
-#include "newatsippgraph.hpp"
+#include "search_algorithms/sippgraph.hpp"
+#include "search_algorithms/newatsippgraph.hpp"
 
 
 namespace rtasipp{

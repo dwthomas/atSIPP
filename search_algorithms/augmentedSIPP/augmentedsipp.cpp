@@ -1,7 +1,5 @@
 #include "augmentedsipp.hpp"
-#include "atsippgraph.hpp"
 #include "data_structures/structs.hpp"
-#include <algorithm>
 #include <limits>
 #include <utility>
 #include <time.h>

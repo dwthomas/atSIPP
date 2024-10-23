@@ -1,6 +1,6 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
-#include "newatsippgraph.hpp"
+#include "search_algorithms/newatsippgraph.hpp"
 
 namespace rePEAT{
     // struct Node;
