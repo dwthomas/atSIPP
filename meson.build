@@ -3,25 +3,29 @@ project('gridbenchmark2sipp', 'cpp',
   default_options : ['warning_level=3', 'default_library=static', 'cpp_std=c++20', 'b_ndebug=if-release'])
 boost_dep = dependency('boost', static:true, modules : ['program_options', 'random', 'iostreams', 'timer'])
 gmp_dep = dependency('gmp', static:true)
-executable('atsipp',
-           ['main.cpp', 'randomsippgraph.cpp', 'segment.cpp','sipp.cpp', 'augmentedsipp.cpp', 'repeat.cpp','rtasipp.cpp', 'plrtosipphonly.cpp', 'hybrid.cpp', 'plrtosipp.cpp'],
+executable('grid2d',
+           ['domains/grid2d/main.cpp', 'domains/grid2d/randomsippgraph.cpp', 'data_structures/segment.cpp',
+            'search_algorithms/SIPP/sipp.cpp', 'search_algorithms/augmentedSIPP/augmentedsipp.cpp',
+            'search_algorithms/RePEAT/repeat.cpp','search_algorithms/RTAS/rtasipp.cpp',
+            'search_algorithms/PLRTS/plrtosipphonly.cpp', 'search_algorithms/MinATFS/hybrid.cpp',
+            'search_algorithms/MaxATFS/plrtosipp.cpp'],
            install : true,
            dependencies : [boost_dep, gmp_dep],
            cpp_args: '-DCGAL_DISABLE_ROUNDING_MATH_CHECK=ON'
            )
 executable('lhtest',
-            ['lhtest.cpp', 'segment.cpp'],
+            ['lhtest.cpp', 'data_structures/segment.cpp'],
             install: true,
             dependencies : [boost_dep,],
             )
 executable('atftest',
-            ['atftest.cpp', 'segment.cpp'],
+            ['atftest.cpp', 'data_structures/segment.cpp'],
             install: true,
             dependencies : [boost_dep, gmp_dep],
             )
 
 executable('testrandom',
-            ['testrandomsipp.cpp', 'randomsippgraph.cpp'],
+            ['domains/grid2d/testrandomsipp.cpp', 'domains/grid2d/randomsippgraph.cpp'],
             install: true,
             dependencies : [boost_dep, gmp_dep],
             )

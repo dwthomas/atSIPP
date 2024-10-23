@@ -1,5 +1,5 @@
 #include <iostream>
-#include "atf.hpp"
+#include "data_structures/atf.hpp"
 
 int main(){
     EdgeATF a(0, 0, 10, 5);

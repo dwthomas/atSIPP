@@ -1,4 +1,4 @@
-#include "segment.hpp"
+#include "data_structures/segment.hpp"
 #include <iostream>
 
 
