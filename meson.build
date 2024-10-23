@@ -3,8 +3,8 @@ project('gridbenchmark2sipp', 'cpp',
   default_options : ['warning_level=3', 'default_library=static', 'cpp_std=c++20', 'b_ndebug=if-release'])
 boost_dep = dependency('boost', static:true, modules : ['program_options', 'random', 'iostreams', 'timer'])
 gmp_dep = dependency('gmp', static:true)
-executable('atsipp',
-           ['main.cpp', 'domains/grid2d/randomsippgraph.cpp', 'data_structures/segment.cpp',
+executable('grid2d',
+           ['domains/grid2d/main.cpp', 'domains/grid2d/randomsippgraph.cpp', 'data_structures/segment.cpp',
             'search_algorithms/SIPP/sipp.cpp', 'search_algorithms/augmentedSIPP/augmentedsipp.cpp',
             'search_algorithms/RePEAT/repeat.cpp','search_algorithms/RTAS/rtasipp.cpp',
             'search_algorithms/PLRTS/plrtosipphonly.cpp', 'search_algorithms/MinATFS/hybrid.cpp',
