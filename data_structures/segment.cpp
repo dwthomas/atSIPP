@@ -1,6 +1,7 @@
 #include "segment.hpp"
+#include <algorithm>
+#include <array>
 #include <cmath>
-#include <iostream>
 
 bool overlap(const Segment& left, const Segment& right){
     auto earliest = std::min(left.x0, right.x0);

@@ -1,10 +1,8 @@
 #pragma once
 
-#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <ostream>
-#include <array>
 #include <cassert>
 #include <iostream>
 #include <boost/container/small_vector.hpp>
