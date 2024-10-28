@@ -4,6 +4,7 @@
 #include "domains/grid2d/map.hpp"
 #include "search_algorithms/sippgraph.hpp"
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <boost/random/mersenne_twister.hpp>
@@ -99,7 +100,7 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
     }
 
     SippGraph<Location> g;
-    std::unordered_map<SIPPState<Location>, long> indexof;
+    std::unordered_map<SIPPState<Location>, long>& indexof = g.indexof;
     // do vertices
     for (std::size_t i = 0; i < states.size(); i++){
         auto loc = map.index2Location(i);
@@ -114,4 +115,38 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
         wire_edges(i, g, map, states, indexof);
     }
     return g;
+}
+
+SIPPState<Location>* mark_safe(SippGraph<Location>& g, const Location& loc){
+    std::vector<std::size_t> loc_ind;
+    for(std::size_t i = 0; i < g.vertices.size(); i++){
+        if(g.vertices[i].configuration == loc){
+            loc_ind.push_back(i);
+        }
+    }
+    g.vertices.emplace_back(loc, atf::interval_t(0, atf::infty()));
+    g.indexof[g.vertices.back()] = g.vertices.size()-1;
+    
+    // delete invalidated edges
+    for(auto i: loc_ind){ 
+        for(auto successor: g.successors[i]){
+            g.successors[g.vertices.size()-1].push_back(successor);
+            auto& preds = g.predecessors[successor.destination];
+            for(auto j = preds.begin(); j != preds.end(); j++){
+                if(j->source == i){
+                    j->source = g.vertices.size()-1;
+                }
+            }
+        }
+        for(auto pred: g.predecessors[i]){
+            g.predecessors[g.vertices.size()-1].push_back(pred);
+            auto& succs = g.successors[pred.source];
+            for(auto j = succs.begin(); j != succs.end(); j++){
+                if(j->destination == i){
+                    j->destination = g.vertices.size();
+                }
+            }
+        }
+    }
+    return &g.vertices.back();
 }

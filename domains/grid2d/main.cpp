@@ -54,12 +54,13 @@ int main(int argc, char* argv[]) {
             //std::cout << g << "\n";
             //std::cerr << "SIPP graph made, compiling @SIPP graph...";
             SippGraph<Location> copy_g(g);
+            const SIPPState<Location> * source = mark_safe(copy_g, source_loc);
+            mark_safe(copy_g, goal_loc);
             AtSippGraph<Location> atg(&copy_g);
             //std::cerr << "compiled!\n";
             //std::cerr << atg << "\n";
             //g.dump();
             double start_time = vm["startTime"].as<double>();
-            const SIPPState<Location> * source = find_earliest(g, source_loc, start_time);
             // run search
             run_search(vm, goal_loc, g, atg, start_time, source);
         }

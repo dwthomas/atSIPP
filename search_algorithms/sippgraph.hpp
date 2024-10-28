@@ -77,12 +77,11 @@ struct SippGraph{
     std::vector<SIPPState<Configuration_t>> vertices;
     std::unordered_map<long, std::vector<SIPPEdge<Configuration_t>>> successors;
     std::unordered_map<long, std::vector<SIPPEdge<Configuration_t>>> predecessors;
-    std::unordered_multimap<Configuration_t, long, std::hash<Configuration_t>> vertex_key;
+    std::unordered_map<SIPPState<Configuration_t>, long> indexof;
 
     SippGraph() = default;
     
-    SippGraph(SippGraph& other):vertices(other.vertices){
-    }
+    SippGraph(SippGraph& other):vertices(other.vertices),successors(other.successors),predecessors(other.predecessors),indexof(other.indexof){}
 
     inline friend std::ostream& operator<< (std::ostream& stream, const SippGraph& g){
         for(long i =0 ; i < (long)g.vertices.size(); i++){
