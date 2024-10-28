@@ -6,13 +6,13 @@
 
 template <typename Configuration_t>
 struct AtSIPPEdge{
-    SIPPState<Configuration_t> * source;
-    SIPPState<Configuration_t> * destination;
+    const SIPPState<Configuration_t> * source;
+    const SIPPState<Configuration_t> * destination;
     EdgeATF duration;
 
 
     AtSIPPEdge() = default;
-    AtSIPPEdge(SIPPState<Configuration_t> * src, SIPPState<Configuration_t>* dst, EdgeATF dur):source(src),destination(dst),duration(dur){}
+    AtSIPPEdge(const SIPPState<Configuration_t> * src, const SIPPState<Configuration_t>* dst, EdgeATF dur):source(src),destination(dst),duration(dur){}
 
     constexpr bool operator ==(const AtSIPPEdge& s) const{
         return *s.source == *source && *s.destination == *destination;
@@ -32,9 +32,9 @@ struct AtSIPPEdge{
 };
 
 template <typename Configuration_t>
-AtSIPPEdge<Configuration_t> compile(const SIPPEdge<Configuration_t>& sipp_edge){
-    const SIPPState<Configuration_t>& u = *sipp_edge.source;
-    const SIPPState<Configuration_t>& v = *sipp_edge.destination;
+AtSIPPEdge<Configuration_t> compile(const SIPPEdge<Configuration_t>& sipp_edge, const SippGraph<Configuration_t> * g){
+    const SIPPState<Configuration_t>& u = g->vertices[sipp_edge.source];
+    const SIPPState<Configuration_t>& v = g->vertices[sipp_edge.destination];
     double zeta = u.safe_interval.lower();
     double alpha = std::max(
         sipp_edge.safe_interval.lower(),
@@ -52,7 +52,7 @@ AtSIPPEdge<Configuration_t> compile(const SIPPEdge<Configuration_t>& sipp_edge){
     );
     double delta = sipp_edge.duration;
     EdgeATF e(zeta, alpha, beta, delta);
-    return AtSIPPEdge<Configuration_t>(sipp_edge.source, sipp_edge.destination, e);
+    return AtSIPPEdge<Configuration_t>(&g->vertices[sipp_edge.source], &g->vertices[sipp_edge.destination], e);
 }
 
 template <typename Configuration_t>
@@ -71,18 +71,18 @@ struct AtSippGraph{
         //         stream << "\t" << succ << "\n";
         //     }
         // }
-        for(const auto& s: sipp_graph->vertices){
+        for(long i = 0; i < sipp_graph->vertices.size(); i++){
             //std::cerr << s << " " << &s << "\n";
-            const auto& succ = sipp_graph->successors.at(&s);
-            successors[&s].reserve(succ.size());
+            const auto& succ = sipp_graph->successors.at(i);
+            successors[&g->vertices[i]].reserve(succ.size());
             for (const auto& successor: succ){
                 //std::cerr << "adding " << successor << " to " << s << "\n";
-                successors[&s].emplace_back(compile(successor));
+                successors[&g->vertices[i]].emplace_back(compile(successor, sipp_graph));
             }
-            const auto& pred = sipp_graph->predecessors.at(&s);
-            predecessors[&s].reserve(pred.size());
+            const auto& pred = sipp_graph->predecessors.at(i);
+            predecessors[&g->vertices[i]].reserve(pred.size());
             for (const auto& predecessor: pred){
-                predecessors[&s].emplace_back(compile(predecessor));
+                predecessors[&g->vertices[i]].emplace_back(compile(predecessor, sipp_graph));
             }
         }
         //std::cerr << *this << "\n";

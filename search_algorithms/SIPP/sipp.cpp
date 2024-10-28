@@ -7,8 +7,8 @@
 
 using namespace sipp;
 
-bool isGoal(const Node& n, const Location& goal_loc){
-    return n.state->configuration == goal_loc;
+bool isGoal(const Node& n, const Location& goal_loc, const SippGraph<Location>& g){
+    return g.vertices[n.state].configuration == goal_loc;
 }
 
 void expand(const SippGraph<Location>& g, const Node& cur, Open& open_list, const Location& goal_loc, MetaData & m){
@@ -22,12 +22,12 @@ void expand(const SippGraph<Location>& g, const Node& cur, Open& open_list, cons
             cur.g + successor.duration, // no wait
             std::max(
                 successor.safe_interval.lower() + successor.duration,
-                successor.destination->safe_interval.lower()
+                g.vertices[successor.destination].safe_interval.lower()
             )
         );
-        if(!contains(cur.state->safe_interval, earliest_arrival_time - successor.duration) || 
+        if(!contains(g.vertices[cur.state].safe_interval, earliest_arrival_time - successor.duration) || 
            !contains(successor.safe_interval, earliest_arrival_time - successor.duration) || 
-           !contains(successor.destination->safe_interval, earliest_arrival_time)){
+           !contains(g.vertices[successor.destination].safe_interval, earliest_arrival_time)){
             continue;
         }
         if (open_list.handles.contains(successor.destination)){
@@ -35,13 +35,13 @@ void expand(const SippGraph<Location>& g, const Node& cur, Open& open_list, cons
             if(earliest_arrival_time < (*handle).g){
                 m.decreased++;
                 //std::cerr << "Decrease " << *handle << "\n";
-                double h = eightWayDistance(successor.destination->configuration, goal_loc);
+                double h = eightWayDistance(g.vertices[successor.destination].configuration, goal_loc);
                 open_list.decrease_key(handle, earliest_arrival_time, h, successor.destination, successor.source);
             }
         }
         else{
             m.generated++;
-            double h = eightWayDistance(successor.destination->configuration, goal_loc);
+            double h = eightWayDistance(g.vertices[successor.destination].configuration, goal_loc);
             open_list.emplace(earliest_arrival_time, h, successor.destination, successor.source);
         }
     }
@@ -57,11 +57,11 @@ void dump_open(const Open& open_list){
     }
 }
 
-std::vector<const SIPPState<Location> *> backup(const Node& n, Open& open_list){
+std::vector<const SIPPState<Location> *> backup(const Node& n, Open& open_list, const SippGraph<Location>& g){
     std::vector<const SIPPState<Location> *> res;
-    const SIPPState<Location> * cur = n.state;
-    while(cur != nullptr){
-        res.push_back(cur);
+    long cur = n.state;
+    while(cur != -1){
+        res.push_back(&g.vertices[cur]);
         cur = open_list.parent[cur];
     }
     std::reverse(res.begin(), res.end());
@@ -69,20 +69,20 @@ std::vector<const SIPPState<Location> *> backup(const Node& n, Open& open_list){
     return res;
 }
 
-std::vector<const SIPPState<Location> *> sipp::search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData& m, double start_time){
+std::vector<const SIPPState<Location> *> sipp::search(const SippGraph<Location>& g, long source, const Location& dest, MetaData& m, double start_time){
     Open open_list;
     m.init();
     struct timespec ts1, ts2;
     clock_gettime(CLOCK_MONOTONIC, &ts1);
-    open_list.emplace(start_time, eightWayDistance(dest, source->configuration), source, nullptr);
+    open_list.emplace(start_time, eightWayDistance(dest, g.vertices[source].configuration), source, -1);
     while(!open_list.empty()){
         //dump_open(open_list);
         Node cur = open_list.top();
         //std::cout << *cur.node << "\n";
-        if(isGoal(cur, dest)){
+        if(isGoal(cur, dest, g)){
             clock_gettime(CLOCK_MONOTONIC, &ts2);
             m.search_time = 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
-            return backup(cur, open_list);
+            return backup(cur, open_list, g);
         }
         open_list.pop();
         expand(g, cur, open_list, dest, m);

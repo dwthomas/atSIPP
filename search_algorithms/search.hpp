@@ -19,7 +19,7 @@ namespace po = boost::program_options;
 inline void run_search(po::variables_map& vm, const Location& goal_loc, const SippGraph<Location>& g, const AtSippGraph<Location>& atg, double start_time, const SIPPState<Location> * source){
     MetaData m;
     if(vm["search"].as<std::string>() == "sipp"){
-        auto res = sipp::search(g, source, goal_loc, m, start_time);
+        auto res = sipp::search(g, source-&(g.vertices[0]), goal_loc, m, start_time);
         for(auto n: res){
             std::cout << *n << "\n";
         }

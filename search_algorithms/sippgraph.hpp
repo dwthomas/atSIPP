@@ -1,5 +1,6 @@
 #pragma once
 #include <bits/types/time_t.h>
+#include <functional>
 #include <boost/functional/hash.hpp>
 #include <unordered_map>
 
@@ -43,30 +44,30 @@ namespace std {
 
 template <typename Configuration_t>
 struct SIPPEdge{
-    SIPPState<Configuration_t> * source;
-    SIPPState<Configuration_t> * destination;
+    long source;
+    long destination;
     atf::time_t duration;
     atf::interval_t safe_interval;
 
 
     SIPPEdge() = default;
-    SIPPEdge(SIPPState<Configuration_t> * src, SIPPState<Configuration_t>* dst, atf::time_t dur, atf::interval_t interval):source(src),destination(dst),duration(dur),safe_interval(interval){}
+    SIPPEdge(long src, long dst, atf::time_t dur, atf::interval_t interval):source(src),destination(dst),duration(dur),safe_interval(interval){}
 
     constexpr bool operator ==(const SIPPEdge& s) const{
-        return *s.source == *source && *s.destination == *destination && safe_interval == s.safe_interval;
+        return s.source == source && s.destination == destination && safe_interval == s.safe_interval;
     }
 
     friend std::size_t hash_value(const SIPPEdge& s){
         std::size_t seed = 0;
-        boost::hash_combine(seed, *s.source);
-        boost::hash_combine(seed, *s.destination);
+        boost::hash_combine(seed, s.source);
+        boost::hash_combine(seed, s.destination);
         boost::hash_combine(seed, s.safe_interval.lower());
         boost::hash_combine(seed, s.safe_interval.upper());
         return seed;
     }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const SIPPEdge& s){
-        stream << *s.source << " -> "  << *s.destination << " [" << s.safe_interval.lower() << "," << s.safe_interval.upper() << "): " << s.duration;
+        stream << s.source << " -> "  << s.destination << " [" << s.safe_interval.lower() << "," << s.safe_interval.upper() << "): " << s.duration;
         return stream;
     }
 };
@@ -74,15 +75,19 @@ struct SIPPEdge{
 template <typename Configuration_t>
 struct SippGraph{
     std::vector<SIPPState<Configuration_t>> vertices;
-    std::unordered_map<const SIPPState<Configuration_t> *, std::vector<SIPPEdge<Configuration_t>>> successors;
-    std::unordered_map<const SIPPState<Configuration_t> *, std::vector<SIPPEdge<Configuration_t>>> predecessors;
+    std::unordered_map<long, std::vector<SIPPEdge<Configuration_t>>> successors;
+    std::unordered_map<long, std::vector<SIPPEdge<Configuration_t>>> predecessors;
+    std::unordered_multimap<Configuration_t, long, std::hash<Configuration_t>> vertex_key;
 
     SippGraph() = default;
+    
+    SippGraph(SippGraph& other):vertices(other.vertices){
+    }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const SippGraph& g){
-        for(const auto& s: g.vertices){
-            stream << s << "\n";
-            for (const auto& succ: g.successors.at(&s)){
+        for(long i =0 ; i < (long)g.vertices.size(); i++){
+            stream << g.vertices[i] << "\n";
+            for (const auto& succ: g.successors.at(i)){
                 stream << "\t" << succ << "\n";
             }
         }

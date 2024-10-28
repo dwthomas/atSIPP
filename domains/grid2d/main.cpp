@@ -7,6 +7,7 @@
 #include "randomsippgraph.hpp"
 
 #include "search_algorithms/search.hpp"
+#include "search_algorithms/sippgraph.hpp"
 
 
 namespace po = boost::program_options;
@@ -17,11 +18,12 @@ int main(int argc, char* argv[]) {
         po::options_description desc("Allowed options");
         desc.add_options()
         ("help,h", "produce help message")
-        ("startx,x", po::value<int>(), "x position of agent starting location")
-        ("starty,y", po::value<int>(), "y position of agent starting location")
-        ("goalx,X", po::value<int>(), "x position of goal location")
-        ("goaly,Y", po::value<int>(), "y position of goal location")
+        ("startx,x", po::value<int>()->default_value(-1), "x position of agent starting location")
+        ("starty,y", po::value<int>()->default_value(-1), "y position of agent starting location")
+        ("goalx,X", po::value<int>()->default_value(-1), "x position of goal location")
+        ("goaly,Y", po::value<int>()->default_value(-1), "y position of goal location")
         ("map,m", po::value<std::filesystem::path>(),"static map file")
+        ("scenario", po::value<std::filesystem::path>()->default_value("./"),"scenario file")
         ("search,s", po::value<std::string>(), "Search algorithm to use")
         ("startTime,t", po::value<double>()->default_value(0.0), "Start Time of search.")
         ("until,u", po::value<double>()->default_value(10.0), "Max time for random obstacles.")
@@ -51,7 +53,8 @@ int main(int argc, char* argv[]) {
             SippGraph<Location> g = make_random_sipp_graph(m, until, occupancy, min_duration, max_duration, source_loc, goal_loc, vm["seed"].as<long>());
             //std::cout << g << "\n";
             //std::cerr << "SIPP graph made, compiling @SIPP graph...";
-            AtSippGraph<Location> atg(&g);
+            SippGraph<Location> copy_g(g);
+            AtSippGraph<Location> atg(&copy_g);
             //std::cerr << "compiled!\n";
             //std::cerr << atg << "\n";
             //g.dump();
