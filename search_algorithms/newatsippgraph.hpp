@@ -34,6 +34,11 @@ struct AtSIPPEdge{
 template <typename Configuration_t>
 AtSIPPEdge<Configuration_t> compile(const SIPPEdge<Configuration_t>& sipp_edge, const SippGraph<Configuration_t> * g){
     const SIPPState<Configuration_t>& u = g->vertices[sipp_edge.source];
+    if(sipp_edge.destination >= g->vertices.size()){
+        std::cerr << "Error: destination index " << sipp_edge << " is out of bounds" << g->vertices.size() <<"\n";
+        exit(-1);
+    }
+
     const SIPPState<Configuration_t>& v = g->vertices[sipp_edge.destination];
     double zeta = u.safe_interval.lower();
     double alpha = std::max(

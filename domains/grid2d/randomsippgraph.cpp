@@ -75,8 +75,8 @@ void wire_edges(std::size_t v, SippGraph<Location>& g, const Map& map, const std
         }
     }
 }
-
-SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double occupancy, double min_duration, double max_duration, const Location& start_location, const Location& goal_location, std::size_t seed){
+ 
+SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double occupancy, double min_duration, double max_duration, std::size_t seed){
     if (occupancy < 0 || min_duration < 0 || max_duration < min_duration || until < 0){
         std::cerr << "Invalid random graph requested all rates must be non-negative, occ=" <<occupancy << " min_d=" << min_duration << " max_d=" << max_duration << "\n";
         exit(-1); 
@@ -143,7 +143,7 @@ SIPPState<Location>* mark_safe(SippGraph<Location>& g, const Location& loc){
             auto& succs = g.successors[pred.source];
             for(auto j = succs.begin(); j != succs.end(); j++){
                 if(j->destination == i){
-                    j->destination = g.vertices.size();
+                    j->destination = g.vertices.size()-1;
                 }
             }
         }

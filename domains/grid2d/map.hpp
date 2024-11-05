@@ -152,14 +152,15 @@ struct Map{
 };
 
 struct Scenario{
-    int start_x;
-    int start_y;
-    int goal_x;
-    int goal_y;
+    Location _source, _goal;
     double optimal_length;
+
+    Scenario(Location start, Location goal, double optimal_length = 0.0):
+        _source(start),_goal(goal),optimal_length(optimal_length){}
 
     Scenario(std::ifstream& line){
         std::string junk;
+        int start_x, start_y, goal_x, goal_y;
         for(int i = 0; i < 4; i++){
             line >> junk;
         }
@@ -167,6 +168,8 @@ struct Scenario{
         line >> start_y;
         line >> goal_x;
         line >> goal_y;
+        _source = Location(start_x, start_y);
+        _goal = Location(goal_x, goal_y);
         line >> optimal_length;
     }
 
@@ -187,7 +190,12 @@ struct Scenario{
     }
 
     void debug() const{
-        std::cout << start_x << " " << start_y << " " << goal_x << " " << goal_y << " " << optimal_length << std::endl; 
+        std::cout << _source << " " << _goal << " " << optimal_length << std::endl; 
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Scenario& s){
+        os << s._source << " " << s._goal << " " << s.optimal_length;
+        return os;
     }
 
     

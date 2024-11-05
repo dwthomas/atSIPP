@@ -3,6 +3,7 @@
 #include <ostream>
 #include <boost/program_options.hpp>
 #include "data_structures/structs.hpp"
+#include "domains/grid2d/map.hpp"
 #include "search_algorithms/newatsippgraph.hpp"
 #include "randomsippgraph.hpp"
 
@@ -42,27 +43,50 @@ int main(int argc, char* argv[]) {
         }
         else if(vm.count("map") && std::filesystem::is_regular_file(vm["map"].as<std::filesystem::path>())){
             // read map
-            Location source_loc(vm["startx"].as<int>(), vm["starty"].as<int>());
-            Location goal_loc(vm["goalx"].as<int>(), vm["goaly"].as<int>());
+            
             //std::cerr << "Generating SIPP graph...";
             Map m(vm["map"].as<std::filesystem::path>().string());
+            std::vector<Scenario> scenarios;
+            if(std::filesystem::is_regular_file(vm["scenario"].as<std::filesystem::path>()) &&
+                vm["scenario"].as<std::filesystem::path>().string() != ""){
+                if(vm["startx"].as<int>() != -1 || vm["starty"].as<int>() != -1 || vm["goalx"].as<int>() != -1 || vm["goaly"].as<int>() != -1){
+                    std::cerr << "Error: start and goal locations specified in scenario mode.\n";
+                    exit(-1);
+                }
+                scenarios = Scenario::read_scenarios(vm["scenario"].as<std::filesystem::path>().string());
+            }
+            else{
+                Location source_loc(vm["startx"].as<int>(), vm["starty"].as<int>());
+                Location goal_loc(vm["goalx"].as<int>(), vm["goaly"].as<int>());
+                scenarios.push_back(Scenario(source_loc, goal_loc));
+            }
+            for (const auto& scenario:scenarios){
+                std::cerr << scenario << "\n";
+                break;
+            }
             double until = vm["until"].as<double>();
             double occupancy = vm["occupancy"].as<double>();
             double min_duration = vm["minDuration"].as<double>();
             double max_duration = vm["maxDuration"].as<double>();
-            SippGraph<Location> g = make_random_sipp_graph(m, until, occupancy, min_duration, max_duration, source_loc, goal_loc, vm["seed"].as<long>());
+            SippGraph<Location> g = make_random_sipp_graph(m, until, occupancy, min_duration, max_duration, vm["seed"].as<long>());
             //std::cout << g << "\n";
             //std::cerr << "SIPP graph made, compiling @SIPP graph...";
-            SippGraph<Location> copy_g(g);
-            const SIPPState<Location> * source = mark_safe(copy_g, source_loc);
-            mark_safe(copy_g, goal_loc);
-            AtSippGraph<Location> atg(&copy_g);
-            //std::cerr << "compiled!\n";
-            //std::cerr << atg << "\n";
-            //g.dump();
-            double start_time = vm["startTime"].as<double>();
-            // run search
-            run_search(vm, goal_loc, g, atg, start_time, source);
+            for(const auto& scenario: scenarios){
+                std::cerr << scenario << "\n";
+                SippGraph<Location> copy_g(g);
+                const SIPPState<Location> * source = mark_safe(copy_g, scenario._source);
+                std::cerr << "Source: " << *source << "\n";
+                mark_safe(copy_g, scenario._goal);
+                std::cerr << "num verts: " << g.vertices.size() << "\n";
+                AtSippGraph<Location> atg(&copy_g);
+                std::cerr << "compiled!\n";
+                // std::cerr << atg << "\n";
+                //g.dump();
+                double start_time = vm["startTime"].as<double>();
+                // run search
+                run_search(vm, scenario._goal, copy_g, atg, start_time, source);
+            }
+            
         }
         else{
             std::cout << desc << std::endl;
