@@ -88,5 +88,5 @@ std::vector<const SIPPState<Location> *> sipp::search(const SippGraph<Location>&
         expand(g, cur, open_list, dest, m);
     }
     std::cerr << "Failed to find path\n";
-    exit(-1);
+    return std::vector<const SIPPState<Location> *>();
 }

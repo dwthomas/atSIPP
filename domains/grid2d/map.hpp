@@ -190,11 +190,11 @@ struct Scenario{
     }
 
     void debug() const{
-        std::cout << _source << " " << _goal << " " << optimal_length << std::endl; 
+        std::cout << "Scenario: " << _source << " " << _goal << " " << optimal_length << std::endl; 
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Scenario& s){
-        os << s._source << " " << s._goal << " " << s.optimal_length;
+        os << "Scenario: " <<  s._source << " " << s._goal << " " << s.optimal_length;
         return os;
     }
 

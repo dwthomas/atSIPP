@@ -212,7 +212,7 @@ namespace asipp{
             expand(g, cur, open_list, dest, m, hf);
         }
         std::cerr << "Failed to find path\n";
-        exit(-1);
+        return std::pair<std::vector<const SIPPState<Location> *>, EdgeATF>();
     }
 
     // template<typename Open_t>

@@ -43,7 +43,6 @@ int main(int argc, char* argv[]) {
         }
         else if(vm.count("map") && std::filesystem::is_regular_file(vm["map"].as<std::filesystem::path>())){
             // read map
-            
             //std::cerr << "Generating SIPP graph...";
             Map m(vm["map"].as<std::filesystem::path>().string());
             std::vector<Scenario> scenarios;
