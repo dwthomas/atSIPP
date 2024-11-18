@@ -58,7 +58,19 @@ int main(int argc, char* argv[]) {
             double start_time = vm["startTime"].as<double>();
             const SIPPState<Location> * source = find_earliest(g, source_loc, start_time);
             // run search
+            std::cout << "{\n";
+            std::cout << "\"filename\": \"" << vm["map"].as<std::filesystem::path>().string() << "\",\n";
+            std::cout << "\"algorithm\": \"" << vm["search"].as<std::string>() << "\",\n";
+            std::cout << "\"seed\": " << vm["seed"].as<long>() << ",\n";
+            std::cout << "\"scenario\": {\n";
+            std::cout << " \"start_x\": " << source_loc.x() << ",\n";
+            std::cout << " \"start_y\": " << source_loc.y() << ",\n";
+            std::cout << " \"goal_x\": " << goal_loc.x() << ",\n";
+            std::cout << " \"goal_y\": " << goal_loc.y() << "\n";
+            std::cout << " },\n";
             run_search(vm, goal_loc, g, atg, start_time, source);
+            std::cout << "\n";
+            std::cout << "}\n";
         }
         else{
             std::cout << desc << std::endl;

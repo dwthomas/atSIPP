@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/container/flat_set.hpp>
+#include <cstddef>
 #include <vector>
 #include <limits>
 
@@ -346,14 +347,20 @@ class CompoundATF{
         }
 
         inline void dump(std::ostream& stream) const{
-            for (auto seg: segments){
-                stream << seg.first;
-                stream << " " << seg.second.encumbent;
-                if(seg.second.full()){
-                    stream << " " << seg.second.newcomer;
+            stream << "\"solution_compound_atf\": [\n";
+            for(auto seg = segments.begin(); seg != segments.end(); seg++){
+                stream << " {\"interval\": \"" << seg->first << "\", \"atf\": \"" << seg->second.encumbent << "\"";
+                if(seg->second.full()){
+                    stream << " " << seg->second.newcomer;
                 } 
-                stream << std::endl;
+                if (std::next(seg) != segments.end()){
+                    stream << "},\n";
+                }
+                else{
+                    stream << "}\n";
+                }
             }
+            stream << " ]";
         }
 
         inline friend std::ostream& operator<<(std::ostream& stream, const CompoundATF& eatf){

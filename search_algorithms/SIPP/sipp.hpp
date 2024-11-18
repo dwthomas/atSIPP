@@ -68,6 +68,6 @@ namespace sipp{
     };
 
 
-   std::vector<const SIPPState<Location> *> search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0);
+   std::pair<std::vector<const SIPPState<Location> *>, double> search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0);
 }
 

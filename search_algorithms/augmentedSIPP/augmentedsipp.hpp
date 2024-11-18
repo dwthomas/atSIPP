@@ -8,8 +8,6 @@
 namespace asipp{
     struct Node;
 
-
-
     double constexpr h_eight_way_helper(const SIPPState<Location>& cur, double cur_t, const Location& dest){
         (void) cur_t;
         return eightWayDistance(cur.configuration, dest);
@@ -25,23 +23,25 @@ namespace asipp{
 
         Node(double _f, EdgeATF e, const SIPPState<Location> * _state, const AtSIPPEdge<Location> * _tla):g(e),f(_f),state(_state),tla(_tla){}
 
-        inline friend bool operator>(const Node& a, const Node& b){
-            if(a.f == b.f){
-                return a.g < b.g;
-            }
-            return a.f > b.f;
-        }
+        // inline friend bool operator>(const Node& a, const Node& b){
+        //     if(a.f == b.f){
+        //         return a.g < b.g;
+        //     }
+        //     return a.f > b.f;
+        // }
 
         inline friend std::ostream& operator<< (std::ostream& stream, const Node& n){
-            stream << *n.state << " g:" << n.g << ", f:" << n.f;
+            stream << *n.state << " g:" << n.g << ", f:" << n.f << " hex:" << std::hex << n.f << std::dec;
             return stream;
         }
     };
 
-    struct NodeComp{
-        bool operator()(const Node * a, const Node * b){
-            std::cerr << "comp " << *a << " " << *b << " " << "\n";
-            return *a > *b;
+    struct StandardNodeComp{
+        inline bool operator()(const Node& a, const Node& b) const{
+            if(a.f == b.f){
+                return a.g < b.g;
+            }
+            return a.f > b.f;
         }
     };
 
@@ -53,9 +53,11 @@ namespace asipp{
     //     Ghost(EdgeATF _e, double _h, SIPPState<Location> * _n, SIPPState<Location> * _p):e(_e),h(_h),n(_n),p(_p){}
     // };
 
-    using Queue = boost::heap::d_ary_heap<Node, boost::heap::arity<4>, boost::heap::mutable_<true>, boost::heap::compare<std::greater<Node>>>;
-    typedef typename Queue::handle_type handle_t;
+    template <class NodeComp = StandardNodeComp>
     struct Open{
+        using Queue = boost::heap::d_ary_heap<Node, boost::heap::arity<4>, boost::heap::mutable_<true>, boost::heap::compare<NodeComp>>;
+        typedef typename Queue::handle_type handle_t;
+
         Queue queue;
         std::unordered_map<const SIPPState<Location> *, const SIPPState<Location> *> parent;
         std::unordered_map<const SIPPState<Location> *, handle_t> handles;
@@ -211,8 +213,9 @@ namespace asipp{
             open_list.pop();
             expand(g, cur, open_list, dest, m, hf);
         }
-        std::cerr << "Failed to find path\n";
-        exit(-1);
+        return std::make_pair(std::vector<const SIPPState<Location> *>(), EdgeATF());
+        // std::cerr << "Failed to find path\n";
+        // exit(-1);
     }
 
     // template<typename Open_t>

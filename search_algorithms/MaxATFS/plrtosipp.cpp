@@ -119,7 +119,7 @@ inline void dump_h(){
 //     }
 // }
 
-void plrtosipp::plrtolearn(const AtSippGraph<Location>& g, const asipp::Open& open_list, const Location& dest, MetaData& m){
+void plrtosipp::plrtolearn(const AtSippGraph<Location>& g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m){
     auto closed = open_list.expanded; 
     //asipp::dump_open(open_list);
     for (const auto& s: closed){ // node in closed
