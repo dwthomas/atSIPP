@@ -5,11 +5,11 @@ from progress.bar import Bar
 
 base_command = "./build/grid2d -x {source_x} -y {source_y} -X {dest_x} -Y {dest_y} -m {map} -s {algorithm} -o 0.5 -u 100 --minDuration 1 --maxDuration 10 --seed {seed} > {outfile}"
 algorithms = [
-#    "sipp",
-#    "asipp",
+    "sipp",
+    "asipp",
     "repeat"
 ]
-seeds = list(range(3))
+seeds = list(range(1))
 
 maps = {
     "maps/den520/den520d.map": "maps/den520/den520d.map.scen",
