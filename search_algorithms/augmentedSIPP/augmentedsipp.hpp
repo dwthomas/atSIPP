@@ -63,6 +63,13 @@ namespace asipp{
         std::unordered_map<const SIPPState<Location> *, handle_t> handles;
         std::unordered_map<const SIPPState<Location> *, double> expanded;
 
+        Open(){
+            queue.reserve(n_prealloc());
+            parent.reserve(n_prealloc());
+            handles.reserve(n_prealloc());
+            expanded.reserve(n_prealloc());
+        }
+
         inline void emplace(EdgeATF e, double h, const SIPPState<Location> * n, const SIPPState<Location> * p, const AtSIPPEdge<Location> * tla){
             parent[n] = p;
             handles[n] = queue.push(Node(e, h, n, tla));
@@ -213,6 +220,7 @@ namespace asipp{
             open_list.pop();
             expand(g, cur, open_list, dest, m, hf);
         }
+        //std::cerr << "Failed to find path\n";
         return std::make_pair(std::vector<const SIPPState<Location> *>(), EdgeATF());
         // std::cerr << "Failed to find path\n";
         // exit(-1);

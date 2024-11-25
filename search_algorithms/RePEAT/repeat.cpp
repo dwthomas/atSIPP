@@ -5,7 +5,8 @@
 double update_reference_time(const EdgeATF& path, asipp::Open<rePEAT::AtSIPPNodeComp>& open_list){
     double upper_bound = path.beta;
     double lower_bound = path.alpha;
-    //std::cerr << "Updating reference time:\n";
+    // std::cerr << "Updating reference time:\n";
+    // std::cerr << lower_bound <<  " " << upper_bound << "\n";
     //std::cerr << path << "\n";
     //asipp::dump_open(open_list);
     while(lower_bound < upper_bound){
@@ -43,8 +44,14 @@ rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<L
         open_list.emplace(init, eightWayDistance(dest, source->configuration), source, nullptr, nullptr);
         clock_gettime(CLOCK_MONOTONIC, &ts1);
         auto res = asipp::search_core(g, open_list, dest, m);
-        solutions.insert(res.second, res.first);
-        t_ref = update_reference_time(res.second, open_list);
+        if(res.second.beta > 0){
+            solutions.insert(res.second, res.first);
+            t_ref = update_reference_time(res.second, open_list);
+        }
+        else{
+            t_ref = end(source->safe_interval);
+        }
+        
         //std::cerr << "tref: " << t_ref << " " << end(source->safe_interval) <<"\n";
         clock_gettime(CLOCK_MONOTONIC, &ts2);
         m.search_time = 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
