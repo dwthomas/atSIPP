@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
+#include <limits>
 #include "data_structures/structs.hpp"
 #include "search_algorithms/newatsippgraph.hpp"
 #include "../augmentedSIPP/augmentedsipp.hpp"
@@ -40,5 +41,5 @@ namespace rePEAT{
         }
     };
 
-    rePEAT::Results search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0);
+    rePEAT::Results search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0, double end_time = std::numeric_limits<double>::infinity());
 }

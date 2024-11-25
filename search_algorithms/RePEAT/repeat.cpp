@@ -28,14 +28,14 @@ double update_reference_time(const EdgeATF& path, asipp::Open<rePEAT::AtSIPPNode
     return upper_bound;
 }
 
-rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & mdat, double start_time){
+rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & mdat, double start_time, double end_time){
     double t_ref = start_time;
     std::vector<const SIPPState<Location> *> path;
     // CompoundATF<std::vector<const SIPPState<Location> *>> solutions;
     rePEAT::Results res;
     auto& solutions = res.any_start_time_plan;
     struct timespec ts1, ts2;
-    while(t_ref < end(source->safe_interval)){
+    while(t_ref < end_time){
         //std::cerr << "tref: " << t_ref << "\n";
         res.reference_times.push_back(t_ref);
         auto&  m = res.search_metadata.emplace_back();

@@ -43,7 +43,7 @@ inline void run_search(po::variables_map& vm, const Location& goal_loc, const Si
         std::cout << solutions;
     }
     else if(vm["search"].as<std::string>() == "repeat"){
-        auto res = rePEAT::search(atg, source, goal_loc, m, start_time);
+        auto res = rePEAT::search(atg, source, goal_loc, m, start_time, vm["atlimit"].as<double>());
         std::cout << res;
     }
     else if(vm["search"].as<std::string>() == "rtas"){

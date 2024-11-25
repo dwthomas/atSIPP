@@ -25,6 +25,7 @@ int main(int argc, char* argv[]) {
         ("search,s", po::value<std::string>(), "Search algorithm to use")
         ("startTime,t", po::value<double>()->default_value(0.0), "Start Time of search.")
         ("until,u", po::value<double>()->default_value(10.0), "Max time for random obstacles.")
+        ("atlimit", po::value<double>()->default_value(10.0), "Max time for any-start-time plan.")
         ("occupancy,o", po::value<double>()->default_value(0.0), "Occupancy of random obstacles")
         ("minDuration", po::value<double>()->default_value(1.0), "Min interval duration")
         ("maxDuration", po::value<double>()->default_value(10.0), "Max interval duration")
