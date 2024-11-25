@@ -3,7 +3,7 @@ import numpy as np
 import subprocess
 from progress.bar import Bar
 
-base_command = "./build/grid2d -x {source_x} -y {source_y} -X {dest_x} -Y {dest_y} -m {map} -s {algorithm} -o 0.25 -u 500 --minDuration 1 --maxDuration 5 --seed {seed} > {outfile}"
+base_command = "./build/grid2d -x {source_x} -y {source_y} -X {dest_x} -Y {dest_y} -m {map} -s {algorithm} -o 0.25 -u 500 --atlimit 10 --minDuration 1 --maxDuration 5 --seed {seed} > {outfile}"
 algorithms = [
 #    "sipp",
     "asipp",
