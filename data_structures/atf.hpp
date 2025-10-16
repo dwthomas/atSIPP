@@ -101,6 +101,45 @@ struct EdgeATF{
     }
 };
 
+enum ComparisonResult {
+    DOMINATES,
+    IS_DOMINATED,
+    NON_COMPARABLE
+};
+
+inline ComparisonResult weak_dominance(const EdgeATF& a, const EdgeATF& b){
+    int a_lt = 0;
+    int b_lt = 0;
+    double a_arrival_time, b_arrival_time;
+    double test_times[] = {a.beta, b.alpha, a.alpha, b.beta, a.zeta};
+    // check a beta 
+    for (double t: test_times){
+        a_arrival_time = a.inclusive_arrival_time(t);
+        b_arrival_time = b.inclusive_arrival_time(t);
+        if (a_arrival_time < b_arrival_time){
+            a_lt++;
+        }
+        else if (b_arrival_time < a_arrival_time){
+            b_lt++;
+        }
+        if(a_lt > 0 && b_lt > 0){
+            return NON_COMPARABLE;
+        }
+    }
+    if(a_lt > b_lt){ // at least one must be zero
+        return DOMINATES;
+    }
+    else if (b_lt > a_lt){
+        return IS_DOMINATED;
+    }
+    else {// they are both the same
+        return DOMINATES;
+    }
+}
+
+ 
+
+
 namespace std {
     template<>
     struct hash<EdgeATF> {

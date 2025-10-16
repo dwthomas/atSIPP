@@ -7,6 +7,7 @@ namespace po = boost::program_options;
 // SIPP Search algorithms 
 #include "search_algorithms/SIPP/sipp.hpp"
 #include "search_algorithms/augmentedSIPP/augmentedsipp.hpp"
+#include "search_algorithms/abSIPP/absipp.hpp"
 
 // Any-start-time SIPP algorithms
 #include "search_algorithms/RePEAT/repeat.hpp"
@@ -34,6 +35,16 @@ inline void run_search(po::variables_map& vm, const Location& goal_loc, const Si
     }
     else if(vm["search"].as<std::string>() == "asipp"){
         auto res = asipp::search(atg, source, goal_loc, m, start_time);
+        std::cout << "\"results\": [\n{";
+        print_results(res.second.earliest_arrival_time(), res.first, m);
+        std::cout << "\n}\n]";
+        CompoundATF<std::vector<const SIPPState<Location> *>> solutions;
+        solutions.insert(res.second, res.first);
+        std::cout << ",\n";
+        std::cout << solutions;
+    }
+    else if(vm["search"].as<std::string>() == "absipp"){
+        auto res = absipp::search(atg, source, goal_loc, m, start_time);
         std::cout << "\"results\": [\n{";
         print_results(res.second.earliest_arrival_time(), res.first, m);
         std::cout << "\n}\n]";
