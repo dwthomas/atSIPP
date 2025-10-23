@@ -20,10 +20,11 @@ namespace augmentedsipp{
         const SIPPState<Location> * state;
         const AtSIPPEdge<Location> * tla;
         std::size_t parent_index;
+        bool pruned;
         Node() = default;
-        Node(EdgeATF e, double _h, const SIPPState<Location> * _state, const AtSIPPEdge<Location> * _tla, std::size_t _parent_index):g(e),f(e.earliest_arrival_time() + _h),state(_state),tla(_tla),parent_index(_parent_index){}
+        Node(EdgeATF e, double _h, const SIPPState<Location> * _state, const AtSIPPEdge<Location> * _tla, std::size_t _parent_index):g(e),f(e.earliest_arrival_time() + _h),state(_state),tla(_tla),parent_index(_parent_index), pruned(false){}
 
-        Node(double _f, EdgeATF e, const SIPPState<Location> * _state, const AtSIPPEdge<Location> * _tla):g(e),f(_f),state(_state),tla(_tla){}
+        Node(double _f, EdgeATF e, const SIPPState<Location> * _state, const AtSIPPEdge<Location> * _tla):g(e),f(_f),state(_state),tla(_tla), pruned(false){}
 
         // inline friend bool operator>(const Node& a, const Node& b){
         //     if(a.f == b.f){
@@ -79,19 +80,20 @@ namespace augmentedsipp{
 
         Queue queue;
         std::unordered_map<const SIPPState<Location> *, handle_t> handles;
-        std::unordered_map<const SIPPState<Location> *, double> expanded;
+        std::unordered_multimap<const SIPPState<Location> *, std::size_t> generated;
 
         Open(){
             nodes.clear();
             nodes.reserve(n_prealloc());
             queue.reserve(n_prealloc());
             handles.reserve(n_prealloc());
-            expanded.reserve(n_prealloc());
+            generated.reserve(n_prealloc());
         }
 
         
         inline void emplace(EdgeATF e, double h, const SIPPState<Location> * n, std::size_t p_index, const AtSIPPEdge<Location> * tla){
             nodes.emplace_back(e, h, n, tla, p_index);
+            generated.emplace(n, nodes.size()-1);
             handles[n] = queue.push(nodes.size()-1);
         }
 
@@ -100,6 +102,17 @@ namespace augmentedsipp{
         }
 
 
+        inline void fix_top(){
+            while(!queue.empty()){
+                Node& n = nodes[queue.top()];
+                if (n.pruned){
+                    queue.pop();
+                }
+                else{
+                    break;
+                }
+            }
+        }
 
         inline bool empty() const{
             return queue.empty();
@@ -111,7 +124,7 @@ namespace augmentedsipp{
 
         inline void pop(){
             Node n = top();
-            expanded[n.state] = n.g.earliest_arrival_time();
+            // expanded[n.state] = n.g.earliest_arrival_time();
             queue.pop();
         }
 
@@ -129,6 +142,7 @@ namespace augmentedsipp{
 
     template <typename Node_t, typename Open_t>
     std::pair<std::vector<const SIPPState<Location> *>, double> backup(const Node_t& n, Open_t& open_list){
+        std::cerr << "backing up\n";
         std::vector<const SIPPState<Location> *> res;
         std::size_t cur = &n - &open_list.nodes[0];
         while(cur != open_list.nodes[cur].parent_index){
@@ -146,7 +160,7 @@ namespace augmentedsipp{
     inline void expand(const AtSippGraph<Location>& g, const Node& cur, Open_t& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
         m.expanded++;
         double zeta = cur.g.zeta;
-        //std::cerr << cur.state << *cur.state << "\n";
+        // std::cerr << cur.state << *cur.state << "\n";
         for(const AtSIPPEdge<Location>& successor: g.successors.at(cur.state)){
             if(cur.g.earliest_arrival_time() >= successor.duration.beta || cur.g.supremum_arrival_time() <= successor.duration.zeta){
                 continue;
@@ -160,27 +174,41 @@ namespace augmentedsipp{
             double delta = successor.duration.delta + cur.g.delta;
             EdgeATF arrival_time_function(zeta, alpha, beta, delta);
             double h = hf(*successor.destination, arrival_time_function.earliest_arrival_time(), goal_loc);
-            if(open_list.expanded.contains(successor.destination)){ // already expanded
-                continue;
-            }
-            else if (open_list.handles.contains(successor.destination)){
-                auto handle = open_list.handles[successor.destination];
+            // if(open_list.expanded.contains(successor.destination)){ // already expanded
+            //     continue;
+            // }
+            // else
+            bool generate = true;
+            if (open_list.generated.contains(successor.destination)){
                 Node n(arrival_time_function, h, successor.destination, tla, &cur - &open_list.nodes[0]);
-                // if(arrival_time_function.earliest_arrival_time() < open_list.nodes[(*handle)].g.earliest_arrival_time()){  // prune successor?
-                if(!Prune_t()(n, open_list.nodes[(*handle)])){  // prune successor?
-                    m.decreased++;
-                    //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-                    open_list.decrease_key(handle, arrival_time_function, h, successor.destination, cur, tla);
+                auto range = open_list.generated.equal_range(successor.destination);
+                for ( auto succ = range.first; succ != range.second; ++succ){
+                    Node& n_pre = open_list.nodes[succ->second];
+                    if(!Prune_t()(n, n_pre)){// 
+                      n_pre.pruned = true;
+                    }
+                    else if (!Prune_t()(n_pre, n)){
+                        generate = false;
+                        break;                        
+                    }
                 }
+                // if(arrival_time_function.earliest_arrival_time() < open_list.nodes[(*handle)].g.earliest_arrival_time()){  // prune successor?
+                // if(!Prune_t()(n, open_list.nodes[(*handle)])){  // prune successor?
+                //     m.decreased++;
+                //     //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
+                //     open_list.decrease_key(handle, arrival_time_function, h, successor.destination, cur, tla);
+                // }
                 // otherwise better than current?
             }
-            else{
+
+            if (generate){
                 m.generated++;
                 //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
                 open_list.emplace(arrival_time_function, h, successor.destination, cur, tla);
                 //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
             }
         }
+        open_list.fix_top();
     }
 
     // template <typename Node_t, typename Open_t>
@@ -228,7 +256,7 @@ namespace augmentedsipp{
             cur = std::next(cur);
         }
         std::cerr << "Closed:\n";
-        for( auto x : open_list.expanded){
+        for( auto x : open_list.generated){
             std::cerr <<  "\t" << *x.first << "\n";
         }
 
@@ -244,10 +272,12 @@ namespace augmentedsipp{
            // std::cerr << expansion_budget << "\n";
             //std::cerr << isGoal(cur, dest) << " " << (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget) << "\n";
             if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
+                std::cerr << "Goal found or expansion budget reached\n";
                 //m.search_timer.stop();
                 return std::make_pair(backup(cur, open_list).first, cur.g);
             }
             open_list.pop();
+            open_list.fix_top();
             expand<Open_t, Prune_t>(g, cur, open_list, dest, m, hf);
         }
         //std::cerr << "Failed to find path\n";
