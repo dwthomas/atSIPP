@@ -38,12 +38,18 @@ namespace augmentedsipp{
         }
     };
 
-    struct StandardNodeComp{
+    struct StandardNodeComp{ // negating and <= matters for decreased count
         inline bool operator()(const Node& a, const Node& b) const{
             if(a.f == b.f){
                 return a.g < b.g;
             }
             return a.f > b.f;
+        }
+    };
+
+    struct NullNodeComp{
+        inline bool operator()(const Node& a, const Node& b) const{
+            return true;
         }
     };
 
@@ -136,8 +142,8 @@ namespace augmentedsipp{
         return std::make_pair(res, n.f);
     }
 
-    template <typename Node_t, typename Open_t>
-    inline void expand(const AtSippGraph<Location>& g, const Node_t& cur, Open_t& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
+    template <typename Open_t, typename Prune_t>
+    inline void expand(const AtSippGraph<Location>& g, const Node& cur, Open_t& open_list, const Location& goal_loc, MetaData & m, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
         m.expanded++;
         double zeta = cur.g.zeta;
         //std::cerr << cur.state << *cur.state << "\n";
@@ -153,21 +159,23 @@ namespace augmentedsipp{
             double beta = std::min(cur.g.beta, successor.duration.beta - cur.g.delta);
             double delta = successor.duration.delta + cur.g.delta;
             EdgeATF arrival_time_function(zeta, alpha, beta, delta);
-            if(open_list.expanded.contains(successor.destination)){
+            double h = hf(*successor.destination, arrival_time_function.earliest_arrival_time(), goal_loc);
+            if(open_list.expanded.contains(successor.destination)){ // already expanded
                 continue;
             }
             else if (open_list.handles.contains(successor.destination)){
                 auto handle = open_list.handles[successor.destination];
-                if(arrival_time_function.earliest_arrival_time() < open_list.nodes[(*handle)].g.earliest_arrival_time()){
+                Node n(arrival_time_function, h, successor.destination, tla, &cur - &open_list.nodes[0]);
+                // if(arrival_time_function.earliest_arrival_time() < open_list.nodes[(*handle)].g.earliest_arrival_time()){  // prune successor?
+                if(!Prune_t()(n, open_list.nodes[(*handle)])){  // prune successor?
                     m.decreased++;
-                    double h = hf(*successor.destination, arrival_time_function.earliest_arrival_time(), goal_loc);
                     //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-                    open_list.decrease_key(handle ,arrival_time_function, h, successor.destination, cur, tla);
+                    open_list.decrease_key(handle, arrival_time_function, h, successor.destination, cur, tla);
                 }
+                // otherwise better than current?
             }
             else{
                 m.generated++;
-                double h = hf(*successor.destination, arrival_time_function.earliest_arrival_time(), goal_loc);
                 //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
                 open_list.emplace(arrival_time_function, h, successor.destination, cur, tla);
                 //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
@@ -225,7 +233,7 @@ namespace augmentedsipp{
         }
 
     }
-    template<typename Open_t>
+    template<typename Open_t, typename Prune_t = StandardNodeComp>
     inline std::pair<std::vector<const SIPPState<Location> *>, EdgeATF> search_core(const AtSippGraph<Location>& g, Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
         long start_expansions = m.expanded;
         //m.search_timer.start();
@@ -240,7 +248,7 @@ namespace augmentedsipp{
                 return std::make_pair(backup(cur, open_list).first, cur.g);
             }
             open_list.pop();
-            expand(g, cur, open_list, dest, m, hf);
+            expand<Open_t, Prune_t>(g, cur, open_list, dest, m, hf);
         }
         //std::cerr << "Failed to find path\n";
         return std::make_pair(std::vector<const SIPPState<Location> *>(), EdgeATF());
