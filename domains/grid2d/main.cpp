@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
         ("minDuration", po::value<double>()->default_value(1.0), "Min interval duration")
         ("maxDuration", po::value<double>()->default_value(10.0), "Max interval duration")
         ("budget,b", po::value<long>()->default_value(1), "Search budget in num of expansions")
+        ("test_query_time", po::bool_switch(), "Test query time for any-start-time searches")
         ("seed", po::value<long>()->default_value(0), "Random seed")
         ;
         po::variables_map vm;

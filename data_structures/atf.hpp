@@ -116,13 +116,23 @@ inline ComparisonResult weak_dominance(const EdgeATF& a, const EdgeATF& b){
     for (double t: test_times){
         a_arrival_time = a.inclusive_arrival_time(t);
         b_arrival_time = b.inclusive_arrival_time(t);
-        if (a_arrival_time < b_arrival_time){
+
+        // check for finite arrival times
+        bool a_at_finite = std::isfinite(a_arrival_time);
+        bool b_at_finite = std::isfinite(b_arrival_time);
+
+        if (!a_at_finite && !b_at_finite){
+            continue; // both infinite, skip
+        }
+
+        if ((a_at_finite && !b_at_finite) || a_arrival_time < b_arrival_time){
             a_lt++;
         }
-        else if (b_arrival_time < a_arrival_time){
+        else if ((!a_at_finite && b_at_finite) || b_arrival_time < a_arrival_time){
             b_lt++;
         }
-        if(a_lt > 0 && b_lt > 0){
+
+        if(a_lt > 0 && b_lt > 0){ // both have at least one time where they are better
             return NON_COMPARABLE;
         }
     }

@@ -2,6 +2,7 @@
 #include <boost/heap/d_ary_heap.hpp>
 #include <cstddef>
 #include <unordered_map>
+#include "data_structures/atf.hpp"
 #include "data_structures/constants.hpp"
 #include "search_algorithms/newatsippgraph.hpp"
 #include "search_algorithms/sippgraph.hpp"
@@ -39,17 +40,47 @@ namespace augmentedsipp{
         }
     };
 
+    struct NegateComp{
+        template <typename Comp>
+        inline bool operator()(const Node& a, const Node& b) const{
+            return !Comp()(a, b);
+        }
+    };
+
     struct StandardNodeComp{ // negating and <= matters for decreased count
         inline bool operator()(const Node& a, const Node& b) const{
             if(a.f == b.f){
-                return a.g < b.g;
+                return a.g.earliest_arrival_time() > b.g.earliest_arrival_time();
             }
-            return a.f > b.f;
+            return a.f < b.f;
+        }
+    };
+
+
+    struct ABNodeComp{
+        inline bool operator()(const Node& a, const Node& b) const{
+            if(a.f == b.f){
+                double aa = std::min(a.g.alpha, a.g.beta);
+                double ba = std::min(b.g.alpha, b.g.beta);
+                if(aa == ba){
+                    return a.g.beta > b.g.beta;
+                }
+                return aa > ba;
+            }
+            return a.f < b.f;
+        }
+    };
+
+    struct DominancePrune{
+        inline bool operator()(const Node& a, const Node& b) const{
+            return weak_dominance(a.g, b.g) == DOMINATES;
         }
     };
 
     struct NullNodeComp{
         inline bool operator()(const Node& a, const Node& b) const{
+            (void)a;
+            (void)b;
             return true;
         }
     };
@@ -69,7 +100,7 @@ namespace augmentedsipp{
         
         struct NodeCompWrapper{
             inline bool operator()(std::size_t a, std::size_t b) const{
-                return NodeComp()(Open::nodes[a], Open::nodes[b]);
+                return !NodeComp()(Open::nodes[a], Open::nodes[b]);
             }
         };
 
@@ -142,7 +173,7 @@ namespace augmentedsipp{
 
     template <typename Node_t, typename Open_t>
     std::pair<std::vector<const SIPPState<Location> *>, double> backup(const Node_t& n, Open_t& open_list){
-        std::cerr << "backing up\n";
+        // std::cerr << "backing up\n";
         std::vector<const SIPPState<Location> *> res;
         std::size_t cur = &n - &open_list.nodes[0];
         while(cur != open_list.nodes[cur].parent_index){
@@ -184,10 +215,10 @@ namespace augmentedsipp{
                 auto range = open_list.generated.equal_range(successor.destination);
                 for ( auto succ = range.first; succ != range.second; ++succ){
                     Node& n_pre = open_list.nodes[succ->second];
-                    if(!Prune_t()(n, n_pre)){// 
+                    if(Prune_t()(n, n_pre)){// 
                       n_pre.pruned = true;
                     }
-                    else if (!Prune_t()(n_pre, n)){
+                    else if (Prune_t()(n_pre, n)){
                         generate = false;
                         break;                        
                     }
@@ -272,7 +303,7 @@ namespace augmentedsipp{
            // std::cerr << expansion_budget << "\n";
             //std::cerr << isGoal(cur, dest) << " " << (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget) << "\n";
             if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
-                std::cerr << "Goal found or expansion budget reached\n";
+                // std::cerr << "Goal found or expansion budget reached\n";
                 //m.search_timer.stop();
                 return std::make_pair(backup(cur, open_list).first, cur.g);
             }
