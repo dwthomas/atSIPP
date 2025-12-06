@@ -3,21 +3,21 @@
 #include <limits>
 #include "data_structures/structs.hpp"
 #include "search_algorithms/newatsippgraph.hpp"
-#include "../augmentedSIPP/augmentedsipp.hpp"
+#include "../aSIPPnew/augmentedsipp.hpp"
 
 
 namespace rePEAT{
-    struct AtSIPPNodeComp{
-        inline bool operator()(const asipp::Node& a, const asipp::Node& b) const{
-            if(a.f == b.f){
-                if(a.g.alpha == b.g.alpha){
-                    return a.g.beta < b.g.beta;
-                }
-                return a.g.alpha < b.g.alpha;
-            }
-            return a.f > b.f;
-        }
-    };
+    // struct AtSIPPNodeComp{
+    //     inline bool operator()(const augmentedsipp::Node& a, const augmentedsipp::Node& b) const{
+    //         if(a.f == b.f){
+    //             if(a.g.alpha == b.g.alpha){
+    //                 return a.g.beta < b.g.beta;
+    //             }
+    //             return a.g.alpha < b.g.alpha;
+    //         }
+    //         return a.f > b.f;
+    //     }
+    // };
     struct Results{
         CompoundATF<std::vector<const SIPPState<Location> *>> any_start_time_plan;
         std::vector<double> reference_times;
@@ -41,5 +41,5 @@ namespace rePEAT{
         }
     };
 
-    rePEAT::Results search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0, double end_time = std::numeric_limits<double>::infinity());
+    rePEAT::Results search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0, double end_time = std::numeric_limits<double>::infinity(), bool test_query_time = false);
 }

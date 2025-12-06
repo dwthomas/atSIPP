@@ -1,12 +1,12 @@
-#include "wth.hpp"
+#include "oth.hpp"
 #include "data_structures/atf.hpp"
 #include "../augmentedSIPP/augmentedsipp.hpp"
 #include "search_algorithms/newatsippgraph.hpp"
 #include "../PLRTS/plrtosipphonly.hpp"
 #include "../RTAS/rtasipp.hpp"
 
-// std::unordered_map<Location, double> wth::h_static;
-// std::unordered_map<const SIPPState<Location> *, rtasipp::CATF> wth::h_dynamic;
+// std::unordered_map<Location, double> oth::h_static;
+// std::unordered_map<const SIPPState<Location> *, rtasipp::CATF> oth::h_dynamic;
 
 inline void dump_h(){
     std::cerr << "h_static\n";
@@ -119,7 +119,7 @@ inline void dump_h(){
 //     }
 // }
 
-void wth::wthtolearn(const AtSippGraph<Location>& g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m){
+void oth::othtolearn(const AtSippGraph<Location>& g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m){
     auto closed = open_list.expanded; 
     //asipp::dump_open(open_list);
     for (const auto& s: closed){ // node in closed
@@ -168,8 +168,8 @@ void wth::wthtolearn(const AtSippGraph<Location>& g, const asipp::Open<asipp::St
     }
 }
 
-std::vector<const SIPPState<Location> *> wth::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, long budget, double start_time, double time_horizon, double cutoff_time){
-    // std::cerr << "wth search\n";
+std::vector<const SIPPState<Location> *> oth::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, long budget, double start_time, double time_horizon, double cutoff_time){
+    // std::cerr << "oth search\n";
     std::vector<const SIPPState<Location> *> path;
     struct timespec ts1, ts2;
     m.init();
@@ -183,7 +183,7 @@ std::vector<const SIPPState<Location> *> wth::search(const AtSippGraph<Location>
         //std::cerr << "Searching\n";
         // run NLASIPP
         path.emplace_back(cur);
-        // std::cerr << "Current time: " << t << "\n";
+        std::cerr << "Current time: " << t << "\n";
         if (t >= cutoff_time){
             std::cerr << "Cutoff time reached\n";
             m.reached_goal = false;
@@ -192,7 +192,7 @@ std::vector<const SIPPState<Location> *> wth::search(const AtSippGraph<Location>
         asipp::Open open_list;
         clock_gettime(CLOCK_MONOTONIC, &ts1);
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), rtasipp::get_h(*cur, t, dest) , cur, nullptr, nullptr);
-        asipp::search_th_core(g, open_list, dest, m, budget, t + time_horizon, rtasipp::get_h);
+        asipp::search_oth_core(g, open_list, dest, m, budget, t + time_horizon, rtasipp::get_h);
         clock_gettime(CLOCK_MONOTONIC, &ts2);
         m.search_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
         //asipp::dump_open(open_list);
@@ -203,7 +203,7 @@ std::vector<const SIPPState<Location> *> wth::search(const AtSippGraph<Location>
         clock_gettime(CLOCK_MONOTONIC, &ts1);
         plrtosipphonly::lsslrtsipp(g, open_list, dest, m);
         // dynamic
-        wthtolearn(g, open_list, dest, m);
+        othtolearn(g, open_list, dest, m);
         clock_gettime(CLOCK_MONOTONIC, &ts2);
         m.learning_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
         // commit 
@@ -215,7 +215,11 @@ std::vector<const SIPPState<Location> *> wth::search(const AtSippGraph<Location>
             m.reached_goal = false;
             break;
         }
+        std::cerr << "best: " << open_list.top() << "\n";
+        std::cerr << "tla: " << (open_list.top().tla) << "\n\n";
+        std::cerr << "tla dref: " << *(open_list.top().tla) << "\n\n";
         auto e = open_list.top().tla;
+        std::cerr << "Taking edge: " << *e << "\n";
         t = e->duration.arrival_time(t);
         cur = e->destination;
     } 

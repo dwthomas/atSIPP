@@ -120,6 +120,8 @@ struct MetaData{
     long expanded;
     long decreased;
     long learn_expanded;
+    long time_horizon_hits;
+    bool reached_goal;
     double search_time;
     double learning_time;
 
@@ -133,15 +135,19 @@ struct MetaData{
         expanded = 0;
         decreased = 0;
         learn_expanded = 0;
+        time_horizon_hits = 0;
+        reached_goal = true;
         reset();
     }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const MetaData& m){
         stream << "\"metadata\": {\n";
+        stream << " \"status\": " << (m.reached_goal ? "\"solved\"" : "\"unsolved\"") << ",\n";
         stream << " \"generated\": " << m.generated << ",\n";
         stream << " \"decreased\": " << m.decreased << ",\n";
         stream << " \"expanded\": " << m.expanded << ",\n";
         stream << " \"learnexpanded\": " << m.learn_expanded << ",\n"; 
+        stream << " \"timehorizonhits\": " << m.time_horizon_hits << ",\n";
         stream << " \"searchruntime_ms\": " <<  m.search_time << ",\n";
         stream << " \"learnruntime_ms\": " << m.learning_time << "\n }";
         return stream;
@@ -155,6 +161,7 @@ inline MetaData sum(const std::vector<MetaData>& mdat){
         res.expanded += m.expanded;
         res.decreased += m.decreased;
         res.learn_expanded += m.learn_expanded;
+        res.time_horizon_hits += m.time_horizon_hits;
         res.search_time += m.search_time;
         res.learning_time += m.learning_time;
     }

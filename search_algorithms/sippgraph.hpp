@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "data_structures/constants.hpp"
+#include "domains/grid2d/map.hpp"
 
 template <typename Configuration_t>
 struct SIPPState{
@@ -73,11 +74,13 @@ struct SIPPEdge{
 
 template <typename Configuration_t>
 struct SippGraph{
+    const Map& map;
     std::vector<SIPPState<Configuration_t>> vertices;
     std::unordered_map<const SIPPState<Configuration_t> *, std::vector<SIPPEdge<Configuration_t>>> successors;
     std::unordered_map<const SIPPState<Configuration_t> *, std::vector<SIPPEdge<Configuration_t>>> predecessors;
 
     SippGraph() = default;
+    SippGraph(const Map& m):map(m){};
 
     inline friend std::ostream& operator<< (std::ostream& stream, const SippGraph& g){
         for(const auto& s: g.vertices){

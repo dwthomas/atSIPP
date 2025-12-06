@@ -63,7 +63,7 @@ SippGraph<Location> make_random_sipp_graph(const Map& map, double until,  double
         }
     }
 
-    SippGraph<Location> g;
+    SippGraph<Location> g(map);
     std::unordered_map<SIPPState<Location>, long> indexof;
     // do vertices
     for (std::size_t i = 0; i < states.size(); i++){

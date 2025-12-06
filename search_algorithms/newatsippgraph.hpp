@@ -6,13 +6,13 @@
 
 template <typename Configuration_t>
 struct AtSIPPEdge{
-    SIPPState<Configuration_t> * source;
-    SIPPState<Configuration_t> * destination;
+    const SIPPState<Configuration_t> * source;
+    const SIPPState<Configuration_t> * destination;
     EdgeATF duration;
 
 
     AtSIPPEdge() = default;
-    AtSIPPEdge(SIPPState<Configuration_t> * src, SIPPState<Configuration_t>* dst, EdgeATF dur):source(src),destination(dst),duration(dur){}
+    AtSIPPEdge(const SIPPState<Configuration_t> * src, const SIPPState<Configuration_t>* dst, EdgeATF dur):source(src),destination(dst),duration(dur){}
 
     constexpr bool operator ==(const AtSIPPEdge& s) const{
         return *s.source == *source && *s.destination == *destination;

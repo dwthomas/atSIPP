@@ -5,7 +5,7 @@
 #include "../augmentedSIPP/augmentedsipp.hpp"
 #include "search_algorithms/sippgraph.hpp"
 
-namespace wth{
+namespace oth{
     // struct Node;
 
     // struct Node{
@@ -227,7 +227,7 @@ namespace wth{
     };
 
     //void lsslrtsipp(const AtSippGraph<Location> & g, const asipp::Open& open_list, const Location& dest, MetaData& m);
-    void wthtolearn(const AtSippGraph<Location> & g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m);
+    void othtolearn(const AtSippGraph<Location> & g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m);
     std::vector<const SIPPState<Location> *> search(const AtSippGraph<Location> & g, const SIPPState<Location> * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0, double time_horizon = std::numeric_limits<double>::infinity(), double cutoff_time = std::numeric_limits<double>::infinity());
 }
 

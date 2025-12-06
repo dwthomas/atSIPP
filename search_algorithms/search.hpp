@@ -19,6 +19,10 @@ namespace po = boost::program_options;
 #include "search_algorithms/MaxATFS/plrtosipp.hpp"
 #include "search_algorithms/PLRTS/plrtosipphonly.hpp"
 
+// time horizon search algorithms
+#include "search_algorithms/WTH/wth.hpp"
+#include "search_algorithms/OTH/oth.hpp"
+
 inline void print_results(double arrival_time, std::vector<const SIPPState<Location> *> res, const MetaData& mdat){
     std::cout << "\"arrival_time\": " << arrival_time << ",\n";
     std::cout << mdat;
@@ -65,8 +69,11 @@ inline void run_search(po::variables_map& vm, const Location& goal_loc, const Si
         std::cout << solutions;
     }
     else if(vm["search"].as<std::string>() == "repeat"){
-        auto res = rePEAT::search(atg, source, goal_loc, m, start_time, vm["atlimit"].as<double>());
+        auto res = rePEAT::search(atg, source, goal_loc, m, start_time, vm["atlimit"].as<double>(), vm["test_query_time"].as<bool>());
         std::cout << res;
+        auto& solutions = res.any_start_time_plan;
+        std::cout << ",\n";
+        std::cout << solutions;
     }
     else if(vm["search"].as<std::string>() == "rtas"){
         long budget = vm["budget"].as<long>();
@@ -99,5 +106,24 @@ inline void run_search(po::variables_map& vm, const Location& goal_loc, const Si
             std::cout << *n << "\n";
         }
         std::cout << m << "\n";
+    }
+    else if(vm["search"].as<std::string>() == "wth"){
+        long budget = vm["budget"].as<long>();
+        auto res = wth::search(atg, source, goal_loc, m, budget, start_time, vm["time_horizon"].as<double>(), vm["cutoff_time"].as<double>());
+        for(auto n: res){
+            std::cout << *n << "\n";
+        }
+        std::cout << m << "\n";
+    }
+    else if(vm["search"].as<std::string>() == "oth"){
+        long budget = vm["budget"].as<long>();
+        auto res = oth::search(atg, source, goal_loc, m, budget, start_time, vm["time_horizon"].as<double>(), vm["cutoff_time"].as<double>());
+        for(auto n: res){
+            std::cout << *n << "\n";
+        }
+        std::cout << m << "\n";
+    }
+    else {
+        std::cerr << "Unknown search algorithm: " << vm["search"].as<std::string>() << "\n";
     }
 }
