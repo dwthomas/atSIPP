@@ -64,7 +64,6 @@ struct AtSippGraph{
     AtSippGraph() = default;
 
     AtSippGraph(const SippGraph<Configuration_t> * g):sipp_graph(g){
-
         // for(const auto& s: g.vertices){
         //     stream << s << "\n";
         //     for (const auto& succ: g.successors.at(&s)){

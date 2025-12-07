@@ -1,6 +1,7 @@
 #include "oth.hpp"
 #include "data_structures/atf.hpp"
 #include "../augmentedSIPP/augmentedsipp.hpp"
+#include "data_structures/constants.hpp"
 #include "search_algorithms/newatsippgraph.hpp"
 #include "../PLRTS/plrtosipphonly.hpp"
 #include "../RTAS/rtasipp.hpp"
@@ -119,7 +120,9 @@ inline void dump_h(){
 //     }
 // }
 
-void oth::othtolearn(const AtSippGraph<Location>& g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m){
+void oth::othtolearn(const AtSippGraph<Location>& g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m, 
+                                const std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_successors, 
+                                const std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_predecessors){
     auto closed = open_list.expanded; 
     //asipp::dump_open(open_list);
     for (const auto& s: closed){ // node in closed
@@ -141,7 +144,20 @@ void oth::othtolearn(const AtSippGraph<Location>& g, const asipp::Open<asipp::St
         dijkstraOpen.pop();
         closed.erase(n.node);
         auto h_d_n = rtasipp::h_dynamic[n.node];
-        for (auto e: g.predecessors.at(n.node)){
+        std::vector<const AtSIPPEdge<Location> *> pred;
+        if(g.predecessors.contains(n.node)){
+            for (const auto& p: g.predecessors.at(n.node)){
+                pred.push_back(&p);
+            }
+        }
+        if(extra_predecessors.contains(n.node)){
+            for (const auto& p: extra_predecessors.at(n.node)){
+                pred.push_back(&p);
+            }
+        }
+        for (const auto& pr: pred){
+            const auto & e = *pr;
+        // for (auto e: g.predecessors.at(n.node)){
             if(closed.find(e.source) == closed.end()){
                 continue;
             }
@@ -175,7 +191,14 @@ std::vector<const SIPPState<Location> *> oth::search(const AtSippGraph<Location>
     m.init();
     auto cur = source;
     double t = start_time;
+   
+
     while(cur->configuration != dest){
+        std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> extra_successors;
+        std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> extra_predecessors;
+
+        extra_successors.reserve(n_prealloc());
+        extra_predecessors.reserve(n_prealloc());
         //search 
         //std::cerr << *cur << " at " << t << "\n";
         //std::cout << rtasipp::get_h(*cur, t, dest) << "\n";
@@ -183,7 +206,7 @@ std::vector<const SIPPState<Location> *> oth::search(const AtSippGraph<Location>
         //std::cerr << "Searching\n";
         // run NLASIPP
         path.emplace_back(cur);
-        std::cerr << "Current time: " << t << "\n";
+        // std::cerr << "Current time: " << t << "\n";
         if (t >= cutoff_time){
             std::cerr << "Cutoff time reached\n";
             m.reached_goal = false;
@@ -192,7 +215,7 @@ std::vector<const SIPPState<Location> *> oth::search(const AtSippGraph<Location>
         asipp::Open open_list;
         clock_gettime(CLOCK_MONOTONIC, &ts1);
         open_list.emplace(EdgeATF(-std::numeric_limits<double>::infinity(), t, std::numeric_limits<double>::infinity(), 0.0), rtasipp::get_h(*cur, t, dest) , cur, nullptr, nullptr);
-        asipp::search_oth_core(g, open_list, dest, m, budget, t + time_horizon, rtasipp::get_h);
+        asipp::search_oth_core(g, open_list, dest, m, extra_successors, extra_predecessors, budget, t + time_horizon,  rtasipp::get_h);
         clock_gettime(CLOCK_MONOTONIC, &ts2);
         m.search_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
         //asipp::dump_open(open_list);
@@ -201,9 +224,9 @@ std::vector<const SIPPState<Location> *> oth::search(const AtSippGraph<Location>
         //learn
         // static
         clock_gettime(CLOCK_MONOTONIC, &ts1);
-        plrtosipphonly::lsslrtsipp(g, open_list, dest, m);
+        plrtosipphonly::lsslrtsipp(g, open_list, dest, m, extra_successors, extra_predecessors);
         // dynamic
-        othtolearn(g, open_list, dest, m);
+        othtolearn(g, open_list, dest, m, extra_successors, extra_predecessors);
         clock_gettime(CLOCK_MONOTONIC, &ts2);
         m.learning_time += 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
         // commit 
@@ -215,11 +238,11 @@ std::vector<const SIPPState<Location> *> oth::search(const AtSippGraph<Location>
             m.reached_goal = false;
             break;
         }
-        std::cerr << "best: " << open_list.top() << "\n";
-        std::cerr << "tla: " << (open_list.top().tla) << "\n\n";
-        std::cerr << "tla dref: " << *(open_list.top().tla) << "\n\n";
+        // std::cerr << "best: " << open_list.top() << "\n";
+        // std::cerr << "tla: " << (open_list.top().tla) << "\n\n";
+        // std::cerr << "tla dref: " << *(open_list.top().tla) << "\n\n";
         auto e = open_list.top().tla;
-        std::cerr << "Taking edge: " << *e << "\n";
+        // std::cerr << "Taking edge: " << *e << "\n";
         t = e->duration.arrival_time(t);
         cur = e->destination;
     } 

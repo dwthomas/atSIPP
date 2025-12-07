@@ -66,7 +66,7 @@ namespace asipp{
         std::unordered_map<const SIPPState<Location> *, double> expanded;
 
         std::vector<SIPPState<Location>> extra_states;
-        std::vector<AtSIPPEdge<Location>> extra_edges;
+        // std::vector<AtSIPPEdge<Location>> extra_edges;
         std::unordered_map<Location, SIPPState<Location> *> oth_expanded_states;    
 
         Open(){
@@ -75,7 +75,7 @@ namespace asipp{
             handles.reserve(n_prealloc());
             expanded.reserve(n_prealloc());
             extra_states.reserve(n_prealloc());
-            extra_edges.reserve(n_prealloc());
+            // extra_edges.reserve(n_prealloc());
         }
 
         inline void emplace(EdgeATF e, double h, const SIPPState<Location> * n, const SIPPState<Location> * p, const AtSIPPEdge<Location> * tla){
@@ -207,22 +207,26 @@ namespace asipp{
     }
 
     template <typename Node_t, typename Open_t>
-    inline void expand_oth(const AtSippGraph<Location>& g, const Node_t& cur, Open_t& open_list, const Location& goal_loc, double time_horizon, MetaData & m, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
+    inline void expand_oth(const AtSippGraph<Location>& g, const Node_t& cur, Open_t& open_list, const Location& goal_loc, double time_horizon, MetaData & m, std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_successors, 
+                                                                                        std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_predecessors, 
+                                                                                          double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
         m.expanded++;
         double zeta = cur.g.zeta;
         //std::cerr << cur.state << *cur.state << "\n";
         std::vector<const AtSIPPEdge<Location> *> succ;
-        for (const AtSIPPEdge<Location>& s : g.successors.at(cur.state)){
-            // auto tla = cur.tla;
-            // if (tla == nullptr){
-            //     tla = &s;
-            // }
-            double alpha = std::max(cur.g.alpha, s.duration.alpha - cur.g.delta);
-            double beta = std::min(cur.g.beta, s.duration.beta - cur.g.delta);
-            double delta = s.duration.delta + cur.g.delta;
-            EdgeATF arrival_time_function(zeta, alpha, beta, delta);
-            if(arrival_time_function.earliest_arrival_time() < time_horizon){
-                succ.push_back(&s);
+        if( g.successors.contains(cur.state) ){
+            for (const AtSIPPEdge<Location>& s : g.successors.at(cur.state)){
+                // auto tla = cur.tla;
+                // if (tla == nullptr){
+                //     tla = &s;
+                // }
+                double alpha = std::max(cur.g.alpha, s.duration.alpha - cur.g.delta);
+                double beta = std::min(cur.g.beta, s.duration.beta - cur.g.delta);
+                double delta = s.duration.delta + cur.g.delta;
+                EdgeATF arrival_time_function(zeta, alpha, beta, delta);
+                if(arrival_time_function.earliest_arrival_time() < time_horizon){
+                    succ.push_back(&s);
+                }
             }
         }
 
@@ -242,8 +246,17 @@ namespace asipp{
                         open_list.oth_expanded_states[neighbor_loc] = neighbor_state;
                     }
                     EdgeATF arrival_time_function(cur.g.zeta, 0, std::numeric_limits<double>::infinity(), 1);
-                    open_list.extra_edges.emplace_back(cur.state, neighbor_state, arrival_time_function);
-                    const AtSIPPEdge<Location>& new_edge = open_list.extra_edges.back();
+                    if(!extra_successors.contains(cur.state)){
+                        extra_successors[cur.state].reserve(1000);
+                    }
+                    extra_successors[cur.state].emplace_back(cur.state, neighbor_state, arrival_time_function);
+                    if(!extra_successors.contains(cur.state)){
+                        extra_successors[cur.state].reserve(1000);
+                    }
+                    extra_predecessors[neighbor_state].emplace_back(neighbor_state, cur.state, arrival_time_function);
+                    // open_list.extra_edges.emplace_back(cur.state, neighbor_state, arrival_time_function);
+                    
+                    const AtSIPPEdge<Location>& new_edge = extra_successors[cur.state].back();
                     succ.emplace_back(&new_edge);
                     open_list.oth_expanded_states[neighbor_loc] = neighbor_state;
                 }
@@ -394,18 +407,21 @@ namespace asipp{
     }
 
      template<typename Open_t>
-    inline std::pair<std::vector<const SIPPState<Location> *>, EdgeATF> search_oth_core(const AtSippGraph<Location>& g, Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double time_horizon = std::numeric_limits<double>::infinity(), double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
+    inline std::pair<std::vector<const SIPPState<Location> *>, EdgeATF> search_oth_core(const AtSippGraph<Location>& g, Open_t& open_list, const Location& dest, MetaData & m, 
+                                                                                        std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_successors, 
+                                                                                        std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_predecessors,  
+                                                                                        long expansion_budget = -1, double time_horizon = std::numeric_limits<double>::infinity(), double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper ){
         long start_expansions = m.expanded;
         //m.search_timer.start();
         while(!open_list.empty()){
            //dump_open(open_list);
             auto cur = open_list.top();
-            std::cout << cur << "\n";
-            if (cur.tla != nullptr){
-                std::cerr << "tla: " << "\n"; 
-                std::cerr << (cur.tla) << "\n";
-                std::cerr << *(cur.tla) << "\n";
-            }
+            // std::cout << cur << "\n";
+            // if (cur.tla != nullptr){
+            //     std::cerr << "tla: " << "\n"; 
+            //     std::cerr << (cur.tla) << "\n";
+            //     std::cerr << *(cur.tla) << "\n";
+            // }
            // std::cerr << expansion_budget << "\n";
             //std::cerr << isGoal(cur, dest) << " " << (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget) << "\n";
             if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
@@ -413,10 +429,10 @@ namespace asipp{
                 return std::make_pair(backup(cur, open_list).first, cur.g);
             }
             open_list.pop();
-            expand_oth(g, cur, open_list, dest, time_horizon, m, hf);
+            expand_oth(g, cur, open_list, dest, time_horizon, m, extra_successors, extra_predecessors, hf);
             if (open_list.empty()){
-                std::cerr << "Re-adding best node to open\n";
-                std::cerr << "Node: " << cur << "\n";
+                // std::cerr << "Re-adding best node to open\n";
+                // std::cerr << "Node: " << cur << "\n";
                 open_list.emplace(cur.g, cur.f - cur.g.earliest_arrival_time(), cur.state, open_list.parent[cur.state], cur.tla);
                 // open_list.push(cur);
                 break;

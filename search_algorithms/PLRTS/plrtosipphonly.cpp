@@ -74,7 +74,9 @@
 //     exit(-1);
 // }
 
-void plrtosipphonly::lsslrtsipp(const AtSippGraph<Location>& g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m){
+void plrtosipphonly::lsslrtsipp(const AtSippGraph<Location>& g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m, 
+                                const std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_successors, 
+                                const std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_predecessors){
     std::unordered_map<Location, double> h_s_prime;
     auto closed = open_list.expanded; 
     LSSOpen dijkstraOpen;
@@ -93,7 +95,20 @@ void plrtosipphonly::lsslrtsipp(const AtSippGraph<Location>& g, const asipp::Ope
         closed.erase(n.node);
         auto n_loc = n.node->configuration;
         double h_s_n = h_s_prime[n_loc];
-        for (const auto& p: g.predecessors.at(n.node)){
+
+        std::vector<const AtSIPPEdge<Location> *> pred;
+        if(g.predecessors.contains(n.node)){
+            for (const auto& p: g.predecessors.at(n.node)){
+                pred.push_back(&p);
+            }
+        }
+        if(extra_predecessors.contains(n.node)){
+            for (const auto& p: extra_predecessors.at(n.node)){
+                pred.push_back(&p);
+            }
+        }
+        for (const auto& pr: pred){
+            const auto & p = *pr;
             if(closed.find(p.source) == closed.end()){
                 continue;
             }

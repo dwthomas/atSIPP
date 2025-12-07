@@ -237,7 +237,9 @@ namespace plrtosipphonly{
         }
     };
 
-    void lsslrtsipp(const AtSippGraph<Location> & g,const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m);
+    void lsslrtsipp(const AtSippGraph<Location> & g,const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m, 
+                                const std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_successors = {}, 
+                                const std::unordered_map<const SIPPState<Location> *, std::vector<AtSIPPEdge<Location>>> & extra_predecessors = {});
     std::vector<const SIPPState<Location> *> search(const AtSippGraph<Location> & g, const SIPPState<Location> * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0);
 }
 
