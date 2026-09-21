@@ -132,7 +132,6 @@ namespace augmentedsipp{
             emplace(e,h,n, &p - &nodes[0], tla);
         }
 
-
         inline void fix_top(){
             while(!queue.empty()){
                 Node& n = nodes[queue.top()];
@@ -162,6 +161,26 @@ namespace augmentedsipp{
         inline void decrease_key(handle_t handle , EdgeATF e, double h, const SIPPState<Location> * n,  const Node& p, const AtSIPPEdge<Location> * tla){
             nodes.emplace_back(e, h, n, tla, &p - &nodes[0]);
             queue.update(handle, nodes.size()-1);
+        }
+
+        inline void reorder_open_list(double new_reference_time, double old_reference_time) {
+            // Find nodes and handles to update
+            std::vector<augmentedsipp::Open<augmentedsipp::ABNodeComp>::handle_t> handles_to_update;
+            std::vector<augmentedsipp::Node *> nodes_to_update;
+            for(auto open_node_i = queue.begin(); open_node_i != queue.end(); ++open_node_i) {
+                auto open_node = nodes[*open_node_i];
+                nodes_to_update.push_back(&open_node);
+                handles_to_update.push_back(handles[open_node.state]);
+            }
+            std::cerr << "Reordering open list with new reference time: " << new_reference_time << ", old reference time: " << old_reference_time << "# nodes: " << nodes_to_update.size() << "\n";
+            // Update nodes and handles
+            for (std::size_t i = 0; i < nodes_to_update.size(); i++) {
+                auto node = nodes_to_update[i];
+                auto handle = handles_to_update[i]; 
+                double new_f = node->g.arrival_time(new_reference_time) + (node->f - node->g.arrival_time(old_reference_time));
+                queue.update(handle, new_f);
+            }
+            std::cerr << "Reordering complete.\n";
         }
     };
 
