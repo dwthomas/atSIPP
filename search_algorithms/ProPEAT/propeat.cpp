@@ -67,7 +67,7 @@ proPEAT::Results proPEAT::search(const AtSippGraph<Location> &g,
       sum_arrival_time += solutions.arrival_time(td);
     }
     clock_gettime(CLOCK_MONOTONIC, &ts4);
-    std::cout << "total arrival time: " << sum_arrival_time << "\n";
+    std::cout << "total arrival time: " << sum_arrival_time << ",\n";
     double query_time = 1000.0 * ts4.tv_sec + 1e-6 * ts4.tv_nsec -
                         (1000.0 * ts3.tv_sec + 1e-6 * ts3.tv_nsec);
     std::cout << "\"Average query time:\" " << query_time / n << " ms,\n";
