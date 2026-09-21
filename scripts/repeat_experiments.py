@@ -3,7 +3,7 @@ import numpy as np
 import subprocess
 from progress.bar import Bar
 
-base_command = "LD_PRELOAD=/home/aifs2/devin/miniforge3/lib/libstdc++.so ./build/grid2d -x {source_x} -y {source_y} -X {dest_x} -Y {dest_y} -m {map} -s {algorithm} -o {occupancy} -u 1000 --atlimit 100 --minDuration {minD} --maxDuration {maxD} --seed {seed} --test_query_time > {outfile}"
+base_command = "./build/grid2d -x {source_x} -y {source_y} -X {dest_x} -Y {dest_y} -m {map} -s {algorithm} -o {occupancy} -u 1000 --atlimit 100 --minDuration {minD} --maxDuration {maxD} --seed {seed} --test_query_time > {outfile}"
 algorithms = [
     #'augmentedsipp'
     # "sipp",
