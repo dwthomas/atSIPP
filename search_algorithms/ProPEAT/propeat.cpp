@@ -1,16 +1,15 @@
-#include "repeat.hpp"
+#include "propeat.hpp"
+#include "../RePEAT/updateRefTime.hpp"
 #include "data_structures/atf.hpp"
-#include "updateRefTime.hpp"
-
 #include <time.h>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
 
-rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & mdat, double start_time, double end_time, bool test_query_time){
+proPEAT::Results proPEAT::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & mdat, double start_time, double end_time, bool test_query_time){
     double t_ref = start_time;
     std::vector<const SIPPState<Location> *> path;
     // CompoundATF<std::vector<const SIPPState<Location> *>> solutions;
-    rePEAT::Results res;
+    proPEAT::Results res;
     auto& solutions = res.any_start_time_plan;
     struct timespec ts1, ts2;
     while(t_ref < end_time){

@@ -7,11 +7,13 @@ namespace po = boost::program_options;
 // SIPP Search algorithms 
 #include "search_algorithms/SIPP/sipp.hpp"
 #include "search_algorithms/augmentedSIPP/augmentedsipp.hpp"
+#include "search_algorithms/weightedAugmentedSIPP/weightedaugmentedsipp.hpp"
 #include "search_algorithms/aSIPPnew/augmentedsipp.hpp"
 #include "search_algorithms/abSIPP/absipp.hpp"
 
 // Any-start-time SIPP algorithms
 #include "search_algorithms/RePEAT/repeat.hpp"
+#include "search_algorithms/ProPEAT/propeat.hpp"
 
 // Real-time SIPP algorithms
 #include "search_algorithms/MinATFS/hybrid.hpp"
@@ -54,6 +56,16 @@ inline void run_search(po::variables_map& vm, const Location& goal_loc, const Si
         std::cout << ",\n";
         std::cout << solutions;
     }
+    else if(vm["search"].as<std::string>() == "weightedaugmentedsipp"){
+        auto res = wasipp::search(atg, source, goal_loc, m, start_time, vm["weight"].as<double>());
+        std::cout << "\"results\": [\n{";
+        print_results(res.second.earliest_arrival_time(), res.first, m);
+        std::cout << "\n}\n]";
+        CompoundATF<std::vector<const SIPPState<Location> *>> solutions;
+        solutions.insert(res.second, res.first);
+        std::cout << ",\n";
+        std::cout << solutions;
+    }
     else if(vm["search"].as<std::string>() == "absipp"){
         auto res = absipp::search(atg, source, goal_loc, m, start_time);
         std::cout << "\"results\": [\n{";
@@ -66,6 +78,13 @@ inline void run_search(po::variables_map& vm, const Location& goal_loc, const Si
     }
     else if(vm["search"].as<std::string>() == "repeat"){
         auto res = rePEAT::search(atg, source, goal_loc, m, start_time, vm["atlimit"].as<double>(), vm["test_query_time"].as<bool>());
+        std::cout << res;
+        auto& solutions = res.any_start_time_plan;
+        std::cout << ",\n";
+        std::cout << solutions;
+    }
+    else if(vm["search"].as<std::string>() == "propeat"){
+        auto res = proPEAT::search(atg, source, goal_loc, m, start_time, vm["atlimit"].as<double>(), vm["test_query_time"].as<bool>());
         std::cout << res;
         auto& solutions = res.any_start_time_plan;
         std::cout << ",\n";
