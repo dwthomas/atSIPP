@@ -8,6 +8,7 @@
 
 rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & mdat, double start_time, double end_time, bool test_query_time){
     double t_ref = start_time;
+    (void) mdat;
     std::vector<const SIPPState<Location> *> path;
     // CompoundATF<std::vector<const SIPPState<Location> *>> solutions;
     rePEAT::Results res;
@@ -33,14 +34,11 @@ rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<L
         //std::cerr << "tref: " << t_ref << " " << end(source->safe_interval) <<"\n";
         clock_gettime(CLOCK_MONOTONIC, &ts2);
         m.search_time = 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
-
-       
-
     }
 
     // test query time 
     if(test_query_time){
-        long n = 1000000000;
+        long n = 10000;
         struct timespec ts3, ts4;
         std::vector<double> t_depart;
         boost::random::mt19937 gen;

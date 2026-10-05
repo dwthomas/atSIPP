@@ -45,19 +45,13 @@ int main(int argc, char* argv[]) {
             // read map
             Location source_loc(vm["startx"].as<int>(), vm["starty"].as<int>());
             Location goal_loc(vm["goalx"].as<int>(), vm["goaly"].as<int>());
-            //std::cerr << "Generating SIPP graph...";
             Map m(vm["map"].as<std::filesystem::path>().string());
             double until = vm["until"].as<double>();
             double occupancy = vm["occupancy"].as<double>();
             double min_duration = vm["minDuration"].as<double>();
             double max_duration = vm["maxDuration"].as<double>();
             SippGraph<Location> g = make_random_sipp_graph(m, until, occupancy, min_duration, max_duration, source_loc, goal_loc, vm["seed"].as<long>());
-            //std::cout << g << "\n";
-            //std::cerr << "SIPP graph made, compiling @SIPP graph...";
             AtSippGraph<Location> atg(&g);
-            //std::cerr << "compiled!\n";
-            //std::cerr << atg << "\n";
-            //g.dump();
             double start_time = vm["startTime"].as<double>();
             const SIPPState<Location> * source = find_earliest(g, source_loc, start_time);
             // run search
