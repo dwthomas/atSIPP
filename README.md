@@ -1,4 +1,4 @@
-# atSIPP
+# Planning With ATFs, Any-start-time Planning and Real-time SIPP
 
 Heuristic search algorithms for planning with arrival-time functions (ATFs)
 in Safe Interval Path Planning (SIPP) state spaces.
