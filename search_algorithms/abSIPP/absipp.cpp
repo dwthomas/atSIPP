@@ -1,13 +1,13 @@
-#include "augmentedsipp.hpp"
+#include "absipp.hpp"
 #include "data_structures/atf.hpp"
 #include "data_structures/structs.hpp"
 #include <limits>
 #include <utility>
 #include <time.h>
 
-using namespace asipp;
+using namespace absipp;
 
-std::pair<std::vector<const SIPPState<Location> *>, EdgeATF> asipp::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time, long expansion_budget, double (*hf)(const SIPPState<Location>&, double , const Location& )){
+std::pair<std::vector<const SIPPState<Location> *>, EdgeATF> absipp::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time, long expansion_budget, double (*hf)(const SIPPState<Location>&, double , const Location& )){
     Open open_list;
     struct timespec ts1, ts2;
     m.init();

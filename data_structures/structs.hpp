@@ -137,10 +137,26 @@ struct MetaData{
     }
 
     inline friend std::ostream& operator<< (std::ostream& stream, const MetaData& m){
-        stream << "Nodes generated: " << m.generated << " Nodes decreased: " << m.decreased << " Nodes expanded: " << m.expanded << " Learning Nodes expanded: " << m.learn_expanded << "\n"; 
-        stream << "Search: " <<  m.search_time << " ms";
-        stream << " Learning: " << m.learning_time << " ms" ;
+        stream << "\"metadata\": {\n";
+        stream << " \"generated\": " << m.generated << ",\n";
+        stream << " \"decreased\": " << m.decreased << ",\n";
+        stream << " \"expanded\": " << m.expanded << ",\n";
+        stream << " \"learnexpanded\": " << m.learn_expanded << ",\n"; 
+        stream << " \"searchruntime_ms\": " <<  m.search_time << ",\n";
+        stream << " \"learnruntime_ms\": " << m.learning_time << "\n }";
         return stream;
     }
 };
 
+inline MetaData sum(const std::vector<MetaData>& mdat){
+    MetaData res;
+    for(auto m: mdat){
+        res.generated += m.generated;
+        res.expanded += m.expanded;
+        res.decreased += m.decreased;
+        res.learn_expanded += m.learn_expanded;
+        res.search_time += m.search_time;
+        res.learning_time += m.learning_time;
+    }
+    return res;
+}

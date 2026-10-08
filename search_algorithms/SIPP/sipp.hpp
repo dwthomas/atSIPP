@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/heap/d_ary_heap.hpp>
 #include <functional>
+#include "data_structures/constants.hpp"
 #include "data_structures/structs.hpp"
 #include "search_algorithms/sippgraph.hpp"
 
@@ -42,6 +43,13 @@ namespace sipp{
         std::unordered_map<const SIPPState<Location> *, handle_t> handles;
         std::unordered_map<const SIPPState<Location> *, double> expanded;
 
+        Open(){
+            queue.reserve(n_prealloc());
+            parent.reserve(n_prealloc());
+            handles.reserve(n_prealloc());
+            expanded.reserve(n_prealloc());
+        }
+
         inline void emplace(double g, double h, const SIPPState<Location> * n, const SIPPState<Location> * p){
             parent[n] = p;
             handles[n] = queue.push(Node(g, h, n));
@@ -68,6 +76,6 @@ namespace sipp{
     };
 
 
-   std::vector<const SIPPState<Location> *> search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0);
+   std::pair<std::vector<const SIPPState<Location> *>, double> search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0);
 }
 

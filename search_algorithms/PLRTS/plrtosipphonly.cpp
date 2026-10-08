@@ -1,6 +1,7 @@
 #include "plrtosipphonly.hpp"
 #include "data_structures/atf.hpp"
 #include "../RTAS/rtasipp.hpp"
+#include "search_algorithms/augmentedSIPP/augmentedsipp.hpp"
 #include "search_algorithms/newatsippgraph.hpp"
 #include "search_algorithms/sippgraph.hpp"
 
@@ -73,7 +74,7 @@
 //     exit(-1);
 // }
 
-void plrtosipphonly::lsslrtsipp(const AtSippGraph<Location>& g, const asipp::Open& open_list, const Location& dest, MetaData& m){
+void plrtosipphonly::lsslrtsipp(const AtSippGraph<Location>& g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m){
     std::unordered_map<Location, double> h_s_prime;
     auto closed = open_list.expanded; 
     LSSOpen dijkstraOpen;

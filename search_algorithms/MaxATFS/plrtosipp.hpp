@@ -227,7 +227,7 @@ namespace plrtosipp{
     };
 
     //void lsslrtsipp(const AtSippGraph<Location> & g, const asipp::Open& open_list, const Location& dest, MetaData& m);
-    void plrtolearn(const AtSippGraph<Location> & g, const asipp::Open& open_list, const Location& dest, MetaData& m);
+    void plrtolearn(const AtSippGraph<Location> & g, const asipp::Open<asipp::StandardNodeComp>& open_list, const Location& dest, MetaData& m);
     std::vector<const SIPPState<Location> *> search(const AtSippGraph<Location> & g, const SIPPState<Location> * source, const Location& dest, MetaData & m, long budget, double start_time = 0.0);
 }
 

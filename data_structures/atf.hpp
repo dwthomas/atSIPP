@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/container/flat_set.hpp>
+#include <cstddef>
 #include <vector>
 #include <limits>
 
@@ -13,6 +14,7 @@
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Arr_segment_traits_2.h>
 #include <CGAL/intersections.h>
+#include <CGAL/Cartesian.h>
 
 
 typedef CGAL::Cartesian<double> K;
@@ -99,6 +101,55 @@ struct EdgeATF{
         return res;
     }
 };
+
+enum ComparisonResult {
+    DOMINATES,
+    IS_DOMINATED,
+    NON_COMPARABLE
+};
+
+inline ComparisonResult weak_dominance(const EdgeATF& a, const EdgeATF& b){
+    int a_lt = 0;
+    int b_lt = 0;
+    double a_arrival_time, b_arrival_time;
+    double test_times[] = {a.beta, b.alpha, a.alpha, b.beta, a.zeta};
+    // check a beta 
+    for (double t: test_times){
+        a_arrival_time = a.inclusive_arrival_time(t);
+        b_arrival_time = b.inclusive_arrival_time(t);
+
+        // check for finite arrival times
+        bool a_at_finite = std::isfinite(a_arrival_time);
+        bool b_at_finite = std::isfinite(b_arrival_time);
+
+        if (!a_at_finite && !b_at_finite){
+            continue; // both infinite, skip
+        }
+
+        if ((a_at_finite && !b_at_finite) || a_arrival_time < b_arrival_time){
+            a_lt++;
+        }
+        else if ((!a_at_finite && b_at_finite) || b_arrival_time < a_arrival_time){
+            b_lt++;
+        }
+
+        if(a_lt > 0 && b_lt > 0){ // both have at least one time where they are better
+            return NON_COMPARABLE;
+        }
+    }
+    if(a_lt > b_lt){ // at least one must be zero
+        return DOMINATES;
+    }
+    else if (b_lt > a_lt){
+        return IS_DOMINATED;
+    }
+    else {// they are both the same
+        return DOMINATES;
+    }
+}
+
+ 
+
 
 namespace std {
     template<>
@@ -346,14 +397,20 @@ class CompoundATF{
         }
 
         inline void dump(std::ostream& stream) const{
-            for (auto seg: segments){
-                stream << seg.first;
-                stream << " " << seg.second.encumbent;
-                if(seg.second.full()){
-                    stream << " " << seg.second.newcomer;
+            stream << "\"solution_compound_atf\": [\n";
+            for(auto seg = segments.begin(); seg != segments.end(); seg++){
+                stream << " {\"interval\": \"" << seg->first << "\", \"atf\": \"" << seg->second.encumbent << "\"";
+                if(seg->second.full()){
+                    stream << " " << seg->second.newcomer;
                 } 
-                stream << std::endl;
+                if (std::next(seg) != segments.end()){
+                    stream << "},\n";
+                }
+                else{
+                    stream << "}\n";
+                }
             }
+            stream << " ]";
         }
 
         inline friend std::ostream& operator<<(std::ostream& stream, const CompoundATF& eatf){

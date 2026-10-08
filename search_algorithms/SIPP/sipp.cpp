@@ -3,6 +3,7 @@
 #include "data_structures/structs.hpp"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <time.h>
 
 using namespace sipp;
@@ -65,11 +66,11 @@ std::vector<const SIPPState<Location> *> backup(const Node& n, Open& open_list){
         cur = open_list.parent[cur];
     }
     std::reverse(res.begin(), res.end());
-    std::cout << "Arrival time: " << n.f << "\n";
+    // std::cout << "Arrival time: " << n.f << "\n";
     return res;
 }
 
-std::vector<const SIPPState<Location> *> sipp::search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData& m, double start_time){
+std::pair<std::vector<const SIPPState<Location> *>, double> sipp::search(const SippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData& m, double start_time){
     Open open_list;
     m.init();
     struct timespec ts1, ts2;
@@ -82,11 +83,14 @@ std::vector<const SIPPState<Location> *> sipp::search(const SippGraph<Location>&
         if(isGoal(cur, dest)){
             clock_gettime(CLOCK_MONOTONIC, &ts2);
             m.search_time = 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
-            return backup(cur, open_list);
+            return std::make_pair(backup(cur, open_list), cur.g);
         }
         open_list.pop();
         expand(g, cur, open_list, dest, m);
     }
-    std::cerr << "Failed to find path\n";
-    exit(-1);
+    clock_gettime(CLOCK_MONOTONIC, &ts2);
+    m.search_time = 1000.0 * ts2.tv_sec + 1e-6 * ts2.tv_nsec - (1000.0 * ts1.tv_sec + 1e-6 * ts1.tv_nsec);
+    return std::make_pair<std::vector<const SIPPState<Location> *>, double>({}, std::numeric_limits<double>::infinity());
+    // std::cerr << "Failed to find path\n";
+    // exit(-1);
 }

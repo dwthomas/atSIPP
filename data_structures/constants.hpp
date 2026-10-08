@@ -24,3 +24,6 @@ constexpr double sqrt2(){
     return boost::math::double_constants::root_two;
 }
 
+constexpr std::size_t n_prealloc(){
+    return 10000000;
+}
