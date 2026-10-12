@@ -32,13 +32,6 @@ namespace absipp{
 
         Node(double _f, EdgeATF e, const SIPPState<Location> * _state, const AtSIPPEdge<Location> * _tla):g(e),f(_f),state(_state),tla(_tla){}
 
-        // inline friend bool operator>(const Node& a, const Node& b){
-        //     if(a.f == b.f){
-        //         return a.g < b.g;
-        //     }
-        //     return a.f > b.f;
-        // }
-
         inline friend std::ostream& operator<< (std::ostream& stream, const Node& n){
             stream << *n.state << " g:" << n.g << ", f:" << n.f << " hex:" << std::hex << n.f << std::dec;
             return stream;
@@ -57,13 +50,6 @@ namespace absipp{
         }
     };
 
-    // struct Ghost{
-    //     EdgeATF e; 
-    //     double h; 
-    //     SIPPState<Location> * n; 
-    //     SIPPState<Location> * p;
-    //     Ghost(EdgeATF _e, double _h, SIPPState<Location> * _n, SIPPState<Location> * _p):e(_e),h(_h),n(_n),p(_p){}
-    // };
 
     template <class NodeComp = ABNodeComp>
     struct Open{
@@ -186,41 +172,6 @@ namespace absipp{
         }
     
 
-    // template <typename Node_t, typename Open_t>
-    // inline void expand_noprune(const Node_t& cur, Open_t& open_list, std::vector<Ghost>& ghost_open, const Location& goal_loc, MetaData & m, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
-    //     m.expanded++;
-    //     double zeta = cur.g.zeta;
-    //     for(GraphEdge * successor: cur.node->successors){
-    //         if(cur.g.earliest_arrival_time() >= successor->edge.beta || cur.g.supremum_arrival_time() <= successor->edge.zeta){
-    //             continue;
-    //         } 
-    //         double alpha = std::max(cur.g.alpha, successor->edge.alpha - cur.g.delta);
-    //         double beta = std::min(cur.g.beta, successor->edge.beta - cur.g.delta);
-    //         double delta = successor->edge.delta + cur.g.delta;
-    //         EdgeATF arrival_time_function(zeta, alpha, beta, delta);
-    //         if(open_list.expanded.contains(successor->destination)){
-    //             ghost_open.emplace_back(cur.g, cur.f-cur.g.earliest_arrival_time(), cur.node, open_list.parent[cur.node]);
-    //             continue;
-    //         }
-    //         else if (open_list.handles.contains(successor->destination)){
-    //             auto handle = open_list.handles[successor->destination];
-    //             if(arrival_time_function.earliest_arrival_time() < (*handle).g.earliest_arrival_time()){
-    //                 m.decreased++;
-    //                 double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
-    //                 //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-    //                 open_list.decrease_key(handle ,arrival_time_function, h, successor->destination, successor->source);
-    //             }
-    //         }
-    //         else{
-    //             m.generated++;
-    //             double h = hf(*successor->destination, arrival_time_function.earliest_arrival_time(), goal_loc);
-    //             //double h = eightWayDistance(successor->destination->state.loc, goal_loc);
-    //             open_list.emplace(arrival_time_function, h, successor->destination, successor->source);
-    //             //std::cerr << "Generated: " << *successor  << " from: " << *successor->source << " to: " << *successor->destination  << "\n";
-    //         }
-    //     }
-    // }
-
     template<typename Open_t = Open<ABNodeComp>>
     inline void dump_open(const Open_t& open_list){
         auto cur = open_list.queue.ordered_begin();
@@ -264,24 +215,7 @@ namespace absipp{
         // exit(-1);
     }
 
-    // template<typename Open_t>
-    // inline void search_core_noprune(Open_t& open_list, const Location& dest, MetaData & m, long expansion_budget = -1, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper){
-    //     long start_expansions = m.expanded;
-    //     std::vector<Ghost> ghost_open;
-    //     while(!open_list.empty()){
-    //         //dump_open(open_list);
-    //         auto cur = open_list.top();
-    //         //std::cout << *cur.node << "\n";
-    //         if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
-    //             return;
-    //         }
-    //         open_list.pop();
-    //         expand_noprune(cur, open_list, ghost_open, dest, m, hf);
-    //     }
-    //     for (auto ghost: ghost_open){
-    //         open_list.emplace(ghost.e, ghost.h, ghost.n, ghost.p);
-    //     }
-    // }
+    
 
     std::pair<std::vector<const SIPPState<Location> *>, EdgeATF> search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0, long expansion_budget = -1, double (*hf)(const SIPPState<Location>&, double , const Location& ) = h_eight_way_helper);
 }
