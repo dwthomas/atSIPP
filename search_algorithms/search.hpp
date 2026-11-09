@@ -68,7 +68,7 @@ inline void run_search(po::variables_map& vm, const Location& goal_loc, const Si
         std::cout << solutions;
     }
     else if(vm["search"].as<std::string>() == "repeat"){
-        auto res = rePEAT::search(atg, source, goal_loc, m, start_time, vm["atlimit"].as<double>(), vm["test_query_time"].as<bool>());
+        auto res = rePEAT::search(atg, source, goal_loc, m, start_time, vm["atlimit"].as<double>(), vm["test_query_time"].as<bool>(), vm["optimal"].as<bool>());
         std::cout << res;
         auto& solutions = res.any_start_time_plan;
         std::cout << ",\n";

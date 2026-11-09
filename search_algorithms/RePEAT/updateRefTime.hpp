@@ -30,3 +30,9 @@ inline double update_reference_time(const EdgeATF& path, augmentedsipp::Open<aug
     }
     return upper_bound;
 }
+
+
+inline double update_reference_time_safe(const EdgeATF& path, augmentedsipp::Open<augmentedsipp::ABNodeComp>& open_list){
+    (void) open_list;
+    return path.beta;
+}
