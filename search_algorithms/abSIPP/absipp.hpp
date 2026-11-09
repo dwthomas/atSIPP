@@ -94,7 +94,7 @@ namespace absipp{
             return queue.empty();
         }
 
-        inline Node<NodeComp> top() const{
+        inline const Node<NodeComp>& top() const{
             return queue.top();
         }
 
@@ -246,7 +246,7 @@ namespace absipp{
         //m.search_timer.start();
         while(!open_list.empty()){
            //dump_open(open_list);
-            auto cur = open_list.top();
+            auto& cur = open_list.top();
             //std::cout << *cur.node << "\n";
            // std::cerr << expansion_budget << "\n";
             //std::cerr << isGoal(cur, dest) << " " << (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget) << "\n";

@@ -26,9 +26,11 @@ rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<L
         if(res.second.beta > 0){
             solutions.insert(res.second, res.first);
             if (optimal){
+                std::cerr << "Optimal update of reference time\n";
                 t_ref = update_reference_time(res.second, open_list);
             }
             else{
+                std::cerr << "Suboptimal update of reference time\n";
                 t_ref = update_reference_time_safe(res.second, open_list);
             }
         }
