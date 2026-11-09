@@ -1,3 +1,4 @@
+#include <boost/program_options/value_semantic.hpp>
 #include <iostream>
 #include <filesystem>
 #include <ostream>
@@ -32,6 +33,7 @@ int main(int argc, char* argv[]) {
         ("budget,b", po::value<long>()->default_value(1), "Search budget in num of expansions")
         ("weight,w", po::value<double>()->default_value(1.0), "Weight for weighted searches")
         ("test_query_time", po::bool_switch(), "Test query time for any-start-time searches")
+        ("optimal", po::value<bool>()->default_value(true), "Use optimal reference time update for rePEAT")
         ("seed", po::value<long>()->default_value(0), "Random seed")
         ;
         po::variables_map vm;
@@ -70,6 +72,7 @@ int main(int argc, char* argv[]) {
             std::cout << "}\n";
         }
         else{
+            std::cerr << "Invalid map file path.\n";
             std::cout << desc << std::endl;
         }
         

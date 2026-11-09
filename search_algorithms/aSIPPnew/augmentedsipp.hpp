@@ -148,7 +148,7 @@ namespace augmentedsipp{
             return queue.empty();
         }
 
-        inline Node top() const{
+        inline Node& top() const{
             return nodes[queue.top()];
         }
 
@@ -192,9 +192,12 @@ namespace augmentedsipp{
 
     template <typename Node_t, typename Open_t>
     std::pair<std::vector<const SIPPState<Location> *>, double> backup(const Node_t& n, Open_t& open_list){
-        // std::cerr << "backing up\n";
+        // std::cerr << "backing up " << *n.state <<"\n";
+        // std::cerr << "nodes list size: " << open_list.nodes.size() << "\n";
+        // std::cerr << "nodes start address: " << &open_list.nodes[0] << " current node address " << &n <<"\n";
         std::vector<const SIPPState<Location> *> res;
         std::size_t cur = &n - &open_list.nodes[0];
+        // std::cerr << "cur: " << cur << " " << *open_list.nodes[cur].state << "\n";
         while(cur != open_list.nodes[cur].parent_index){
             // std::cerr << "cur: " << cur << " " << *open_list.nodes[cur].state << "\n";
             res.push_back(open_list.nodes[cur].state);
@@ -316,14 +319,17 @@ namespace augmentedsipp{
         long start_expansions = m.expanded;
         //m.search_timer.start();
         while(!open_list.empty()){
-           //dump_open(open_list);
-            auto cur = open_list.top();
+        //    dump_open(open_list);
+            const auto& cur = open_list.top();
             //std::cout << *cur.node << "\n";
            // std::cerr << expansion_budget << "\n";
             //std::cerr << isGoal(cur, dest) << " " << (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget) << "\n";
             if(isGoal(cur, dest) || (expansion_budget >= 0 && m.expanded - start_expansions >= expansion_budget)){
                 // std::cerr << "Goal found or expansion budget reached\n";
-                //m.search_timer.stop();
+                // //m.search_timer.stop();
+                // std::cerr << "Goal found" << " " << *cur.state << "\n";
+                // std::cerr << "Arrival time: " << cur.g << "\n";
+                // std::cerr << "address: " << &cur << " " << &open_list.nodes[0] << " " << &cur - &open_list.nodes[0] << "\n";
                 return std::make_pair(backup(cur, open_list).first, cur.g);
             }
             open_list.pop();

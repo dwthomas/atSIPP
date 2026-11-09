@@ -41,5 +41,5 @@ namespace rePEAT{
         }
     };
 
-    rePEAT::Results search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0, double end_time = std::numeric_limits<double>::infinity(), bool test_query_time = false);
+    rePEAT::Results search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & m, double start_time = 0.0, double end_time = std::numeric_limits<double>::infinity(), bool test_query_time = false, bool optimal=true);
 }

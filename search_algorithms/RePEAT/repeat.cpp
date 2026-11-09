@@ -6,7 +6,7 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
 
-rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & mdat, double start_time, double end_time, bool test_query_time){
+rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<Location> * source, const Location& dest, MetaData & mdat, double start_time, double end_time, bool test_query_time, bool optimal){
     double t_ref = start_time;
     (void) mdat;
     std::vector<const SIPPState<Location> *> path;
@@ -25,7 +25,14 @@ rePEAT::Results rePEAT::search(const AtSippGraph<Location>& g, const SIPPState<L
         auto res = augmentedsipp::search_core<augmentedsipp::Open<augmentedsipp::ABNodeComp>, augmentedsipp::DominancePrune>(g, open_list, dest, m);
         if(res.second.beta > 0){
             solutions.insert(res.second, res.first);
-            t_ref = update_reference_time(res.second, open_list);
+            if (optimal){
+                std::cerr << "Optimal update of reference time\n";
+                t_ref = update_reference_time(res.second, open_list);
+            }
+            else{
+                std::cerr << "Suboptimal update of reference time\n";
+                t_ref = update_reference_time_safe(res.second, open_list);
+            }
         }
         else{
             t_ref = end(source->safe_interval);

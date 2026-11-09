@@ -25,5 +25,5 @@ constexpr double sqrt2(){
 }
 
 constexpr std::size_t n_prealloc(){
-    return 10000000;
+    return 50000000;
 }
